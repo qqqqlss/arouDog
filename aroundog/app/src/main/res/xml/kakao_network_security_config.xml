@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+<!--cleartext 네트워크 트래픽 사용-->
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">maps.daum-img.net</domain>
+    </domain-config>
+</network-security-config>
