@@ -92,6 +92,17 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback{
             override fun onNavigationItemSelected(item: MenuItem): Boolean {
                 when(item.itemId){
                     R.id.walk->{//산책하기
+                        if(supportFragmentManager.findFragmentByTag("walkStart")!=null){
+                            supportFragmentManager.beginTransaction().show(supportFragmentManager.findFragmentByTag("walkStart")!!).commit()
+
+                            if(supportFragmentManager.findFragmentByTag("aroundWalk") != null)
+                                supportFragmentManager.beginTransaction().hide(supportFragmentManager.findFragmentByTag("aroundWalk")!!).commit()
+                            if(supportFragmentManager.findFragmentByTag("profile") != null)
+                                supportFragmentManager.beginTransaction().hide(supportFragmentManager.findFragmentByTag("profile")!!).commit()
+                            if(supportFragmentManager.findFragmentByTag("walk") != null)
+                                supportFragmentManager.beginTransaction().hide(supportFragmentManager.findFragmentByTag("walk")!!).commit()
+                            return true
+                        }
                         if(supportFragmentManager.findFragmentByTag("walk") != null)
                             supportFragmentManager.beginTransaction().show(supportFragmentManager.findFragmentByTag("walk")!!).commit()
                         else
@@ -115,6 +126,9 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback{
                             supportFragmentManager.beginTransaction().hide(supportFragmentManager.findFragmentByTag("walk")!!).commit()
                         if(supportFragmentManager.findFragmentByTag("profile") != null)
                             supportFragmentManager.beginTransaction().hide(supportFragmentManager.findFragmentByTag("profile")!!).commit()
+
+                        if(supportFragmentManager.findFragmentByTag("walkStart") != null)
+                            supportFragmentManager.beginTransaction().hide(supportFragmentManager.findFragmentByTag("walkStart")!!).commit()
                         return true
                     }
                     R.id.profile -> {//프로필
@@ -128,6 +142,9 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback{
                             supportFragmentManager.beginTransaction().hide(supportFragmentManager.findFragmentByTag("walk")!!).commit()
                         if(supportFragmentManager.findFragmentByTag("aroundWalk") != null)
                             supportFragmentManager.beginTransaction().hide(supportFragmentManager.findFragmentByTag("aroundWalk")!!).commit()
+
+                        if(supportFragmentManager.findFragmentByTag("walkStart") != null)
+                            supportFragmentManager.beginTransaction().hide(supportFragmentManager.findFragmentByTag("walkStart")!!).commit()
                         return true
                     }
                 }

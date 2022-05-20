@@ -34,7 +34,7 @@
     </com.naver.maps.map.MapView>
     
     <!--    프래그먼트를 띄울 레이아웃-->
-    <FrameLayout
+    <androidx.fragment.app.FragmentContainerView
         android:id="@+id/main_container"
         android:layout_width="match_parent"
         android:layout_height="0dp"

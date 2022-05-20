@@ -1,6 +1,5 @@
 package com.example.aroundog.fragments
 
-import android.graphics.Color
 import android.location.Location
 import android.os.Bundle
 import android.util.Log
@@ -10,7 +9,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
-import android.widget.Toast
+import androidx.core.os.bundleOf
+import androidx.fragment.app.setFragmentResult
+import com.example.aroundog.LastLocation
 import com.example.aroundog.R
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.*
@@ -18,6 +19,7 @@ import com.naver.maps.map.overlay.LocationOverlay
 import com.naver.maps.map.overlay.OverlayImage
 import com.naver.maps.map.overlay.PathOverlay
 import com.naver.maps.map.util.FusedLocationSource
+import java.io.Serializable
 
 class MainFragment : Fragment(), OnMapReadyCallback{
 
@@ -34,7 +36,6 @@ class MainFragment : Fragment(), OnMapReadyCallback{
     var walkDistance:Double = 0.0
     val TAG = "MainFragmentTAG"
 
-    lateinit var textView:TextView
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         var mapView = childFragmentManager.findFragmentById(R.id.map) as MapFragment?
@@ -51,7 +52,7 @@ class MainFragment : Fragment(), OnMapReadyCallback{
         overlayImage = OverlayImage.fromAsset("logo.png")
         //compassImage = OverlayImage.fromResource(R.drawable.compass)
 
-        pathOverlaySettings()
+        //pathOverlaySettings()
     }
 
     override fun onCreateView(//인터페이스를 그리기위해 호출
@@ -61,20 +62,32 @@ class MainFragment : Fragment(), OnMapReadyCallback{
 
         val view:ViewGroup = inflater.inflate(R.layout.fragment_main,container,false) as ViewGroup
         val button:Button = view.findViewById(R.id.startWalk)
-        textView = view.findViewById(R.id.textView)
         button.setOnClickListener {
-            Log.d(TAG, "button click")
-            if (isStart) {
-                isStart = false
-                endWalk()
-                Toast.makeText(activity, "산책끝", Toast.LENGTH_SHORT).show()
-            } else {
-                isStart = true
-                //시작위치 지정
-                pathList.add(LatLng(lastLocation))
+//            Log.d(TAG, "button click")
+//            //프래그먼트 시작
+//            if (isStart) {
+//                isStart = false
+//                endWalk()
+//                Toast.makeText(activity, "산책끝", Toast.LENGTH_SHORT).show()
+//            } else {
+//                isStart = true
+//                //시작위치 지정
+//                pathList.add(LatLng(lastLocation))
+//
+//                Toast.makeText(activity, "산책시작", Toast.LENGTH_SHORT).show()
+//            }
+            //walkFragment 생성
+            var lastLocationToClass: LastLocation = LastLocation(lastLocation)
+            var bundle = Bundle()
+            bundle.putSerializable("lastLocation",lastLocationToClass)
+            setFragmentResult("walkStart",bundle)
+//            setFragmentResult("walkStart", bundleOf("lastlocation" to lastLocation))
+//            //부모(메인액티비티)에 프래그먼트를 생성하기 위해 parentFragmentManager 사용
+            parentFragmentManager.beginTransaction().replace(R.id.main_container,
+                WalkFragment(),"walkStart"
+            ).commit()
 
-                Toast.makeText(activity, "산책시작", Toast.LENGTH_SHORT).show()
-            }
+
         }
 
         //return inflater.inflate(R.layout.fragment_walk, container, false)
@@ -84,21 +97,21 @@ class MainFragment : Fragment(), OnMapReadyCallback{
     companion object {
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1000
     }
-    fun pathOverlaySettings(){
-        pathOverlay.outlineWidth=0//테두리 없음
-        pathOverlay.width=20//경로선 폭
-        pathOverlay.passedColor = Color.RED//지나온 경로선
-        pathOverlay.color= Color.GREEN//경로선 색상
-    }
-
-    fun endWalk(){
-        //Log.d(TAG,"end walk ${pathList.toString()}")
-        pathList.clear()
-        pathOverlay.map=null
-        Log.d(TAG,"walk distance ${walkDistance}")
-        walkDistance = 0.0
-
-    }
+//    fun pathOverlaySettings(){
+//        pathOverlay.outlineWidth=0//테두리 없음
+//        pathOverlay.width=20//경로선 폭
+//        pathOverlay.passedColor = Color.RED//지나온 경로선
+//        pathOverlay.color= Color.GREEN//경로선 색상
+//    }
+//
+//    fun endWalk(){
+//        //Log.d(TAG,"end walk ${pathList.toString()}")
+//        pathList.clear()
+//        pathOverlay.map=null
+//        Log.d(TAG,"walk distance ${walkDistance}")
+//        walkDistance = 0.0
+//
+//    }
 
 
     override fun onRequestPermissionsResult(requestCode: Int,
@@ -155,6 +168,7 @@ class MainFragment : Fragment(), OnMapReadyCallback{
                 naverMap.cameraPosition = CameraPosition(LatLng(lastLocation),16.0, 0.0,0.0)
             }
         }
+
         //위치 업데이트될때의 리스너
         //bearing업데이트일때도 여기로 들어옴
         naverMap.addOnLocationChangeListener { location ->
@@ -182,25 +196,25 @@ class MainFragment : Fragment(), OnMapReadyCallback{
                 Log.d(TAG, "bearing : ${location.bearing}")
                 //locationOverlay.bearing=0f
             }
-            else{//위치업데이트일때
-                if(isStart){//산책을 시작했다면
-                    //pathOverlay.map=null
-                    var latLocation:LatLng = LatLng(location)
-                    var distance:Double = latLocation.distanceTo(pathList.last())
-                    Log.d(TAG, "마지막 " + pathList.last().toString()+" 현재 "+ latLocation.toString())
-                    Log.d(TAG,"이전과 거리차이"+distance.toString())
-                    walkDistance += latLocation.distanceTo(pathList.last())//마지막 위치와 현재 위치의 거리차이 저장
-
-                    textView.text = "이동거리 : " + walkDistance.toInt().toString() + "M"
-                    //Toast.makeText(activity,walkDistance.toString(), Toast.LENGTH_SHORT).show()
-                    pathList.add(latLocation)
-                    pathOverlay.coords = pathList
-                    pathOverlay.map = naverMap
-                }else {
-                    textView.text = "이동거리 0M"
-                }
-                Log.d(TAG, "위치업데이트")
-            }
+//            else{//위치업데이트일때
+//                if(isStart){//산책을 시작했다면
+//                    //pathOverlay.map=null
+//                    var latLocation:LatLng = LatLng(location)
+//                    var distance:Double = latLocation.distanceTo(pathList.last())
+//                    Log.d(TAG, "마지막 " + pathList.last().toString()+" 현재 "+ latLocation.toString())
+//                    Log.d(TAG,"이전과 거리차이"+distance.toString())
+//                    walkDistance += latLocation.distanceTo(pathList.last())//마지막 위치와 현재 위치의 거리차이 저장
+//
+//                    textView.text = "이동거리 : " + walkDistance.toInt().toString() + "M"
+//                    //Toast.makeText(activity,walkDistance.toString(), Toast.LENGTH_SHORT).show()
+//                    pathList.add(latLocation)
+//                    pathOverlay.coords = pathList
+//                    pathOverlay.map = naverMap
+//                }else {
+//                    textView.text = "이동거리 0M"
+//                }
+//                Log.d(TAG, "위치업데이트")
+//            }
 
             lastLocation = location
 
