@@ -7,7 +7,6 @@ import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
-import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.*
 import com.example.aroundog.R
@@ -52,10 +51,9 @@ class MainFragment : Fragment(), OnMapReadyCallback{
         locationSource =
             FusedLocationSource(this, LOCATION_PERMISSION_REQUEST_CODE)
 
-        //locationSource.isCompassEnabled = true // 나침반 여부
+        locationSource.isCompassEnabled = true // 나침반 여부 지정
 
         overlayImage = OverlayImage.fromAsset("logo.png")
-        //compassImage = OverlayImage.fromResource(R.drawable.compass)
 
         pathOverlaySettings()
     }
@@ -67,29 +65,25 @@ class MainFragment : Fragment(), OnMapReadyCallback{
 
         val view:ViewGroup = inflater.inflate(R.layout.fragment_main,container,false) as ViewGroup
         startWalkButton = view.findViewById(R.id.startWalkButton)
-
         walkTimeTV = view.findViewById(R.id.walkTimeTV)
         walkDistanceTV = view.findViewById(R.id.walkDistanceTV)
         pauseButton = view.findViewById(R.id.pauseButton)
         statusLayout = view.findViewById(R.id.statusLayout)
         frame = view.findViewById(R.id.map)
 
+        //산책시작 버튼 클릭 리스너
         startWalkButton.setOnClickListener {
             Log.d(TAG, "button click")
-            if (isStart) {
+            if (isStart) {//산책 안할때
                 isStart = false
                 endWalk()
-                Toast.makeText(activity, "산책끝", Toast.LENGTH_SHORT).show()
-            } else {
+            } else {//산책할때
                 isStart = true
-                //시작위치 지정
-                pathList.add(LatLng(lastLocation))
+                pathList.add(LatLng(lastLocation))//시작위치 지정
                 startWalk()
-                Toast.makeText(activity, "산책시작", Toast.LENGTH_SHORT).show()
             }
         }
 
-        //return inflater.inflate(R.layout.fragment_walk, container, false)
         return view
     }
 
@@ -110,12 +104,9 @@ class MainFragment : Fragment(), OnMapReadyCallback{
     }
 
     fun endWalk(){
-        //Log.d(TAG,"end walk ${pathList.toString()}")
         pathList.clear()
         pathOverlay.map=null
-        Log.d(TAG,"walk distance ${walkDistance}")
         walkDistance = 0.0
-
     }
 
 
@@ -136,30 +127,29 @@ class MainFragment : Fragment(), OnMapReadyCallback{
         }
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
+
     fun uiSettings(){
         //naverMap.uiSettings.isCompassEnabled=true
-        naverMap.uiSettings.isLocationButtonEnabled=true
-        naverMap.uiSettings.isZoomControlEnabled=false
+        naverMap.uiSettings.isLocationButtonEnabled=true//현재위치 버튼 여부
+        naverMap.uiSettings.isZoomControlEnabled=false//줌 버튼 여부
     }
+
     fun setlocationOverlay(): LocationOverlay {
         var locationOverlay: LocationOverlay = naverMap.locationOverlay
         locationOverlay.icon=overlayImage
-//        locationOverlay.subIcon = compassImage
-//        locationOverlay.subIcon=LocationOverlay.DEFAULT_SUB_ICON_ARROW
         locationOverlay.iconHeight = 50
         locationOverlay.iconWidth = 100
 
         return locationOverlay
-
     }
+
     override fun onMapReady(p0: NaverMap) {
         this.naverMap = p0
-
         naverMap.locationSource = locationSource
         naverMap.locationTrackingMode = LocationTrackingMode.NoFollow
-        locationSource.isCompassEnabled =true//있어야 실시간으로 각도변경 가능
 
-        uiSettings()
+        uiSettings()//지도 ui세팅
+
         var locationOverlay = setlocationOverlay()
 
         //옵션 변경될때의 리스너
@@ -176,7 +166,6 @@ class MainFragment : Fragment(), OnMapReadyCallback{
         //위치 업데이트될때의 리스너
         //bearing업데이트일때도 여기로 들어옴
         naverMap.addOnLocationChangeListener { location ->
-
             if(naverMap.locationTrackingMode == LocationTrackingMode.NoFollow){
                 locationOverlay.bearing=0f
             }
@@ -198,20 +187,14 @@ class MainFragment : Fragment(), OnMapReadyCallback{
 
             if (location == lastLocation){//각도업데이트일때
                 Log.d(TAG, "bearing : ${location.bearing}")
-                //locationOverlay.bearing=0f
             }
             else{//위치업데이트일때
                 if(isStart){//산책을 시작했다면
                     //pathOverlay.map=null
-                    var latLocation:LatLng = LatLng(location)
-                    var distance:Double = latLocation.distanceTo(pathList.last())
-                    Log.d(TAG, "마지막 " + pathList.last().toString()+" 현재 "+ latLocation.toString())
-                    Log.d(TAG,"이전과 거리차이"+distance.toString())
-                    walkDistance += latLocation.distanceTo(pathList.last())//마지막 위치와 현재 위치의 거리차이 저장
-
+                    var updateLocation:LatLng = LatLng(location)
+                    walkDistance += updateLocation.distanceTo(pathList.last())//마지막 위치와 현재 위치의 거리차이 저장
                     walkDistanceTV.text = walkDistance.toInt().toString() + " M"
-                    //Toast.makeText(activity,walkDistance.toString(), Toast.LENGTH_SHORT).show()
-                    pathList.add(latLocation)
+                    pathList.add(updateLocation)
                     pathOverlay.coords = pathList
                     pathOverlay.map = naverMap
                 }else {
