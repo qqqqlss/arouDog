@@ -7,10 +7,9 @@ import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.VISIBLE
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import com.example.aroundog.R
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.*
@@ -34,7 +33,14 @@ class MainFragment : Fragment(), OnMapReadyCallback{
     var walkDistance:Double = 0.0
     val TAG = "MainFragmentTAG"
 
-    lateinit var textView:TextView
+    lateinit var frame:FrameLayout
+    lateinit var startWalkButton:Button
+    lateinit var walkDistanceTV:TextView
+    lateinit var walkTimeTV:TextView
+    lateinit var pauseButton:ImageButton
+    lateinit var statusLayout:LinearLayout
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         var mapView = childFragmentManager.findFragmentById(R.id.map) as MapFragment?
@@ -60,9 +66,15 @@ class MainFragment : Fragment(), OnMapReadyCallback{
     ): View? {
 
         val view:ViewGroup = inflater.inflate(R.layout.fragment_main,container,false) as ViewGroup
-        val button:Button = view.findViewById(R.id.startWalk)
-        textView = view.findViewById(R.id.textView)
-        button.setOnClickListener {
+        startWalkButton = view.findViewById(R.id.startWalkButton)
+
+        walkTimeTV = view.findViewById(R.id.walkTimeTV)
+        walkDistanceTV = view.findViewById(R.id.walkDistanceTV)
+        pauseButton = view.findViewById(R.id.pauseButton)
+        statusLayout = view.findViewById(R.id.statusLayout)
+        frame = view.findViewById(R.id.map)
+
+        startWalkButton.setOnClickListener {
             Log.d(TAG, "button click")
             if (isStart) {
                 isStart = false
@@ -72,7 +84,7 @@ class MainFragment : Fragment(), OnMapReadyCallback{
                 isStart = true
                 //시작위치 지정
                 pathList.add(LatLng(lastLocation))
-
+                startWalk()
                 Toast.makeText(activity, "산책시작", Toast.LENGTH_SHORT).show()
             }
         }
@@ -83,6 +95,12 @@ class MainFragment : Fragment(), OnMapReadyCallback{
 
     companion object {
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1000
+    }
+    fun startWalk(){
+        statusLayout.visibility=View.VISIBLE
+        startWalkButton.visibility=View.GONE
+        frame.layoutParams.height=0
+
     }
     fun pathOverlaySettings(){
         pathOverlay.outlineWidth=0//테두리 없음
@@ -191,13 +209,13 @@ class MainFragment : Fragment(), OnMapReadyCallback{
                     Log.d(TAG,"이전과 거리차이"+distance.toString())
                     walkDistance += latLocation.distanceTo(pathList.last())//마지막 위치와 현재 위치의 거리차이 저장
 
-                    textView.text = "이동거리 : " + walkDistance.toInt().toString() + "M"
+                    walkDistanceTV.text = walkDistance.toInt().toString() + " M"
                     //Toast.makeText(activity,walkDistance.toString(), Toast.LENGTH_SHORT).show()
                     pathList.add(latLocation)
                     pathOverlay.coords = pathList
                     pathOverlay.map = naverMap
                 }else {
-                    textView.text = "이동거리 0M"
+                    //textView.text = "이동거리 0M"
                 }
                 Log.d(TAG, "위치업데이트")
             }

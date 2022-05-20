@@ -5,7 +5,7 @@
         android:id="@+id/aroundWalk"
         android:title="주변 산책로" />
     <item
-        android:id="@+id/walk"
+        android:id="@+id/statusLayout"
         android:title="산책하기" />
     <item
         android:id="@+id/profile"

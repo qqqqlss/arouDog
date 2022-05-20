@@ -86,12 +86,12 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback{
 
 
         supportFragmentManager.beginTransaction().replace(R.id.main_container, mainFragment,"walk").commitAllowingStateLoss()
-        binding.bottomNav.menu.findItem(R.id.walk).setChecked(true)//시작은 산책하기로
+        binding.bottomNav.menu.findItem(R.id.statusLayout).setChecked(true)//시작은 산책하기로
 
         binding.bottomNav.setOnItemSelectedListener(object: NavigationBarView.OnItemSelectedListener{
             override fun onNavigationItemSelected(item: MenuItem): Boolean {
                 when(item.itemId){
-                    R.id.walk->{//산책하기
+                    R.id.statusLayout->{//산책하기
                         if(supportFragmentManager.findFragmentByTag("walk") != null)
                             supportFragmentManager.beginTransaction().show(supportFragmentManager.findFragmentByTag("walk")!!).commit()
                         else
