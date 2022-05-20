@@ -16,6 +16,8 @@ import com.naver.maps.map.overlay.LocationOverlay
 import com.naver.maps.map.overlay.OverlayImage
 import com.naver.maps.map.overlay.PathOverlay
 import com.naver.maps.map.util.FusedLocationSource
+import java.util.concurrent.TimeUnit
+import kotlin.concurrent.timer
 
 class MainFragment : Fragment(), OnMapReadyCallback{
 
@@ -94,7 +96,14 @@ class MainFragment : Fragment(), OnMapReadyCallback{
         statusLayout.visibility=View.VISIBLE
         startWalkButton.visibility=View.GONE
         frame.layoutParams.height=0
-
+        var time:Long = 0
+        kotlin.concurrent.timer(period = 1000){
+            time++
+            val hour = TimeUnit.SECONDS.toHours(time)
+            val minute = TimeUnit.SECONDS.toMinutes(time) - hour*60
+            val second = TimeUnit.SECONDS.toSeconds(time) - hour*3600 - minute*60
+            walkTimeTV.text = String.format("%02d",hour) + " : " + String.format("%02d",minute) + " : "  + String.format("%02d",second)
+        }
     }
     fun pathOverlaySettings(){
         pathOverlay.outlineWidth=0//테두리 없음
@@ -107,6 +116,7 @@ class MainFragment : Fragment(), OnMapReadyCallback{
         pathList.clear()
         pathOverlay.map=null
         walkDistance = 0.0
+        //서버에는 time 전달
     }
 
 
@@ -197,6 +207,7 @@ class MainFragment : Fragment(), OnMapReadyCallback{
                     pathList.add(updateLocation)
                     pathOverlay.coords = pathList
                     pathOverlay.map = naverMap
+
                 }else {
                     //textView.text = "이동거리 0M"
                 }
