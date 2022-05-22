@@ -3,13 +3,16 @@ package com.example.aroundog.fragments
 import android.graphics.Color
 import android.location.Location
 import android.os.Bundle
+import android.os.Parcelable
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.fragment.app.setFragmentResult
 import com.example.aroundog.R
+import com.example.aroundog.SerialLatLng
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.*
 import com.naver.maps.map.overlay.LocationOverlay
@@ -27,6 +30,7 @@ class MainFragment : Fragment(), OnMapReadyCallback{
     private lateinit var naverMap: NaverMap
 
     private var pathList:ArrayList<LatLng> = ArrayList<LatLng>()
+    var serialPathList:ArrayList<SerialLatLng> = ArrayList<SerialLatLng>()
     private var pathOverlay: PathOverlay = PathOverlay()
     private var isStart:Boolean = false
     private var isFirst:Boolean = true
@@ -47,9 +51,9 @@ class MainFragment : Fragment(), OnMapReadyCallback{
     var time:Long = 0
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        var mapView = childFragmentManager.findFragmentById(R.id.map) as MapFragment?
+        var mapView = parentFragmentManager.findFragmentById(R.id.map) as MapFragment?
             ?: MapFragment.newInstance().also {
-                childFragmentManager.beginTransaction().add(R.id.map, it).commit()
+                parentFragmentManager.beginTransaction().add(R.id.map, it, "map").commit()
             }
         mapView.getMapAsync(this)
 
@@ -67,6 +71,8 @@ class MainFragment : Fragment(), OnMapReadyCallback{
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+//        if(parentFragmentManager.findFragmentByTag("map") != null)
+//            parentFragmentManager.beginTransaction().show(parentFragmentManager.findFragmentByTag("map")!!).commit()
 
         val view:ViewGroup = inflater.inflate(R.layout.fragment_main,container,false) as ViewGroup
         startWalkButton = view.findViewById(R.id.startWalkButton)
@@ -81,6 +87,7 @@ class MainFragment : Fragment(), OnMapReadyCallback{
             Log.d(TAG, "산책시작 버튼 클릭")
             isStart = true
             pathList.add(LatLng(lastLocation))//시작위치 지정
+            serialPathList.add(SerialLatLng(LatLng(lastLocation)))
             startWalk()
 
         }
@@ -90,12 +97,30 @@ class MainFragment : Fragment(), OnMapReadyCallback{
             //산책결과 프래그먼트 추가해야함
             Toast.makeText(activity,"산책종료", Toast.LENGTH_SHORT).show()
             isStart = false
+
+
+
+            var bundle:Bundle = Bundle()
+            bundle.putSerializable("arraylist", LatLngToSerial())
+            //bundle.putSerializable("arraylist", serialPathList)
+            setFragmentResult("walkEnd",bundle)
+            parentFragmentManager.beginTransaction().add(R.id.main_container, EndWalkFragment(), "endWalk").addToBackStack(null).commit()
+
+
             endWalk()
         }
 
         return view
     }
-
+    fun LatLngToSerial(): ArrayList<SerialLatLng> {
+        var tempList = ArrayList<SerialLatLng>()
+        var iterator = pathList.iterator()
+        while(iterator.hasNext()){
+            var temp = SerialLatLng(iterator.next())
+            tempList.add(temp)
+        }
+        return tempList
+    }
     companion object {
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1000
     }
@@ -235,6 +260,7 @@ class MainFragment : Fragment(), OnMapReadyCallback{
                     walkDistance += updateLocation.distanceTo(pathList.last())//마지막 위치와 현재 위치의 거리차이 저장
                     walkDistanceTV.text = walkDistance.toInt().toString() + " M"
                     pathList.add(updateLocation)
+                    serialPathList.add(SerialLatLng(updateLocation))
                     pathOverlay.coords = pathList
                     pathOverlay.map = naverMap
 
