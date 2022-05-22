@@ -16,7 +16,9 @@ import com.naver.maps.map.overlay.LocationOverlay
 import com.naver.maps.map.overlay.OverlayImage
 import com.naver.maps.map.overlay.PathOverlay
 import com.naver.maps.map.util.FusedLocationSource
+import java.util.*
 import java.util.concurrent.TimeUnit
+import kotlin.collections.ArrayList
 import kotlin.concurrent.timer
 
 class MainFragment : Fragment(), OnMapReadyCallback{
@@ -41,7 +43,8 @@ class MainFragment : Fragment(), OnMapReadyCallback{
     lateinit var pauseButton:ImageButton
     lateinit var statusLayout:LinearLayout
 
-
+    lateinit var timer:Timer
+    var time:Long = 0
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         var mapView = childFragmentManager.findFragmentById(R.id.map) as MapFragment?
@@ -75,15 +78,19 @@ class MainFragment : Fragment(), OnMapReadyCallback{
 
         //산책시작 버튼 클릭 리스너
         startWalkButton.setOnClickListener {
-            Log.d(TAG, "button click")
-            if (isStart) {//산책 안할때
-                isStart = false
-                endWalk()
-            } else {//산책할때
-                isStart = true
-                pathList.add(LatLng(lastLocation))//시작위치 지정
-                startWalk()
-            }
+            Log.d(TAG, "산책시작 버튼 클릭")
+            isStart = true
+            pathList.add(LatLng(lastLocation))//시작위치 지정
+            startWalk()
+
+        }
+
+        //산책종료 버튼클릭 리스너
+        pauseButton.setOnClickListener {
+            //산책결과 프래그먼트 추가해야함
+            Toast.makeText(activity,"산책종료", Toast.LENGTH_SHORT).show()
+            isStart = false
+            endWalk()
         }
 
         return view
@@ -96,15 +103,30 @@ class MainFragment : Fragment(), OnMapReadyCallback{
         statusLayout.visibility=View.VISIBLE
         startWalkButton.visibility=View.GONE
         frame.layoutParams.height=0
-        var time:Long = 0
-        kotlin.concurrent.timer(period = 1000){
+        startTimer()
+    }
+
+    fun startTimer(){
+        timer = kotlin.concurrent.timer(period = 1000){
             time++
-            val hour = TimeUnit.SECONDS.toHours(time)
-            val minute = TimeUnit.SECONDS.toMinutes(time) - hour*60
-            val second = TimeUnit.SECONDS.toSeconds(time) - hour*3600 - minute*60
-            walkTimeTV.text = String.format("%02d",hour) + " : " + String.format("%02d",minute) + " : "  + String.format("%02d",second)
+            setTimer()
         }
     }
+    fun stopTimer(){
+        timer.cancel()
+    }
+    fun resetTimer(){
+        timer.cancel()
+        time=0
+        setTimer()
+    }
+    fun setTimer(){
+        var hour = TimeUnit.SECONDS.toHours(time)
+        var minute = TimeUnit.SECONDS.toMinutes(time) - hour*60
+        var second = TimeUnit.SECONDS.toSeconds(time) - hour*3600 - minute*60
+        walkTimeTV.text = String.format("%02d",hour) + " : " + String.format("%02d",minute) + " : "  + String.format("%02d",second)
+    }
+
     fun pathOverlaySettings(){
         pathOverlay.outlineWidth=0//테두리 없음
         pathOverlay.width=20//경로선 폭
@@ -117,6 +139,14 @@ class MainFragment : Fragment(), OnMapReadyCallback{
         pathOverlay.map=null
         walkDistance = 0.0
         //서버에는 time 전달
+        statusLayout.visibility=View.GONE
+        startWalkButton.visibility=View.VISIBLE
+
+        val layout:ViewGroup.LayoutParams = frame.layoutParams
+        layout.width=ViewGroup.LayoutParams.MATCH_PARENT
+        layout.height=ViewGroup.LayoutParams.MATCH_PARENT
+        frame.layoutParams = layout
+        resetTimer()
     }
 
 
