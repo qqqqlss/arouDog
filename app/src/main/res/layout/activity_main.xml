@@ -6,32 +6,6 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     tools:context=".MainActivity">
-
-
-<!--    <LinearLayout-->
-<!--        android:layout_width="wrap_content"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:orientation="horizontal">-->
-
-<!--        <Button-->
-<!--            android:id="@+id/button"-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:text="메인 액티비티 버튼" />-->
-
-<!--        <TextView-->
-<!--            android:id="@+id/walkDistance"-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content" />-->
-<!--    </LinearLayout>-->
-
-    <!--    잠시 높이를 0으로 변경-->
-    <com.naver.maps.map.MapView
-        android:id="@+id/mapView"
-        android:layout_width="match_parent"
-        android:layout_height="0dp">
-
-    </com.naver.maps.map.MapView>
     
     <!--    프래그먼트를 띄울 레이아웃-->
     <FrameLayout
@@ -53,14 +27,5 @@
         app:labelVisibilityMode="labeled"
         app:menu="@menu/bottom_navigation"
         />
-
-    <!--    <fragment-->
-    <!--        android:id="@+id/nav_host_fragment"-->
-    <!--        android:name="androidx.navigation.fragment.NavHostFragment"-->
-    <!--        android:layout_width="0dp"-->
-    <!--        android:layout_height="0dp"-->
-
-    <!--        app:defaultNavHost="true"-->
-    <!--        app:navGraph="@navigation/nav_graph" />-->
 
 </LinearLayout>
