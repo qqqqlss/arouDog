@@ -1,6 +1,7 @@
 plugins {
     id 'com.android.application'
     id 'kotlin-android'
+    id 'com.google.gms.google-services' //firebase
 }
 
 android {
@@ -75,5 +76,11 @@ dependencies {
     // Jetpack Compose Integration
     implementation("androidx.navigation:navigation-compose:$nav_version")
 
+    //anko
     implementation("org.jetbrains.anko:anko:$anko_version")
+
+    //firebase
+    implementation platform('com.google.firebase:firebase-bom:30.0.2')
+    implementation ('com.google.firebase:firebase-analytics-ktx')
+
 }
