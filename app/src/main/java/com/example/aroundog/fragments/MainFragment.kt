@@ -13,6 +13,11 @@ import android.widget.*
 import androidx.fragment.app.setFragmentResult
 import com.example.aroundog.R
 import com.example.aroundog.SerialLatLng
+import com.example.aroundog.RealtimeLocation
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.IgnoreExtraProperties
+import com.google.firebase.database.ktx.database
+import com.google.firebase.ktx.Firebase
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.*
 import com.naver.maps.map.overlay.LocationOverlay
@@ -24,11 +29,11 @@ import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
 import kotlin.concurrent.timer
 
+
 class MainFragment : Fragment(), OnMapReadyCallback{
 
     private lateinit var locationSource: FusedLocationSource
     private lateinit var naverMap: NaverMap
-
     private var pathList:ArrayList<LatLng> = ArrayList<LatLng>()
     var serialPathList:ArrayList<SerialLatLng> = ArrayList<SerialLatLng>()
     private var pathOverlay: PathOverlay = PathOverlay()
@@ -49,6 +54,9 @@ class MainFragment : Fragment(), OnMapReadyCallback{
 
     lateinit var timer:Timer
     var time:Long = 0
+
+    val realdb:RealtimeLocation = RealtimeLocation()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         var mapView = parentFragmentManager.findFragmentById(R.id.map) as MapFragment?
@@ -65,6 +73,9 @@ class MainFragment : Fragment(), OnMapReadyCallback{
         overlayImage = OverlayImage.fromAsset("logo.png")
 
         pathOverlaySettings()
+
+        realdb.initializeDbRef()
+
     }
 
     override fun onCreateView(//인터페이스를 그리기위해 호출
@@ -174,7 +185,6 @@ class MainFragment : Fragment(), OnMapReadyCallback{
         resetTimer()
     }
 
-
     override fun onRequestPermissionsResult(requestCode: Int,
                                             permissions: Array<String>,
                                             grantResults: IntArray) {
@@ -263,6 +273,8 @@ class MainFragment : Fragment(), OnMapReadyCallback{
                     serialPathList.add(SerialLatLng(updateLocation))
                     pathOverlay.coords = pathList
                     pathOverlay.map = naverMap
+
+                    realdb.writeNewUser("x", location.latitude, location.longitude) //현재 위치 db전송
 
                 }else {
                     //textView.text = "이동거리 0M"
