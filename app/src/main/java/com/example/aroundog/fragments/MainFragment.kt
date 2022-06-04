@@ -21,6 +21,7 @@ import com.google.firebase.ktx.Firebase
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.*
 import com.naver.maps.map.overlay.LocationOverlay
+import com.naver.maps.map.overlay.Marker
 import com.naver.maps.map.overlay.OverlayImage
 import com.naver.maps.map.overlay.PathOverlay
 import com.naver.maps.map.util.FusedLocationSource
@@ -227,6 +228,13 @@ class MainFragment : Fragment(), OnMapReadyCallback{
 
         var locationOverlay = setlocationOverlay()
 
+        var ymarker = Marker()
+        ymarker.position = LatLng(37.514,126.838)
+        ymarker.map = naverMap
+        var zmarker = Marker()
+        zmarker.position = LatLng(37.5133,126.83)
+        zmarker.map = naverMap
+
         //옵션 변경될때의 리스너
         naverMap.addOnOptionChangeListener {
             val mode=naverMap.locationTrackingMode
@@ -275,6 +283,10 @@ class MainFragment : Fragment(), OnMapReadyCallback{
                     pathOverlay.map = naverMap
 
                     realdb.writeNewUser("x", location.latitude, location.longitude) //현재 위치 db전송
+                    ymarker.position = realdb.getValue("y")
+                    ymarker.position = realdb.getValue("z")
+
+                    Log.d("firebase", "ymarker position "+ymarker.position.toString())
 
                 }else {
                     //textView.text = "이동거리 0M"
