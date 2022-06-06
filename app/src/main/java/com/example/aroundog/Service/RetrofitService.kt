@@ -31,31 +31,12 @@ interface RetrofitService {
 
     ):Call<ArrayList<GetWalkHistory>>
 
-//    <?php
-//    $con = mysqli_connect("122.32.165.55", "aroundog", "abcd1234", "team");
-//    mysqli_query($con,'SET NAMES utf8');
-//
-//    $id= $_POST["user_id"];
-//    $history = $_POST["history"];
-//
-//    $statement = mysqli_prepare($con, "INSERT INTO Walk(user_id, history) VALUES (?,?)");
-//    mysqli_stmt_bind_param($statement, "ss", $id, $history);
-//    $exec = mysqli_stmt_execute($statement);
-//
-//    $response = array();
-//
-//    if($exec == false){
-//        $response["success"] = "false";
-//
-//    }else{
-//        $response["success"] = "true";
-//
-//    }
-//
-//    echo json_encode($response);
-//    ?>
-
-
+    @FormUrlEncoded
+    @POST("/clickButton.php")
+    fun clickButton(
+        @Field("button") button:String,
+        @Field("serialNumber") serialNumber:String
+    ):Call<UpdateWalkHistory>
 
     @GET("/test.php")
     fun test(
