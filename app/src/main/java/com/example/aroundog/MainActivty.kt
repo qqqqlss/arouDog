@@ -1,26 +1,17 @@
 package com.example.aroundog
 
-import android.graphics.Color
-import android.location.Location
 import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.MenuItem
+import androidx.appcompat.app.AppCompatActivity
 import com.example.aroundog.databinding.ActivityMainAfterLoginBinding
 import com.example.aroundog.databinding.ActivityMainBinding
 import com.example.aroundog.fragments.AroundWalkFragment
-import com.example.aroundog.fragments.ProfileFragment
 import com.example.aroundog.fragments.MainFragment
+import com.example.aroundog.fragments.ProfileFragment
 import com.google.android.material.navigation.NavigationBarView
-import com.naver.maps.geometry.LatLng
-import com.naver.maps.map.*
-import com.naver.maps.map.overlay.LocationOverlay
-import com.naver.maps.map.overlay.OverlayImage
-import com.naver.maps.map.overlay.PathOverlay
-import com.naver.maps.map.util.FusedLocationSource
 
-class MainActivity : AppCompatActivity(){
+class MainActivty : AppCompatActivity() {
     private var TAG: String = "MAINTAG"
     private lateinit var binding: ActivityMainAfterLoginBinding
     lateinit var userPermission: PermissionSupport
@@ -35,9 +26,9 @@ class MainActivity : AppCompatActivity(){
 
     }
     fun setFragment(){
-        val mainFragment:MainFragment = MainFragment()
-        val aroundWalkFragment:AroundWalkFragment = AroundWalkFragment()
-        val profileFragment:ProfileFragment = ProfileFragment()
+        val mainFragment: MainFragment = MainFragment()
+        val aroundWalkFragment: AroundWalkFragment = AroundWalkFragment()
+        val profileFragment: ProfileFragment = ProfileFragment()
 
 
         supportFragmentManager.beginTransaction().replace(R.id.main_container, mainFragment,"walk").commitAllowingStateLoss()
@@ -105,5 +96,4 @@ class MainActivity : AppCompatActivity(){
             }
         }
     }
-
 }
