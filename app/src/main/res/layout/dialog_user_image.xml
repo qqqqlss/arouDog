@@ -30,7 +30,7 @@
             android:orientation="horizontal">
 
             <androidx.cardview.widget.CardView
-                android:id="@+id/dialog_user_image_green_female"
+                android:id="@+id/profile1"
                 android:layout_width="120dp"
                 android:layout_height="120dp"
                 android:layout_gravity="center"
@@ -44,12 +44,12 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:scaleType="centerCrop"
-                    android:src="@drawable/ic_profile_female_green" />
+                    android:src="@drawable/profile_1" />
 
             </androidx.cardview.widget.CardView>
 
             <androidx.cardview.widget.CardView
-                android:id="@+id/dialog_user_image_green_male"
+                android:id="@+id/profile2"
                 android:layout_width="120dp"
                 android:layout_height="120dp"
                 android:layout_gravity="center"
@@ -62,11 +62,11 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:scaleType="centerCrop"
-                    android:src="@drawable/ic_profile_male_green" />
+                    android:src="@drawable/profile_2" />
             </androidx.cardview.widget.CardView>
 
             <androidx.cardview.widget.CardView
-                android:id="@+id/dialog_user_image_blue_female"
+                android:id="@+id/profile3"
                 android:layout_width="120dp"
                 android:layout_height="120dp"
                 android:layout_gravity="center"
@@ -79,63 +79,64 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:scaleType="centerCrop"
-                    android:src="@drawable/ic_profile_female_blue" />
+                    android:src="@drawable/profile_3" />
 
             </androidx.cardview.widget.CardView>
+            <!--
+                        <androidx.cardview.widget.CardView
+                            android:id="@+id/dialog_user_image_blue_male"
+                            android:layout_width="120dp"
+                            android:layout_height="120dp"
+                            android:layout_gravity="center"
+                            android:layout_marginRight="25dp"
+                            android:clickable="true"
+                            android:foreground="?android:attr/selectableItemBackground"
+                            app:cardCornerRadius="75dp">
 
-            <androidx.cardview.widget.CardView
-                android:id="@+id/dialog_user_image_blue_male"
-                android:layout_width="120dp"
-                android:layout_height="120dp"
-                android:layout_gravity="center"
-                android:layout_marginRight="25dp"
-                android:clickable="true"
-                android:foreground="?android:attr/selectableItemBackground"
-                app:cardCornerRadius="75dp">
+                            <ImageView
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:scaleType="centerCrop"
+                                android:src="@drawable/ic_profile_male_blue" />
 
-                <ImageView
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:scaleType="centerCrop"
-                    android:src="@drawable/ic_profile_male_blue" />
+                        </androidx.cardview.widget.CardView>
 
-            </androidx.cardview.widget.CardView>
+                        <androidx.cardview.widget.CardView
+                            android:id="@+id/dialog_user_image_purple_female"
+                            android:layout_width="120dp"
+                            android:layout_height="120dp"
+                            android:layout_gravity="center"
+                            android:layout_marginRight="25dp"
+                            android:clickable="true"
+                            android:foreground="?android:attr/selectableItemBackground"
+                            app:cardCornerRadius="75dp">
 
-            <androidx.cardview.widget.CardView
-                android:id="@+id/dialog_user_image_purple_female"
-                android:layout_width="120dp"
-                android:layout_height="120dp"
-                android:layout_gravity="center"
-                android:layout_marginRight="25dp"
-                android:clickable="true"
-                android:foreground="?android:attr/selectableItemBackground"
-                app:cardCornerRadius="75dp">
+                            <ImageView
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:scaleType="centerCrop"
+                                android:src="@drawable/ic_profile_female_purple" />
 
-                <ImageView
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:scaleType="centerCrop"
-                    android:src="@drawable/ic_profile_female_purple" />
+                        </androidx.cardview.widget.CardView>
 
-            </androidx.cardview.widget.CardView>
+                        <androidx.cardview.widget.CardView
+                            android:id="@+id/dialog_user_image_purple_male"
+                            android:layout_width="120dp"
+                            android:layout_height="120dp"
+                            android:layout_gravity="center"
+                            android:layout_marginRight="25dp"
+                            android:clickable="true"
+                            android:foreground="?android:attr/selectableItemBackground"
+                            app:cardCornerRadius="75dp">
 
-            <androidx.cardview.widget.CardView
-                android:id="@+id/dialog_user_image_purple_male"
-                android:layout_width="120dp"
-                android:layout_height="120dp"
-                android:layout_gravity="center"
-                android:layout_marginRight="25dp"
-                android:clickable="true"
-                android:foreground="?android:attr/selectableItemBackground"
-                app:cardCornerRadius="75dp">
+                            <ImageView
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:scaleType="centerCrop"
+                                android:src="@drawable/ic_profile_male_purple" />
 
-                <ImageView
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:scaleType="centerCrop"
-                    android:src="@drawable/ic_profile_male_purple" />
-
-            </androidx.cardview.widget.CardView>
+                        </androidx.cardview.widget.CardView>
+               -->
         </LinearLayout>
 
     </HorizontalScrollView>

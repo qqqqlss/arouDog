@@ -15,12 +15,14 @@ import androidx.cardview.widget.CardView
 // 유저 프로필 설정 다이얼로그
 class UserProfileDialog(context: Context, private val select: Select, profile: ImageView) :
     Dialog(context) {
-    var GreenFemale: CardView? = null
-    var GreenMale: CardView? = null
-    var BlueFemale: CardView? = null
+    var BlueProfile: CardView? = null
+    var GreenProfile: CardView? = null
+    var PinkProfile: CardView? = null
+    /*
     var BlueMale: CardView? = null
     var PurpleFemale: CardView? = null
     var PurpleMale: CardView? = null
+     */
     var selectImage = 1
 
     interface Select {
@@ -28,31 +30,34 @@ class UserProfileDialog(context: Context, private val select: Select, profile: I
     }
 
     fun selectProfile(profile: ImageView) {
-        GreenFemale = findViewById(R.id.dialog_user_image_green_female)
-        GreenMale = findViewById(R.id.dialog_user_image_green_male)
-        BlueFemale = findViewById(R.id.dialog_user_image_blue_female)
+        BlueProfile = findViewById(R.id.profile1)
+        GreenProfile = findViewById(R.id.profile2)
+        PinkProfile = findViewById(R.id.profile3)
+        /*
         BlueMale = findViewById(R.id.dialog_user_image_blue_male)
         PurpleFemale = findViewById(R.id.dialog_user_image_purple_female)
         PurpleMale = findViewById(R.id.dialog_user_image_purple_male)
+        */
 
-        GreenFemale!!.setOnClickListener(View.OnClickListener {
+        BlueProfile!!.setOnClickListener(View.OnClickListener {
             selectImage = 1
             select.clickProfile(selectImage)
-            profile.setImageResource(R.drawable.ic_profile_female_green)
+            profile.setImageResource(R.drawable.profile_1)
             dismiss()
         })
-        GreenMale!!.setOnClickListener(View.OnClickListener {
+        GreenProfile!!.setOnClickListener(View.OnClickListener {
             selectImage = 2
             select.clickProfile(selectImage)
-            profile.setImageResource(R.drawable.ic_profile_male_green)
+            profile.setImageResource(R.drawable.profile_2)
             dismiss()
         })
-        BlueFemale!!.setOnClickListener(View.OnClickListener {
+        PinkProfile!!.setOnClickListener(View.OnClickListener {
             selectImage = 3
             select.clickProfile(selectImage)
-            profile.setImageResource(R.drawable.ic_profile_female_blue)
+            profile.setImageResource(R.drawable.profile_3)
             dismiss()
         })
+        /*
         BlueMale!!.setOnClickListener(View.OnClickListener {
             selectImage = 4
             select.clickProfile(selectImage)
@@ -71,6 +76,7 @@ class UserProfileDialog(context: Context, private val select: Select, profile: I
             profile.setImageResource(R.drawable.ic_profile_male_purple)
             dismiss()
         })
+         */
     }
 
     init {
