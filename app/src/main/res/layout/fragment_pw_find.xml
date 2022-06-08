@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    >
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="25dp">
+
+        <EditText
+            android:layout_width="350dp"
+            android:layout_height="50dp"
+            android:layout_centerHorizontal="true"
+            android:background="@drawable/style_rounded_login"
+            android:fontFamily="@font/nanum_barun_gothic_light"
+            android:hint="이용자님의 아이디를 입력해주세요."
+            android:paddingLeft="17dp"
+            android:textColor="@color/black"
+            android:textColorHint="@color/black"
+            android:textSize="15sp" />
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_marginTop="12dp"
+            android:layout_marginEnd="40dp"
+            android:layout_marginRight="40dp"
+            android:background="@color/transparent"
+            android:src="@drawable/ic_register_not_check" />
+    </RelativeLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="40dp"
+        android:layout_marginTop="8dp"
+        android:fontFamily="@font/nanum_square"
+        android:text="입력 후 아이디가 존재하는지 확인해주세요."
+        android:textColor="@color/gray"
+        android:textSize="10sp" />
+
+    <EditText
+        android:layout_width="350dp"
+        android:layout_height="50dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/style_rounded_login"
+        android:fontFamily="@font/nanum_barun_gothic_light"
+        android:hint="이용자님의 이름을 입력해주세요."
+        android:inputType="textPassword"
+        android:paddingLeft="17dp"
+        android:textColor="@color/black"
+        android:textColorHint="@color/black"
+        android:textSize="15sp" />
+
+    <EditText
+        android:layout_width="350dp"
+        android:layout_height="50dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/style_rounded_login"
+        android:fontFamily="@font/nanum_barun_gothic_light"
+        android:hint="이용자님의 이메일을 입력해주세요."
+        android:paddingLeft="17dp"
+        android:textColor="@color/black"
+        android:textColorHint="@color/black"
+        android:textSize="15sp" />
+
+    <Button
+        android:layout_width="350dp"
+        android:layout_height="50dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="15dp"
+        android:background="@drawable/style_rounded_postive_button"
+        android:fontFamily="@font/nanum_square_eb"
+        android:text="비밀번호 찾기"
+        android:textColor="@color/white"
+        android:textStyle="bold" />
+
+</LinearLayout>

@@ -7,4 +7,19 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="green">#6bc77c</color>
+    <color name="darkgreen">#46b95b</color>
+    <color name="lightGreen">#8cd095</color>
+    <color name="gray">#5a6a72</color>
+    <color name="transparent">#00FFFFFF</color>
+
+    <!-- 아고라 -->
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#FF4081</color>
+    <color name="lightColorAccent">#30FF4081</color>
+    <color name="dark_black">#CC262626</color>
+    <color name="transparent_75_white">#ACFFFFFF</color>
+    <color name="dark_gray">#FF55585A</color>
+
 </resources>

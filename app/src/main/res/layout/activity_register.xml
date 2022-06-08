@@ -1,0 +1,310 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".RegisterActivity">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/register_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:background="#E8DAB3">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:fontFamily="@font/nanum_square_eb"
+            android:text="회원가입"
+            android:textColor="@color/white"
+            android:textSize="30sp" />
+    </androidx.appcompat.widget.Toolbar>
+
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="350dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="30dp"
+                android:fontFamily="@font/nanum_barun_gothic"
+                android:text="스마트 자전거를\n만들어 볼까요?"
+                android:textColor="@color/black"
+                android:textSize="30sp" />
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/register_user_cardView"
+                android:layout_width="153dp"
+                android:layout_height="153dp"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
+                android:layout_gravity="center"
+                android:layout_marginTop="10dp"
+                android:clickable="true"
+                android:foreground="?android:attr/selectableItemBackground"
+                app:cardCornerRadius="75dp">
+
+                <ImageView
+                    android:id="@+id/register_user_profile"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/ic_profile_female_green" />
+            </androidx.cardview.widget.CardView>
+
+            <TextView
+                android:layout_width="330dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="10dp"
+                android:fontFamily="@font/nanum_square"
+                android:text="클릭하면 이미지를 선택할 수 있어요."
+                android:textColor="@color/gray"
+                android:textSize="11sp" />
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp">
+
+                <EditText
+                    android:id="@+id/register_id"
+                    android:layout_width="350dp"
+                    android:layout_height="50dp"
+                    android:layout_centerHorizontal="true"
+                    android:background="@drawable/style_rounded_login"
+                    android:digits="@string/text_id"
+                    android:fontFamily="@font/nanum_barun_gothic_light"
+                    android:hint="아이디를 입력해주세요."
+                    android:inputType="textVisiblePassword"
+                    android:paddingLeft="17dp"
+                    android:textColor="@color/black"
+                    android:textColorHint="@color/black"
+                    android:maxLength="15"
+                    android:textSize="15sp" />
+
+                <ImageButton
+                    android:id="@+id/register_id_validate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentRight="true"
+                    android:layout_marginTop="12dp"
+                    android:layout_marginRight="45dp"
+                    android:background="@color/transparent"
+                    android:src="@drawable/ic_register_not_check" />
+            </RelativeLayout>
+
+            <TextView
+                android:id="@+id/register_id_check"
+                android:layout_width="330dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="6dp"
+                android:fontFamily="@font/nanum_square"
+                android:text="존재하는 아이디입니다! 다른 아이디를 입력해주세요."
+                android:textColor="#FF0000"
+                android:textSize="11sp"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/register_validate_check"
+                android:layout_width="330dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="6dp"
+                android:fontFamily="@font/nanum_square"
+                android:text="아이디가 존재하는지 확인해주세요!"
+                android:textColor="#FF0000"
+                android:textSize="11sp"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/register_id_length_check"
+                android:layout_width="330dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="8dp"
+                android:fontFamily="@font/nanum_square"
+                android:text="6자 ~ 15자 이상으로 입력해주세요."
+                android:textColor="@color/gray"
+                android:textSize="11sp" />
+
+            <TextView
+                android:layout_width="330dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="3dp"
+                android:fontFamily="@font/nanum_square"
+                android:text="입력하신 후 중복확인 버튼을 눌러주세요."
+                android:textColor="@color/gray"
+                android:textSize="11sp" />
+
+            <EditText
+                android:id="@+id/register_pw"
+                android:layout_width="350dp"
+                android:layout_height="50dp"
+                android:layout_gravity="center"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/style_rounded_login"
+                android:fontFamily="@font/nanum_barun_gothic_light"
+                android:hint="비밀번호를 입력해주세요."
+                android:inputType="textPassword"
+                android:paddingLeft="17dp"
+                android:textColor="@color/black"
+                android:textColorHint="@color/black"
+                android:maxLength="16"
+                android:textSize="15sp" />
+
+            <TextView
+                android:id="@+id/register_pw_length_check"
+                android:layout_width="330dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="8dp"
+                android:fontFamily="@font/nanum_square"
+                android:text="8자 ~ 16자 이상의 영문 / 숫자 조합으로 입력해주세요."
+                android:textColor="@color/gray"
+                android:textSize="11sp" />
+
+            <EditText
+                android:id="@+id/register_pw2"
+                android:layout_width="350dp"
+                android:layout_height="50dp"
+                android:layout_gravity="center"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/style_rounded_login"
+                android:fontFamily="@font/nanum_barun_gothic_light"
+                android:hint="비밀번호를 재입력해주세요."
+                android:inputType="textPassword"
+                android:paddingLeft="17dp"
+                android:textColor="@color/black"
+                android:textColorHint="@color/black"
+                android:maxLength="16"
+                android:textSize="15sp" />
+
+            <TextView
+                android:id="@+id/register_pw_check"
+                android:layout_width="330dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="6dp"
+                android:fontFamily="@font/nanum_square"
+                android:text="비밀번호가 일치하지 않습니다! 다시 입력해주세요."
+                android:textColor="#FF0000"
+                android:textSize="11sp"
+                android:visibility="gone" />
+
+            <EditText
+                android:id="@+id/register_name"
+                android:layout_width="350dp"
+                android:layout_height="50dp"
+                android:layout_gravity="center"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/style_rounded_login"
+                android:fontFamily="@font/nanum_barun_gothic_light"
+                android:hint="이용자님의 이름을 입력해주세요."
+                android:inputType="text"
+                android:paddingLeft="17dp"
+                android:textColor="@color/black"
+                android:textColorHint="@color/black"
+                android:maxLength="15"
+                android:textSize="15sp" />
+
+            <EditText
+                android:id="@+id/register_number"
+                android:layout_width="350dp"
+                android:layout_height="50dp"
+                android:layout_gravity="center"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/style_rounded_login"
+                android:digits="0123456789"
+                android:fontFamily="@font/nanum_barun_gothic_light"
+                android:hint="이용자님의 휴대폰 번호를 입력해주세요."
+                android:inputType="number"
+                android:paddingLeft="17dp"
+                android:textColor="@color/black"
+                android:textColorHint="@color/black"
+                android:maxLength="11"
+                android:textSize="15sp" />
+
+            <TextView
+                android:layout_width="330dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="8dp"
+                android:fontFamily="@font/nanum_square"
+                android:text="' - ' 없이 숫자만 입력해주세요."
+                android:textColor="@color/gray"
+                android:textSize="11sp" />
+
+
+            <EditText
+                android:id="@+id/register_email"
+                android:layout_width="350dp"
+                android:layout_height="50dp"
+                android:layout_marginTop="10dp"
+                android:layout_centerHorizontal="true"
+                android:layout_gravity="center"
+                android:background="@drawable/style_rounded_login"
+                android:digits="@string/text_not_korean"
+                android:fontFamily="@font/nanum_barun_gothic_light"
+                android:hint="이용자님의 이메일을 입력해주세요."
+                android:inputType="textEmailAddress"
+                android:paddingLeft="17dp"
+                android:textColor="@color/black"
+                android:textColorHint="@color/black"
+                android:maxLength="35"
+                android:textSize="15sp" />
+
+            <TextView
+                android:layout_width="330dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="8dp"
+                android:fontFamily="@font/nanum_square"
+                android:text="이용자님의 아이디, 비밀번호를 찾을 때 사용돼요! 정확히 입력해주세요."
+                android:textColor="@color/gray"
+                android:textSize="11sp" />
+
+            <TextView
+                android:id="@+id/register_check"
+                android:layout_width="330dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="4dp"
+                android:fontFamily="@font/nanum_square"
+                android:text="비어있는 항목이 있어요! 모두 입력해주세요."
+                android:textColor="#FF0000"
+                android:textSize="11sp"
+                android:visibility="gone" />
+
+            <Button
+                android:id="@+id/register_button"
+                android:layout_width="350dp"
+                android:layout_height="50dp"
+                android:layout_gravity="center"
+                android:layout_marginTop="15dp"
+                android:layout_marginBottom="10dp"
+                android:background="@drawable/style_rounded_postive_button"
+                android:fontFamily="@font/nanum_square_eb"
+                android:text="회원가입"
+                android:textColor="@color/white"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+    </ScrollView>
+</LinearLayout>

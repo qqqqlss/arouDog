@@ -1,14 +1,174 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".fragments.ProfileFragment">
+    android:orientation="vertical"
+    >
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <ImageView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="프로필 프래그먼트" />
+        android:layout_height="170dp"
+        android:layout_marginTop="30dp"
+        android:src="@drawable/logo_aob" />
 
-</FrameLayout>
+    <TextView
+        android:layout_width="350dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="30dp"
+        android:fontFamily="@font/nanum_barun_gothic"
+        android:text="로그인 창"
+        android:textColor="@color/colorAccent"
+        android:textSize="40sp" />
+
+    <EditText
+        android:id="@+id/login_id"
+        android:layout_width="350dp"
+        android:layout_height="50dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/style_rounded_login"
+        android:fontFamily="@font/nanum_barun_gothic_light"
+        android:inputType="textVisiblePassword"
+        android:digits="@string/text_id"
+        android:hint="아이디를 입력해주세요."
+        android:paddingLeft="17dp"
+        android:textColor="@color/black"
+        android:textColorHint="@color/black"
+        android:textSize="15sp" />
+
+    <TextView
+        android:id="@+id/login_id_check"
+        android:layout_width="330dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:fontFamily="@font/nanum_square"
+        android:text="아이디를 입력해 주세요."
+        android:layout_marginTop="6dp"
+        android:textColor="#FF0000"
+        android:textSize="12sp"
+        android:maxLength="15"
+        android:visibility="gone"/>
+
+    <EditText
+        android:id="@+id/login_pw"
+        android:layout_width="350dp"
+        android:layout_height="50dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="15dp"
+        android:background="@drawable/style_rounded_login"
+        android:fontFamily="@font/nanum_barun_gothic_light"
+        android:hint="비밀번호를 입력해주세요."
+        android:inputType="textPassword"
+        android:paddingLeft="17dp"
+        android:textColor="@color/black"
+        android:textColorHint="@color/black"
+        android:maxLength="16"
+        android:textSize="15sp" />
+
+    <TextView
+        android:id="@+id/login_pw_check"
+        android:layout_width="330dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:fontFamily="@font/nanum_square"
+        android:text="비밀번호를 입력해주세요."
+        android:layout_marginTop="6dp"
+        android:textColor="#FF0000"
+        android:textSize="12sp"
+        android:visibility="gone"/>
+
+    <TextView
+        android:id="@+id/login_check"
+        android:layout_width="330dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:fontFamily="@font/nanum_square"
+        android:text="아이디, 비밀번호를 다시 확인해주세요."
+        android:layout_marginTop="6dp"
+        android:textColor="#FF0000"
+        android:textSize="12sp"
+        android:visibility="gone"/>
+
+    <LinearLayout
+        android:layout_width="350dp"
+        android:layout_height="45dp"
+        android:layout_gravity="center"
+        android:orientation="horizontal">
+
+        <CheckBox
+            android:id="@+id/login_stay_cb"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:button="@null"
+            android:layout_marginBottom="1dp"
+            android:background="@drawable/style_checkbox"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:fontFamily="@font/nanum_square"
+            android:text="로그인 상태 유지"
+            android:layout_marginLeft="5dp"
+            android:textColor="@color/gray"
+            android:textSize="14sp" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <Button
+            android:id="@+id/login_find"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:background="@color/transparent"
+            android:fontFamily="@font/nanum_square"
+            android:text="아이디 / 비밀번호 찾기"
+            android:textSize="14sp"
+            android:textColor="@color/gray" />
+
+    </LinearLayout>
+    <Button
+        android:id="@+id/login_button"
+        android:layout_width="350dp"
+        android:layout_height="50dp"
+        android:layout_gravity="center"
+        android:background="@drawable/style_rounded_postive_button"
+        android:fontFamily="@font/nanum_square_eb"
+        android:text="로그인"
+        android:textColor="@color/white"
+        android:textStyle="bold" />
+
+    <LinearLayout
+        android:layout_width="350dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="right"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/transparent"
+            android:fontFamily="@font/nanum_square"
+            android:text="처음 방문하셨나요?"
+            android:textSize="15sp"
+            android:textColor="@color/gray" />
+
+        <Button
+            android:id="@+id/login_register"
+            android:layout_width="75dp"
+            android:layout_height="wrap_content"
+            android:background="@color/transparent"
+            android:fontFamily="@font/nanum_square_eb"
+            android:text="회원가입"
+            android:textSize="15sp"
+            android:textColor="@color/green" />
+
+    </LinearLayout>
+
+</LinearLayout>

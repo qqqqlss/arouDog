@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".Introduction.Activity.FindActivity">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/find_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:background="@color/green">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="아이디 / 비밀번호 찾기"
+            android:layout_gravity="center"
+            android:textColor="@color/white"
+            android:textSize="30sp"
+            android:fontFamily="@font/nanum_square_eb" />
+
+    </androidx.appcompat.widget.Toolbar>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#80FFFFFF"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:orientation="horizontal"
+        android:gravity="center">
+
+        <Button
+            android:id="@+id/find_id"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@color/transparent"
+            android:text="아이디 찾기"
+            android:fontFamily="@font/nanum_square"
+            android:textStyle="bold"
+            android:textSize="20sp"
+            android:textColor="@color/green"/>
+
+        <Button
+            android:id="@+id/find_pw"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@color/transparent"
+            android:text="비밀번호 찾기"
+            android:textStyle="normal"
+            android:fontFamily="@font/nanum_square"
+            android:textColor="#B35A6A72"
+            android:textSize="20sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:orientation="horizontal">
+
+        <View
+            android:id="@+id/find_id_line"
+            android:layout_width="match_parent"
+            android:layout_weight="1"
+            android:layout_height="2dp"
+            android:background="@color/green" />
+        <View
+            android:id="@+id/find_pw_line"
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:layout_weight="1"
+            android:background="#B35A6A72" />
+
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="30dp"
+        android:layout_marginTop="25dp"
+        android:fontFamily="@font/nanum_barun_gothic"
+        android:text="소중한 계정을\n함께 찾아봐요!"
+        android:textColor="@color/black"
+        android:textSize="30sp" />
+
+    <FrameLayout
+        android:id="@+id/find_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+
+</LinearLayout>
