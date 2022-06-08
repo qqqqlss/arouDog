@@ -9,6 +9,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.setFragmentResultListener
 import com.example.aroundog.BuildConfig
 import com.example.aroundog.Model.UpdateWalkHistory
@@ -25,7 +27,9 @@ import com.naver.maps.map.MapFragment
 import com.naver.maps.map.NaverMap
 import com.naver.maps.map.OnMapReadyCallback
 import com.naver.maps.map.overlay.PathOverlay
-import okhttp3.*
+import okhttp3.MediaType
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -51,7 +55,7 @@ class EndWalkFragment : Fragment(), OnMapReadyCallback {
     val gson:Gson = Gson()
     lateinit var naverMap:NaverMap
     lateinit var exitButton: ImageButton
-    var userId:String = "admin"
+    lateinit var userId:String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -72,6 +76,8 @@ class EndWalkFragment : Fragment(), OnMapReadyCallback {
         retrofitAPI = retrofit.create(RetrofitService::class.java)
 
 
+        var user_info_pref = requireActivity().getSharedPreferences("userInfo", AppCompatActivity.MODE_PRIVATE)
+        userId = user_info_pref.getString("id","error").toString()
     }
 
     override fun onDestroyView() {
@@ -130,6 +136,10 @@ class EndWalkFragment : Fragment(), OnMapReadyCallback {
 
     fun sendToDB(bitmap: Bitmap){
         thread(start = true){
+            if(userId == "error"){
+                Toast.makeText(requireContext(),"아이디 에러입니다.",Toast.LENGTH_SHORT).show()
+                return@thread
+            }
             val now = System.currentTimeMillis()
             val date = Date(now)
             val formatDate = SimpleDateFormat("yyyyMMddkkmmss", Locale("ko", "KR"))
