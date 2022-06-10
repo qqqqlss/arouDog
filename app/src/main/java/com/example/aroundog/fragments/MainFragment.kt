@@ -213,7 +213,7 @@ class MainFragment : Fragment(), OnMapReadyCallback{
     fun setlocationOverlay(): LocationOverlay {
         var locationOverlay: LocationOverlay = naverMap.locationOverlay
         locationOverlay.icon=overlayImage
-        locationOverlay.iconHeight = 50
+        locationOverlay.iconHeight = 100
         locationOverlay.iconWidth = 100
 
         return locationOverlay

@@ -94,7 +94,7 @@ class AroundWalkFragment : Fragment() {
                 var byteArray:ByteArray = Base64.decode(walkHistory.imgFile, Base64.DEFAULT)
                 bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
             } else {
-                bitmap = BitmapFactory.decodeResource(resources,R.drawable.error)
+                bitmap = BitmapFactory.decodeResource(resources,R.drawable.error2)
             }
             addItem(walkHistory.serialNumber,bitmap, walkHistory.userId, walkHistory.good.toInt(), walkHistory.bad.toInt())
         }
