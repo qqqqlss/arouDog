@@ -9,6 +9,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.setFragmentResultListener
@@ -29,7 +30,9 @@ import com.naver.maps.map.OnMapReadyCallback
 import com.naver.maps.map.overlay.PathOverlay
 import okhttp3.MediaType
 import okhttp3.MultipartBody
+import okhttp3.OkHttpClient
 import okhttp3.RequestBody
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -39,6 +42,7 @@ import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
 import java.lang.Exception
+import java.lang.Math.round
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
@@ -56,6 +60,8 @@ class EndWalkFragment : Fragment(), OnMapReadyCallback {
     lateinit var naverMap:NaverMap
     lateinit var exitButton: ImageButton
     lateinit var userId:String
+    lateinit var time:String
+    lateinit var walkDistance:String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -98,9 +104,16 @@ class EndWalkFragment : Fragment(), OnMapReadyCallback {
 
         hideBottomNavigation(true)
 
+        var timeTV:TextView = view.findViewById(R.id.timeTV)
+        var walkDistance_end:TextView = view.findViewById(R.id.walkDistanceTV_end)
+        
         setFragmentResultListener("walkEnd"){ key, bundle ->
             var serialLatLngList = bundle.getSerializable("arraylist") as ArrayList<SerialLatLng>
+            time = bundle.getSerializable("time") as String
+            walkDistance = round((bundle.getSerializable("walkDistance") as Double)).toString()
             pathList = SerialoLatLng(serialLatLngList)//ArrayList<SerialLatLng>을 ArrayList<LatLng>으로 변경
+            timeTV.text="산책시간\n"+time
+            walkDistance_end.text = "이동거리\n" + walkDistance + "m"
         }
         return view
     }
