@@ -25,6 +25,7 @@ import com.naver.maps.map.overlay.Marker
 import com.naver.maps.map.overlay.OverlayImage
 import com.naver.maps.map.overlay.PathOverlay
 import com.naver.maps.map.util.FusedLocationSource
+import java.time.LocalDateTime
 import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
@@ -43,6 +44,7 @@ class MainFragment : Fragment(), OnMapReadyCallback{
     lateinit var overlayImage: OverlayImage
     lateinit var compassImage: OverlayImage
     lateinit var lastLocation: Location
+    lateinit var startTime:LocalDateTime
     var walkDistance:Double = 0.0
     val TAG = "MainFragmentTAG"
 
@@ -100,6 +102,7 @@ class MainFragment : Fragment(), OnMapReadyCallback{
             isStart = true
             pathList.add(LatLng(lastLocation))//시작위치 지정
             serialPathList.add(SerialLatLng(LatLng(lastLocation)))
+            startTime=LocalDateTime.now()//시작시간 지정
             startWalk()
 
         }
@@ -115,6 +118,7 @@ class MainFragment : Fragment(), OnMapReadyCallback{
             var bundle:Bundle = Bundle()
             bundle.putSerializable("arraylist", LatLngToSerial())
             //bundle.putSerializable("arraylist", serialPathList)
+            bundle.putSerializable("startTime", startTime)
             setFragmentResult("walkEnd",bundle)
             parentFragmentManager.beginTransaction().add(R.id.main_container, EndWalkFragment(), "endWalk").addToBackStack(null).commit()
 
