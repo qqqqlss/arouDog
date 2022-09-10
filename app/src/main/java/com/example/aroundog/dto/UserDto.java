@@ -3,7 +3,7 @@ package com.example.aroundog.dto;
 import com.example.aroundog.Model.Gender;
 
 public class UserDto {
-    private Long id;
+    private String userId;
     private String password;
     private Integer age;
     private int image;
@@ -11,9 +11,14 @@ public class UserDto {
     private String phone;
     private String email;
     private Gender gender;
+    private Boolean success;
 
-    public Long getId() {
-        return id;
+    public Boolean isSuccess() {
+        return success;
+    }
+
+    public String getUserId() {
+        return userId;
     }
 
     public String getPassword() {
@@ -48,7 +53,8 @@ public class UserDto {
 
     }
 
-    public UserDto(String password, Integer age, int image, String userName, String phone, String email, Gender gender) {
+    public UserDto(String userId, String password, Integer age, int image, String userName, String phone, String email, Gender gender, Boolean success) {
+        this.userId = userId;
         this.password = password;
         this.age = age;
         this.image = image;
@@ -56,5 +62,6 @@ public class UserDto {
         this.phone = phone;
         this.email = email;
         this.gender = gender;
+        this.success = success;
     }
 }
