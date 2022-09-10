@@ -56,7 +56,7 @@ class EndWalkFragment : Fragment(), OnMapReadyCallback {
     val gson:Gson = Gson()
     lateinit var naverMap:NaverMap
     lateinit var exitButton: ImageButton
-    lateinit var userId:Long
+    var userId:String = "error"
     lateinit var time:String
     lateinit var walkDistance:String
     lateinit var startTime:LocalDateTime
@@ -81,7 +81,7 @@ class EndWalkFragment : Fragment(), OnMapReadyCallback {
 
 
         var user_info_pref = requireActivity().getSharedPreferences("userInfo", AppCompatActivity.MODE_PRIVATE)
-        userId = user_info_pref.getLong("id",-1)
+        userId = user_info_pref.getString("id","error").toString()
     }
 
     override fun onDestroyView() {
@@ -149,8 +149,8 @@ class EndWalkFragment : Fragment(), OnMapReadyCallback {
 
     fun sendToDB(bitmap: Bitmap){
         thread(start = true){
-            if(userId == -1L){
-                Toast.makeText(requireContext(),"아이디 에러입니다.",Toast.LENGTH_SHORT).show()
+            if(userId == "error"){
+//                Toast.makeText(requireContext(),"아이디 에러입니다.",Toast.LENGTH_SHORT).show()
                 return@thread
             }
 
@@ -162,7 +162,7 @@ class EndWalkFragment : Fragment(), OnMapReadyCallback {
             var params = getParams(startTimeFormat, endTimeFormat) //파라미터 설정
             var image: MultipartBody.Part = getParamImage(file) //이미지 설정
 
-            walkRetrofit.addWalk(1L, params, image).enqueue(object:Callback<Void>{
+            walkRetrofit.addWalk(userId, params, image).enqueue(object:Callback<Void>{
                 override fun onResponse(call: Call<Void>, response: Response<Void>) {
                     if(response.isSuccessful){
                         Log.d(TAG, "성공적")

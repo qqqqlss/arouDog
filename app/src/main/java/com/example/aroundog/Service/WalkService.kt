@@ -9,6 +9,6 @@ interface WalkService {
     @Multipart
     @POST("/walk/{userId}/add")
     @JvmSuppressWildcards
-    fun addWalk(@Path("userId", encoded = true) userId:Long, @PartMap params: HashMap<String, RequestBody>, @Part image:MultipartBody.Part):Call<Void>
+    fun addWalk(@Path("userId", encoded = true) userId:String, @PartMap params: HashMap<String, RequestBody>, @Part image:MultipartBody.Part):Call<Void>
 
 }
