@@ -40,6 +40,9 @@ class RegisterActivity : AppCompatActivity() {
     private var register_validate_check: TextView? = null
     private var register_id_length_check: TextView? = null
     private var register_pw_length_check: TextView? = null
+    private var register_age: TextView? = null
+    private var register_man: RadioButton? = null
+    private var register_woman: RadioButton? = null
     private var builder: AlertDialog.Builder? = null
     //private val dialog: AlertDialog? = null
     private var validate = 2 // 아이디 확인값, 확인을 아예 안했을 때 2, 확인은 했지만 맞지 않았을 때 1, 확인이 완료됐을 때 0
@@ -103,20 +106,20 @@ class RegisterActivity : AppCompatActivity() {
                     .build()
                 // 데이터베이스 접속 및 확인
                 val retrofit: Retrofit = Retrofit.Builder()
-                    .baseUrl(IntroService.INTRO_URL)
+                    .baseUrl(BuildConfig.SERVER)
                     .addConverterFactory(GsonConverterFactory.create())
                     .client(client)
                     .build()
                 val validateAPI: IntroService = retrofit.create(IntroService::class.java)
 
-                validateAPI.idValidate(id).enqueue(object : Callback<CheckSuccess> {
+                validateAPI.idValidate(id).enqueue(object : Callback<Boolean> {
                     override fun onResponse(
-                        call: Call<CheckSuccess>,
-                        response: Response<CheckSuccess>
+                        call: Call<Boolean>,
+                        response: Response<Boolean>
                     ) {
                         loadingDialog!!.dismiss()
                         if (response.isSuccessful) { // 성공적으로 받아왔을 때
-                            if (response.body()?.isSuccess == false) { // 중복되는 아이디가 없을 때
+                            if (response.body() == false) { // 중복되는 아이디가 없을 때
                                 register_id_validate!!.setImageResource(R.drawable.ic_register_check)
                                 validate = 0
                             } else { // 중복되는 아이디가 있을 때
@@ -136,7 +139,7 @@ class RegisterActivity : AppCompatActivity() {
                     }
 
                     override fun onFailure(
-                        call: Call<CheckSuccess>,
+                        call: Call<Boolean>,
                         t: Throwable
                     ) {
                         loadingDialog!!.dismiss()
@@ -160,26 +163,37 @@ class RegisterActivity : AppCompatActivity() {
             val name = register_name!!.text.toString()
             val number = register_number!!.text.toString()
             val email = register_email!!.text.toString()
+            val age = register_age!!.text.toString()
+            val man = register_man!!.isChecked
+            val woman = register_woman!!.isChecked
+            val checkRadio = (man || woman)
+
             if (validate == 2) { // 아이디 체크를 완전히 하지 않았을 때
                 register_validate_check!!.visibility = View.VISIBLE
             }
 
             // 빈 값이 존재할 경우
-            if (id == "" || password == "" || password2 == "" || name == "" || number == "" || email == "" ) {
+            if (id == "" || password == "" || password2 == "" || name == "" || number == "" || email == "" || age == "" || !checkRadio) {
                 register_check!!.visibility = View.VISIBLE // 값을 채워넣으라는 안내문 출력
                 return@OnClickListener
             } else { // 값을 모두 넣었을 때
+                //성별 저장
+                var strRadio = if (man) {
+                    "MAN"
+                } else {
+                    "WOMAN"
+                }
 
                 // 비밀번호는 재확인 비밀번호와 일치하는지, 아이디 중복확인은 완전히 완료하였는지,
                 // 아이디, 비밀번호는 조건에 맞게끔 입력하였는지 검사 후 일치하면 데이터베이스를 받아오는 단계로 넘어감
                 if (password == password2 && validate == 0 && idLengthCheck && pwLengthCheck) {
                     loadingDialog!!.show()
                     val retrofit: Retrofit = Retrofit.Builder()
-                        .baseUrl(IntroService.INTRO_URL)
+                        .baseUrl(BuildConfig.SERVER)
                         .addConverterFactory(GsonConverterFactory.create())
                         .build()
                     val introAPI: IntroService = retrofit.create(IntroService::class.java)
-                    introAPI.signUp(id, password, userImage, name, number, email)
+                    introAPI.signUp(id, password, userImage, name, number, email, strRadio, age)
                         .enqueue(object : Callback<CheckSuccess?> {
                             override fun onResponse(
                                 call: Call<CheckSuccess?>,
@@ -254,6 +268,9 @@ class RegisterActivity : AppCompatActivity() {
         register_validate_check = findViewById(R.id.register_validate_check)
         register_id_length_check = findViewById(R.id.register_id_length_check)
         register_pw_length_check = findViewById(R.id.register_pw_length_check)
+        register_age = findViewById(R.id.register_age)
+        register_man = findViewById(R.id.register_man)
+        register_woman = findViewById(R.id.register_woman)
         userCardView = findViewById(R.id.register_user_cardView)
         userProfile = findViewById(R.id.register_user_profile)
         loadingDialog = LoadingDialog(this, 3)
