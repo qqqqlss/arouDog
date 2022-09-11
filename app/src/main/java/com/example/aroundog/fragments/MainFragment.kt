@@ -225,6 +225,7 @@ class MainFragment : Fragment(), OnMapReadyCallback {
                     webView.evaluateJavascript("javascript:getLocation()") {
                         Log.d(TAG, it)
                         tile = it
+                        tile = it.replace("\"","")
                     }
                 }
             }
