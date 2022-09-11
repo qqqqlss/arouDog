@@ -490,6 +490,7 @@ class MainFragment : Fragment(), OnMapReadyCallback {
                             marker.map=null
                         }
                     }
+                    markerList.clear()
                 }
 
 
