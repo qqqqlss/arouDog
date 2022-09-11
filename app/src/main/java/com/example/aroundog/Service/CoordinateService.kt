@@ -13,24 +13,27 @@ interface CoordinateService {
     @FormUrlEncoded
     @POST("/coor/insert")
     fun insert(
-        @Field("userId") userId:String,
-        @Field("latitude") latitude:Double,
-        @Field("longitude") longitude:Double,
-        @Field("tile") tile:String
+        @Field("userId") userId: String,
+        @Field("latitude") latitude: Double,
+        @Field("longitude") longitude: Double,
+        @Field("tile") tile: String
     ): Call<Boolean>
 
     //현재 위치 올리기 latitude, longitude, tile
     @GET("/coor/update")
     fun update(
-        @Query("userId") userId:String,
-        @Query("latitude") latitude:Double,
-        @Query("longitude") longitude:Double,
-        @Query("tile") tile:String
-    ):Call<Boolean>
+        @Query("userId") userId: String,
+        @Query("latitude") latitude: Double,
+        @Query("longitude") longitude: Double,
+        @Query("tile") tile: String
+    ): Call<Boolean>
 
     @GET("/coor")
     fun getWalkingList(
-        @Query("tile") tile:String
-    ):Call<List<UserCoordinateDogDto>>
+        @Query("tile") tile: String
+    ): Call<List<UserCoordinateDogDto>>
+
+    @GET("/coor/false")
+    fun endWalking(@Query("userId") userId: String): Call<Boolean>
 
 }

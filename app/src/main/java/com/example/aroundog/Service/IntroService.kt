@@ -19,14 +19,14 @@ interface IntroService {
     @FormUrlEncoded
     @POST("/user/register")
     fun signUp(
-    @Field("userId") userId:String,
-    @Field("password") password:String,
-    @Field("image") image:Int,
-    @Field("userName") userName:String,
-    @Field("phone") phone:String,
-    @Field("email") email:String,
-    @Field("gender") gender: String,
-    @Field("age") age:String
+        @Field("userId") userId:String,
+        @Field("password") password:String,
+        @Field("image") image:Int,
+        @Field("userName") userName:String,
+        @Field("phone") phone:String,
+        @Field("email") email:String,
+        @Field("gender") gender: String,
+        @Field("age") age:String
     ):Call<CheckSuccess>;
 
     @GET("/login/idValidate")
