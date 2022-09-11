@@ -18,7 +18,10 @@ import com.example.aroundog.BuildConfig
 import com.example.aroundog.R
 import com.example.aroundog.RealtimeLocation
 import com.example.aroundog.SerialLatLng
-import com.example.aroundog.dto.WalkingUserDto
+import com.example.aroundog.Service.CoordinateService
+import com.example.aroundog.dto.UserCoordinateDogDto
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.*
 import com.naver.maps.map.overlay.LocationOverlay
@@ -27,9 +30,15 @@ import com.naver.maps.map.overlay.OverlayImage
 import com.naver.maps.map.overlay.PathOverlay
 import com.naver.maps.map.util.FusedLocationSource
 import kotlinx.coroutines.*
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 import java.time.LocalDateTime
 import java.util.*
 import java.util.concurrent.TimeUnit
+import kotlin.collections.ArrayList
 
 
 class MainFragment : Fragment(), OnMapReadyCallback {
@@ -61,10 +70,14 @@ class MainFragment : Fragment(), OnMapReadyCallback {
 
     lateinit var strTime: String
     var tile = ""
-    var walkingUser: Map<Long, WalkingUserDto> = HashMap()
-    var lastWalkingUser: Map<Long, WalkingUserDto> = HashMap()
-    lateinit var jobUser: Job
+    var lastTile = ""
     lateinit var userId: String
+    lateinit var retrofit: CoordinateService
+    lateinit var databaseCoroutine: Job
+
+    var userCoordinateDogBoolean = false
+    lateinit var userCoordinateDogDtoList:List<UserCoordinateDogDto>
+    var markerList = ArrayList<Marker>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -88,6 +101,13 @@ class MainFragment : Fragment(), OnMapReadyCallback {
         userId = user_info_pref.getString("id", "error").toString()
 
         realdb.initializeDbRef()
+        //retrofit
+        var gsonInstance: Gson = GsonBuilder().setLenient().create()
+        retrofit = Retrofit.Builder()
+            .baseUrl(BuildConfig.SERVER)
+            .addConverterFactory(GsonConverterFactory.create(gsonInstance))
+            .build()
+            .create(CoordinateService::class.java)
 
     }
 
@@ -117,77 +137,94 @@ class MainFragment : Fragment(), OnMapReadyCallback {
             startTime = LocalDateTime.now()//시작시간 지정
 
             startWalk()
-            createWebView()//웹뷰 생성
-//            thread(start=true) {
-//                //산책중일때만
-//                while (isStart) {
-//                    if(tile.isEmpty())
-//                        continue
-//                    walkingUser = realdb.getWalkingUser(tile)
-////                    if (lastWalkingUser.isEmpty()) {
-////                        lastWalkingUser = walkingUser
-////                    } else {
-////
-////
-////                    }
-//                    delay(1000)
-//                }
+            createWebView()//웹뷰 생성, tile 값 지정
 
-
-            jobUser = CoroutineScope(Dispatchers.IO).launch {
+            var coorUpdate = false
+            databaseCoroutine = CoroutineScope(Dispatchers.IO).launch {
                 while (true) {
                     if (tile.isEmpty()) {
+                        //타일 값 받을때까지
                         delay(10L)
                         continue
-                    }
+                    }//if
 
                     if (naverMap != null) {
+                        if (!coorUpdate) {//첫 실행일때는 모든 정보 넣어서 테이블에 추가
+                            retrofit.insert(
+                                userId,
+                                lastLocation.latitude,
+                                lastLocation.longitude,
+                                tile
+                            ).enqueue(object : Callback<Boolean> {
+                                override fun onResponse(
+                                    call: Call<Boolean>,
+                                    response: Response<Boolean>
+                                ) {
+                                    if (response.isSuccessful) {
+                                        if (response.body() == true) {
+                                            Log.d(TAG, "업데이트 성공")
+                                        } else
+                                            Log.d(TAG, "업데이트 실패")
+                                    }
+                                }
+                                override fun onFailure(call: Call<Boolean>, t: Throwable) {
+                                    Log.d(TAG, "전송실패 ", t)
+                                }
+                            })
+                            Log.d(TAG, "tile ${tile}")
+                            coorUpdate = true
+                        } //if
 
-                        do {
-                            try {
-                                CoroutineScope(Dispatchers.IO).launch {
-                                    walkingUser = realdb.getWalkingUser(tile)
-                                    Log.d(TAG, "naver != null / read realdb")
-                                }.join()
-                                Log.d(TAG, "getWalkingUser end : $walkingUser")
-                            } catch (e: Exception) {
-                                Log.d(TAG, "", e)
-                            } finally {
-                                delay(100L)
-                            }
-                        } while (walkingUser.isEmpty())
-
-                        Log.d(TAG, "out do while")
-
-                        for (userData in walkingUser) {
-
-                            if (userData.value.walking) {//산책중인 경우에만
-
-                                //서버에서 유저 정보/사진 가져오기
-
-                                CoroutineScope(Dispatchers.Main).launch() {
-                                    Log.d(TAG, "in make marker")
-                                    //마커 추가
-                                    val marker = Marker()
-                                    marker.captionText = userData.key.toString()
-                                    marker.position =
-                                        LatLng(userData.value.latitude, userData.value.longitude)
-                                    marker.map = naverMap
+                        else {//첫실행 아닐때
+                            retrofit.update(
+                                userId,
+                                lastLocation.latitude,
+                                lastLocation.longitude,
+                                tile
+                            ).enqueue(object : Callback<Boolean> {
+                                override fun onResponse(
+                                    call: Call<Boolean>,
+                                    response: Response<Boolean>
+                                ) {
+                                    if (response.isSuccessful) {
+                                        if (response.body() == true) {
+                                            Log.d(TAG, "업데이트 성공")
+                                        } else
+                                            Log.d(TAG, "업데이트 실패")
+                                    }
                                 }
 
+                                override fun onFailure(call: Call<Boolean>, t: Throwable) {
+                                    Log.d(TAG, "전송실패 ", t)
+                                }
+                            })
+                        }//else
 
-                                //안되면 셋에 마커들 넣고 null 해보기
+                        //다른 사용자들의 위치정보 불러오기
+                        //tile 올려서 해당 사용자들만 받아오게
+                        retrofit.getWalkingList(tile).enqueue(object:Callback<List<UserCoordinateDogDto>>{
+                            override fun onResponse(
+                                call: Call<List<UserCoordinateDogDto>>,
+                                response: Response<List<UserCoordinateDogDto>>
+                            ) {
+                                if (response.isSuccessful) {
+                                    userCoordinateDogDtoList = response.body()!!
+                                    userCoordinateDogBoolean = true
+
+                                }
                             }
-                        }
-                    } else {
-                        Log.d(TAG, "map is null")
-                        delay(10L)
-                        continue
-                    }
-                    delay(5000L)
-                }
-            }
-
+                            override fun onFailure(
+                                call: Call<List<UserCoordinateDogDto>>,
+                                t: Throwable
+                            ) {
+                                Log.d(TAG, "getWalkingList fail", t)
+                            }
+                        })
+                        //1초간 대기
+                        delay(1000L)
+                    }//if
+                }//while
+            }//launch
         }
 
         //산책종료 버튼클릭 리스너
@@ -209,11 +246,12 @@ class MainFragment : Fragment(), OnMapReadyCallback {
 
             endWalk()
 
-            jobUser.cancel()
+            databaseCoroutine.cancel()
         }
 
         return view
     }
+
 
     private fun createWebView() {
         var url =
@@ -224,7 +262,6 @@ class MainFragment : Fragment(), OnMapReadyCallback {
                     super.onPageFinished(view, url)
                     webView.evaluateJavascript("javascript:getLocation()") {
                         Log.d(TAG, it)
-                        tile = it
                         tile = it.replace("\"","")
                     }
                 }
@@ -394,6 +431,29 @@ class MainFragment : Fragment(), OnMapReadyCallback {
                 Log.d(TAG, "첫번째 위치 업데이트")
                 lastLocation = location
             }
+            CoroutineScope(Dispatchers.Main).launch {
+                Log.d(TAG, "in while")
+                if(!markerList.isEmpty()){
+                    for (marker in markerList) {
+                        marker.map=null
+                    }
+                }
+                if(userCoordinateDogBoolean){
+                    for (userCoordinateDogDto in userCoordinateDogDtoList) {
+                        //지도에 표시
+                        //일단 확인용으로 이렇게, 나중에는 <유저 아이디, 마커> 이렇게 해봅시다.
+                        var latLng = LatLng(userCoordinateDogDto.latitude, userCoordinateDogDto.longitude)
+
+                        var marker = Marker()
+                        marker.position=latLng
+                        marker.map = naverMap
+                        markerList.add(marker)
+                    }
+
+                }
+
+
+            }
 
             if (location == lastLocation) {//각도업데이트일때
                 Log.d(TAG, "bearing : ${location.bearing}")
@@ -423,6 +483,9 @@ class MainFragment : Fragment(), OnMapReadyCallback {
 //                    ymarker.position = realdb.getValue("z")
 
 //                    Log.d("firebase", "ymarker position "+ymarker.position.toString())
+
+
+
 
                 } else {
                     //textView.text = "이동거리 0M"
