@@ -100,7 +100,7 @@ class MainFragment : Fragment(), OnMapReadyCallback {
             requireActivity().getSharedPreferences("userInfo", AppCompatActivity.MODE_PRIVATE)
         userId = user_info_pref.getString("id", "error").toString()
 
-        realdb.initializeDbRef()
+
         //retrofit
         var gsonInstance: Gson = GsonBuilder().setLenient().create()
         retrofit = Retrofit.Builder()
@@ -108,25 +108,14 @@ class MainFragment : Fragment(), OnMapReadyCallback {
             .addConverterFactory(GsonConverterFactory.create(gsonInstance))
             .build()
             .create(CoordinateService::class.java)
-
     }
 
     override fun onCreateView(//인터페이스를 그리기위해 호출
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-//        if(parentFragmentManager.findFragmentByTag("map") != null)
-//            parentFragmentManager.beginTransaction().show(parentFragmentManager.findFragmentByTag("map")!!).commit()
 
-        val view: ViewGroup =
-            inflater.inflate(R.layout.fragment_main, container, false) as ViewGroup
-        startWalkButton = view.findViewById(R.id.startWalkButton)
-        walkTimeTV = view.findViewById(R.id.walkTimeTV)
-        walkDistanceTV = view.findViewById(R.id.walkDistanceTV)
-        pauseButton = view.findViewById(R.id.pauseButton)
-        statusLayout = view.findViewById(R.id.statusLayout)
-        frame = view.findViewById(R.id.map)
-        webView = view.findViewById(R.id.webView)
+        val view: ViewGroup = setView(inflater, container)
 
         //산책시작 버튼 클릭 리스너
         startWalkButton.setOnClickListener {
@@ -229,27 +218,63 @@ class MainFragment : Fragment(), OnMapReadyCallback {
 
         //산책종료 버튼클릭 리스너
         pauseButton.setOnClickListener {
-            //산책결과 프래그먼트 추가해야함
             isStart = false
 
-
-            var bundle: Bundle = Bundle()
-            bundle.putSerializable("arraylist", LatLngToSerial())
-            bundle.putSerializable("walkDistance", walkDistance)
-            bundle.putSerializable("time", strTime)
-            bundle.putSerializable("startTime", startTime)
-            setFragmentResult("walkEnd", bundle)
+            //Bundle설정
+            setBundle()
             parentFragmentManager.beginTransaction()
                 .add(R.id.main_container, EndWalkFragment(), "endWalk").addToBackStack(null)
                 .commit()
 
-
+            //산책 종료 메서드
             endWalk()
 
+
+            //insert/update 코루틴 종료
             databaseCoroutine.cancel()
-        }
+
+            //서버에 false 전송
+            retrofit.endWalking(userId).enqueue(object:Callback<Boolean>{
+                override fun onResponse(call: Call<Boolean>, response: Response<Boolean>) {
+                    if (response.isSuccessful) {
+                        Log.d(TAG, "endWalking is success");
+                    }
+                }
+                override fun onFailure(
+                    call: Call<Boolean>,
+                    t: Throwable
+                ) {
+                    Log.d(TAG, "endWalking fail", t)
+                }
+            })
+        }//listener
 
         return view
+    }
+
+    private fun setView(
+        inflater: LayoutInflater,
+        container: ViewGroup?
+    ): ViewGroup {
+        val view: ViewGroup =
+            inflater.inflate(R.layout.fragment_main, container, false) as ViewGroup
+        startWalkButton = view.findViewById(R.id.startWalkButton)
+        walkTimeTV = view.findViewById(R.id.walkTimeTV)
+        walkDistanceTV = view.findViewById(R.id.walkDistanceTV)
+        pauseButton = view.findViewById(R.id.pauseButton)
+        statusLayout = view.findViewById(R.id.statusLayout)
+        frame = view.findViewById(R.id.map)
+        webView = view.findViewById(R.id.webView)
+        return view
+    }
+
+    private fun setBundle() {
+        var bundle: Bundle = Bundle()
+        bundle.putSerializable("arraylist", LatLngToSerial())
+        bundle.putSerializable("walkDistance", walkDistance)
+        bundle.putSerializable("time", strTime)
+        bundle.putSerializable("startTime", startTime)
+        setFragmentResult("walkEnd", bundle)
     }
 
 
@@ -343,6 +368,8 @@ class MainFragment : Fragment(), OnMapReadyCallback {
         layout.height = ViewGroup.LayoutParams.MATCH_PARENT
         frame.layoutParams = layout
         resetTimer()
+        walkDistance = 0.0
+        walkDistanceTV.text="0M"
     }
 
     override fun onRequestPermissionsResult(
@@ -433,23 +460,36 @@ class MainFragment : Fragment(), OnMapReadyCallback {
             }
             CoroutineScope(Dispatchers.Main).launch {
                 Log.d(TAG, "in while")
-                if(!markerList.isEmpty()){
-                    for (marker in markerList) {
-                        marker.map=null
+                if(isStart){
+                    //기존 마커 지우기
+                    if(!markerList.isEmpty()){
+                        for (marker in markerList) {
+                            marker.map=null
+                        }
                     }
-                }
-                if(userCoordinateDogBoolean){
-                    for (userCoordinateDogDto in userCoordinateDogDtoList) {
-                        //지도에 표시
-                        //일단 확인용으로 이렇게, 나중에는 <유저 아이디, 마커> 이렇게 해봅시다.
-                        var latLng = LatLng(userCoordinateDogDto.latitude, userCoordinateDogDto.longitude)
+                    if(userCoordinateDogBoolean){
+                        for (userCoordinateDogDto in userCoordinateDogDtoList) {
+                            if (userId.equals(userCoordinateDogDto.userId)) {
+                                continue
+                            }
+                            //지도에 표시
+                            //일단 확인용으로 이렇게, 나중에는 <유저 아이디, 마커> 이렇게 해봅시다.
+                            var latLng = LatLng(userCoordinateDogDto.latitude, userCoordinateDogDto.longitude)
 
-                        var marker = Marker()
-                        marker.position=latLng
-                        marker.map = naverMap
-                        markerList.add(marker)
+                            var marker = Marker()
+                            marker.position=latLng
+                            marker.map = naverMap
+                            markerList.add(marker)
+                        }
+
                     }
-
+                }else{
+                    //마커 전부 삭제
+                    if(!markerList.isEmpty()){
+                        for (marker in markerList) {
+                            marker.map=null
+                        }
+                    }
                 }
 
 
