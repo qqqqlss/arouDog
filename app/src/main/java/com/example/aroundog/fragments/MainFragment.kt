@@ -15,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResult
 import com.example.aroundog.BuildConfig
+import com.example.aroundog.Model.DogBreed
 import com.example.aroundog.R
 import com.example.aroundog.SerialLatLng
 import com.example.aroundog.Service.CoordinateService
@@ -76,6 +77,10 @@ class MainFragment : Fragment(), OnMapReadyCallback {
     var updateCoordinateMap = HashMap<Long, Marker>()//<개id, 마커>
     var visibleOnMapMap = HashMap<Long, Marker>()
 
+    lateinit var dog1:OverlayImage
+    lateinit var dog2:OverlayImage
+    lateinit var dog3:OverlayImage
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         var mapView = parentFragmentManager.findFragmentById(R.id.map) as MapFragment?
@@ -105,6 +110,10 @@ class MainFragment : Fragment(), OnMapReadyCallback {
             .addConverterFactory(GsonConverterFactory.create(gsonInstance))
             .build()
             .create(CoordinateService::class.java)
+
+        dog1 = OverlayImage.fromResource(R.drawable.dog1)
+        dog2 = OverlayImage.fromResource(R.drawable.dog2)
+        dog3 = OverlayImage.fromResource(R.drawable.dog3)
     }
 
     override fun onCreateView(//인터페이스를 그리기위해 호출
@@ -203,6 +212,13 @@ class MainFragment : Fragment(), OnMapReadyCallback {
                                                 var marker = Marker().apply {
                                                     position = latLng
                                                     captionText = dto.dogName
+                                                    icon = setDogImage(dto.dogBreed)//이미지 설정
+                                                    width = 170
+                                                    height = 170
+                                                    setOnClickListener { o->
+                                                        Toast.makeText(context, dto.dogName + " / "+dto.dogAge + "살", Toast.LENGTH_SHORT).show()
+                                                        true
+                                                    }
                                                 }
                                                 CoroutineScope(Dispatchers.Main).launch {
                                                     marker.map = naverMap
@@ -289,6 +305,16 @@ class MainFragment : Fragment(), OnMapReadyCallback {
         }//listener
 
         return view
+    }
+
+    private fun setDogImage(dogBreed: DogBreed): OverlayImage {
+        if (dogBreed.equals(DogBreed.BIG)) {
+            return dog1
+        } else if (dogBreed.equals(DogBreed.MEDIUM)) {
+            return dog2
+        } else{
+            return dog3
+        }
     }
 
     private fun setView(
