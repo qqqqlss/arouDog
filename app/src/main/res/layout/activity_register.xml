@@ -224,6 +224,45 @@
                 android:textSize="15sp" />
 
             <EditText
+                android:id="@+id/register_age"
+                android:layout_width="350dp"
+                android:layout_height="50dp"
+                android:layout_gravity="center"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/style_rounded_login"
+                android:fontFamily="@font/nanum_barun_gothic_light"
+                android:hint="이용자님의 나이를 입력해주세요."
+                android:inputType="text"
+                android:paddingLeft="17dp"
+                android:textColor="@color/black"
+                android:textColorHint="@color/black"
+                android:maxLength="15"
+                android:textSize="15sp" />
+
+            <RadioGroup
+                android:id="@+id/register_gender"
+                android:layout_width="350dp"
+                android:layout_height="50dp"
+                android:layout_gravity="center"
+                android:layout_marginTop="10dp"
+                android:orientation="horizontal">
+
+                <RadioButton
+                    android:id="@+id/register_man"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:text="남성" />
+
+                <RadioButton
+                    android:id="@+id/register_woman"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:text="여성" />
+            </RadioGroup>
+
+            <EditText
                 android:id="@+id/register_number"
                 android:layout_width="350dp"
                 android:layout_height="50dp"

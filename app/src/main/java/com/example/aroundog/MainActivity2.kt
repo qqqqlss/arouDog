@@ -13,6 +13,7 @@ import android.widget.TextView
 import android.widget.Toast
 import com.example.aroundog.Model.User
 import com.example.aroundog.Service.IntroService
+import com.example.aroundog.dto.UserDto
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Call
@@ -100,33 +101,30 @@ class MainActivity2 : AppCompatActivity(){
                         .build()
                     // 데이터베이스 접속 및 확인
                     val retrofit = Retrofit.Builder()
-                        .baseUrl(IntroService.INTRO_URL)
+                        .baseUrl(BuildConfig.SERVER)
                         .addConverterFactory(GsonConverterFactory.create())
                         .client(client)     //로그 기능 추가
                         .build()
 
                     val introAPI = retrofit.create(IntroService::class.java)
 
-                    introAPI.login(id, pw).enqueue(object : Callback<User> {
-                        override fun onResponse(call: Call<User>, response: Response<User>) {
+                    introAPI.login(id, pw).enqueue(object : Callback<UserDto> {
+                        override fun onResponse(call: Call<UserDto>, response: Response<UserDto>) {
                             loadingDialog?.dismiss()
                             if (response.isSuccessful) { // 성공적으로 받아왔을 때
                                 if (response.body()!!.isSuccess) { // 아이디, 비밀번호가 일치했을 때
                                     val userdata = response.body() // 유저 데이터를 호출한 데이터베이스로부터 받아와 변수에 저장
                                     if (userdata != null) {
-                                        user_info_editor.putString("id", userdata.id)
-                                    }
-                                    if (userdata != null) {
+                                        user_info_editor.putString("id", userdata.userId)
                                         user_info_editor.putString("password", userdata.password)
-                                    }
-                                    if (userdata != null) {
-                                        user_info_editor.putString("name", userdata.name)
-                                    }
-                                    if (userdata != null) {
+                                        user_info_editor.putString("name", userdata.userName)
                                         user_info_editor.putString("phone", userdata.phone)
-                                    }
-                                    if (userdata != null) {
                                         user_info_editor.putString("email", userdata.email)
+                                        user_info_editor.putString("email", userdata.email)
+                                        user_info_editor.putInt("age", userdata.age)
+                                        user_info_editor.putString("gender",
+                                            userdata.gender.toString()
+                                        )
                                     }
                                     user_info_editor.commit() // 세션 영역에 해당 유저의 정보를 넣음
                                     if (login_stay_cb != null) {
@@ -160,7 +158,7 @@ class MainActivity2 : AppCompatActivity(){
                             }
                         }
 
-                        override fun onFailure(call: Call<User>, t: Throwable) {
+                        override fun onFailure(call: Call<UserDto>, t: Throwable) {
                             loadingDialog?.dismiss()
                             Toast.makeText(applicationContext, "서버 네트워크가 닫혀있습니다.", Toast.LENGTH_LONG)
                                 .show()

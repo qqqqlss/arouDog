@@ -14,10 +14,9 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.setFragmentResultListener
 import com.example.aroundog.BuildConfig
-import com.example.aroundog.Model.UpdateWalkHistory
 import com.example.aroundog.R
 import com.example.aroundog.SerialLatLng
-import com.example.aroundog.Service.RetrofitService
+import com.example.aroundog.Service.WalkService
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
@@ -30,9 +29,7 @@ import com.naver.maps.map.OnMapReadyCallback
 import com.naver.maps.map.overlay.PathOverlay
 import okhttp3.MediaType
 import okhttp3.MultipartBody
-import okhttp3.OkHttpClient
 import okhttp3.RequestBody
-import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -43,8 +40,8 @@ import java.io.File
 import java.io.FileOutputStream
 import java.lang.Exception
 import java.lang.Math.round
-import java.text.SimpleDateFormat
-import java.util.*
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import kotlin.collections.ArrayList
 import kotlin.concurrent.thread
 
@@ -55,13 +52,14 @@ class EndWalkFragment : Fragment(), OnMapReadyCallback {
     lateinit var mapFragment:MapFragment
     lateinit var gsonInstance: Gson
     lateinit var retrofit:Retrofit
-    lateinit var retrofitAPI:RetrofitService
+    lateinit var walkRetrofit:WalkService
     val gson:Gson = Gson()
     lateinit var naverMap:NaverMap
     lateinit var exitButton: ImageButton
-    lateinit var userId:String
+    var userId:String = "error"
     lateinit var time:String
     lateinit var walkDistance:String
+    lateinit var startTime:LocalDateTime
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -79,7 +77,7 @@ class EndWalkFragment : Fragment(), OnMapReadyCallback {
             .baseUrl(BuildConfig.SERVER)
             .addConverterFactory(GsonConverterFactory.create(gsonInstance))
             .build()
-        retrofitAPI = retrofit.create(RetrofitService::class.java)
+        walkRetrofit = retrofit.create(WalkService::class.java)
 
 
         var user_info_pref = requireActivity().getSharedPreferences("userInfo", AppCompatActivity.MODE_PRIVATE)
@@ -110,6 +108,7 @@ class EndWalkFragment : Fragment(), OnMapReadyCallback {
         setFragmentResultListener("walkEnd"){ key, bundle ->
             var serialLatLngList = bundle.getSerializable("arraylist") as ArrayList<SerialLatLng>
             time = bundle.getSerializable("time") as String
+            startTime = bundle.getSerializable("startTime") as LocalDateTime
             walkDistance = round((bundle.getSerializable("walkDistance") as Double)).toString()
             pathList = SerialoLatLng(serialLatLngList)//ArrayList<SerialLatLng>을 ArrayList<LatLng>으로 변경
             timeTV.text="산책시간\n"+time
@@ -141,63 +140,101 @@ class EndWalkFragment : Fragment(), OnMapReadyCallback {
 
             naverMap.takeSnapshot(false){
                 sendToDB(it)
-                Log.d("sex", "실행됨")
+                Log.d(TAG, "실행됨")
                 requireActivity().supportFragmentManager.beginTransaction().remove(this).commit()
             }
+
         }
     }
 
     fun sendToDB(bitmap: Bitmap){
         thread(start = true){
             if(userId == "error"){
-                Toast.makeText(requireContext(),"아이디 에러입니다.",Toast.LENGTH_SHORT).show()
+//                Toast.makeText(requireContext(),"아이디 에러입니다.",Toast.LENGTH_SHORT).show()
                 return@thread
             }
-            val now = System.currentTimeMillis()
-            val date = Date(now)
-            val formatDate = SimpleDateFormat("yyyyMMddkkmmss", Locale("ko", "KR"))
-            val strDate = formatDate.format(date)
-            val fileName = strDate + userId + ".jpg"
 
-            var file:File = File(requireContext().cacheDir, fileName)
-            file.createNewFile()
-            var bos:ByteArrayOutputStream = ByteArrayOutputStream()
-            bitmap.compress(Bitmap.CompressFormat.JPEG,90, bos)
-            var bitmapdata:ByteArray = bos.toByteArray()
+            val date = LocalDateTime.now()
+            val endTimeFormat = date.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"))
+            val startTimeFormat = startTime.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"))
 
-            try {
-                var fos:FileOutputStream = FileOutputStream(file)
-                fos.write(bitmapdata)
-                fos.flush()
-                fos.close()
+            var file: File = getImage(endTimeFormat, bitmap) //이미지 생성
+            var params = getParams(startTimeFormat, endTimeFormat) //파라미터 설정
+            var image: MultipartBody.Part = getParamImage(file) //이미지 설정
 
-            }catch (e:Exception){
-
-            }
-
-            var requestFile:RequestBody = RequestBody.create(MediaType.parse("multipart/form-data"), file)
-            var body:MultipartBody.Part = MultipartBody.Part.createFormData("uploaded_file", file.name, requestFile)
-
-            var history:String = gson.toJson(pathList)
-
-
-            var requestId:RequestBody = RequestBody.create(MediaType.parse("multipart/form-data"), userId)
-            var requestHistory:RequestBody = RequestBody.create(MediaType.parse("multipart/form-data"), history)
-
-            retrofitAPI.postWalkHistory(requestId, requestHistory, body).enqueue(object : Callback<UpdateWalkHistory> {
-                override fun onResponse(call: Call<UpdateWalkHistory>, response: Response<UpdateWalkHistory>) {
+            walkRetrofit.addWalk(userId, params, image).enqueue(object:Callback<Void>{
+                override fun onResponse(call: Call<Void>, response: Response<Void>) {
                     if(response.isSuccessful){
-                        Log.d(TAG, "성공적" + response.body()!!.result)
+                        Log.d(TAG, "성공적")
                     }else{
-                        Log.d(TAG, "실패 " + call.toString() + "/"+ response.body().toString())
+                        Log.d(TAG, "실패 ")
                     }
                 }
-                override fun onFailure(call: Call<UpdateWalkHistory>, t: Throwable) {
-                    Log.d(TAG, t.message.toString())
+
+                override fun onFailure(call: Call<Void>, t: Throwable) {
+                    Log.d(TAG, "전송 실패 ${t.toString()}")
                 }
             })
         }
 
+    }
+
+    private fun getImage(endTimeFormat: String, bitmap: Bitmap): File {
+        val fileName = endTimeFormat + "#" + userId + ".jpg"
+        Log.d(TAG, "fileName : $fileName")
+
+        var file: File = File(requireContext().cacheDir, fileName)
+        file.createNewFile()
+        var bos: ByteArrayOutputStream = ByteArrayOutputStream()
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 90, bos)
+        var bitmapdata: ByteArray = bos.toByteArray()
+
+        try {
+            var fos: FileOutputStream = FileOutputStream(file)
+            fos.write(bitmapdata)
+            fos.flush()
+            fos.close()
+
+        } catch (e: Exception) {
+
+        }
+        return file
+    }
+
+    private fun getParamImage(file: File): MultipartBody.Part {
+        var requestFile: RequestBody =
+            RequestBody.create(MediaType.parse("multipart/form-data"), file)
+        var image: MultipartBody.Part =
+            MultipartBody.Part.createFormData("image", file.name, requestFile)
+        return image
+    }
+
+    private fun getParams(
+        startTimeFormat: String?,
+        endTimeFormat: String?
+    ): HashMap<String, RequestBody> {
+
+        val firstLatLng: LatLng = pathList.get(0)
+        val lastLatLng: LatLng = pathList.get(pathList.size-1)
+        val historyCenter:String = "{\"latitude\":" + (firstLatLng.latitude + lastLatLng.latitude)/2 + ",\"longitude\":" + (firstLatLng.longitude + lastLatLng.longitude)/2 + "}"
+
+
+        var history: String = gson.toJson(pathList)
+        var course: RequestBody =
+            RequestBody.create(MediaType.parse("multipart/form-data"), history)
+        var courseCenter: RequestBody =
+            RequestBody.create(MediaType.parse("multipart/form-data"), historyCenter)
+        var startTime: RequestBody =
+            RequestBody.create(MediaType.parse("multipart/form-data"), startTimeFormat)
+        var endTime: RequestBody =
+            RequestBody.create(MediaType.parse("multipart/form-data"), endTimeFormat)
+
+        var params = HashMap<String, RequestBody>()
+        params.put("course", course)
+        params.put("courseCenter", courseCenter)
+        params.put("startTime", startTime)
+        params.put("endTime", endTime)
+        return params
     }
 
     fun SerialoLatLng(list:ArrayList<SerialLatLng>):ArrayList<LatLng>{

@@ -3,21 +3,25 @@ package com.example.aroundog.fragments
 import android.graphics.Color
 import android.location.Location
 import android.os.Bundle
-import android.os.Parcelable
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.WebSettings
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import android.widget.*
+import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResult
+import com.example.aroundog.BuildConfig
 import com.example.aroundog.R
-import com.example.aroundog.SerialLatLng
 import com.example.aroundog.RealtimeLocation
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.IgnoreExtraProperties
-import com.google.firebase.database.ktx.database
-import com.google.firebase.ktx.Firebase
+import com.example.aroundog.SerialLatLng
+import com.example.aroundog.Service.CoordinateService
+import com.example.aroundog.dto.UserCoordinateDogDto
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.*
 import com.naver.maps.map.overlay.LocationOverlay
@@ -25,38 +29,55 @@ import com.naver.maps.map.overlay.Marker
 import com.naver.maps.map.overlay.OverlayImage
 import com.naver.maps.map.overlay.PathOverlay
 import com.naver.maps.map.util.FusedLocationSource
+import kotlinx.coroutines.*
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import java.time.LocalDateTime
 import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
-import kotlin.concurrent.timer
 
 
-class MainFragment : Fragment(), OnMapReadyCallback{
+class MainFragment : Fragment(), OnMapReadyCallback {
 
     private lateinit var locationSource: FusedLocationSource
     private lateinit var naverMap: NaverMap
-    private var pathList:ArrayList<LatLng> = ArrayList<LatLng>()
-    var serialPathList:ArrayList<SerialLatLng> = ArrayList<SerialLatLng>()
+    private var pathList: ArrayList<LatLng> = ArrayList<LatLng>()
     private var pathOverlay: PathOverlay = PathOverlay()
-    private var isStart:Boolean = false
-    private var isFirst:Boolean = true
+    private var isStart: Boolean = false
+    private var isFirst: Boolean = true
     lateinit var overlayImage: OverlayImage
     lateinit var compassImage: OverlayImage
     lateinit var lastLocation: Location
-    var walkDistance:Double = 0.0
+    lateinit var startTime: LocalDateTime
+    var walkDistance: Double = 0.0
     val TAG = "MainFragmentTAG"
 
-    lateinit var frame:FrameLayout
-    lateinit var startWalkButton:Button
-    lateinit var walkDistanceTV:TextView
-    lateinit var walkTimeTV:TextView
-    lateinit var pauseButton:ImageButton
-    lateinit var statusLayout:LinearLayout
+    lateinit var frame: FrameLayout
+    lateinit var startWalkButton: Button
+    lateinit var walkDistanceTV: TextView
+    lateinit var walkTimeTV: TextView
+    lateinit var pauseButton: ImageButton
+    lateinit var statusLayout: LinearLayout
+    lateinit var webView: WebView
+    lateinit var timer: Timer
+    var time: Long = 0
 
-    lateinit var timer:Timer
-    var time:Long = 0
+    val realdb: RealtimeLocation = RealtimeLocation()
 
-    val realdb:RealtimeLocation = RealtimeLocation()
+    lateinit var strTime: String
+    var tile = ""
+    var lastTile = ""
+    lateinit var userId: String
+    lateinit var retrofit: CoordinateService
+    lateinit var databaseCoroutine: Job
+
+    var userCoordinateDogBoolean = false
+    lateinit var userCoordinateDogDtoList:List<UserCoordinateDogDto>
+    var markerList = ArrayList<Marker>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -75,149 +96,319 @@ class MainFragment : Fragment(), OnMapReadyCallback{
 
         pathOverlaySettings()
 
-        realdb.initializeDbRef()
+        var user_info_pref =
+            requireActivity().getSharedPreferences("userInfo", AppCompatActivity.MODE_PRIVATE)
+        userId = user_info_pref.getString("id", "error").toString()
 
+
+        //retrofit
+        var gsonInstance: Gson = GsonBuilder().setLenient().create()
+        retrofit = Retrofit.Builder()
+            .baseUrl(BuildConfig.SERVER)
+            .addConverterFactory(GsonConverterFactory.create(gsonInstance))
+            .build()
+            .create(CoordinateService::class.java)
     }
 
     override fun onCreateView(//인터페이스를 그리기위해 호출
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-//        if(parentFragmentManager.findFragmentByTag("map") != null)
-//            parentFragmentManager.beginTransaction().show(parentFragmentManager.findFragmentByTag("map")!!).commit()
 
-        val view:ViewGroup = inflater.inflate(R.layout.fragment_main,container,false) as ViewGroup
-        startWalkButton = view.findViewById(R.id.startWalkButton)
-        walkTimeTV = view.findViewById(R.id.walkTimeTV)
-        walkDistanceTV = view.findViewById(R.id.walkDistanceTV)
-        pauseButton = view.findViewById(R.id.pauseButton)
-        statusLayout = view.findViewById(R.id.statusLayout)
-        frame = view.findViewById(R.id.map)
+        val view: ViewGroup = setView(inflater, container)
 
         //산책시작 버튼 클릭 리스너
         startWalkButton.setOnClickListener {
             Log.d(TAG, "산책시작 버튼 클릭")
             isStart = true
             pathList.add(LatLng(lastLocation))//시작위치 지정
-            serialPathList.add(SerialLatLng(LatLng(lastLocation)))
-            startWalk()
 
+            startTime = LocalDateTime.now()//시작시간 지정
+
+            startWalk()
+            createWebView()//웹뷰 생성, tile 값 지정
+
+            var coorUpdate = false
+            databaseCoroutine = CoroutineScope(Dispatchers.IO).launch {
+                while (true) {
+                    if (tile.isEmpty()) {
+                        //타일 값 받을때까지
+                        delay(10L)
+                        continue
+                    }//if
+
+                    if (naverMap != null) {
+                        if (!coorUpdate) {//첫 실행일때는 모든 정보 넣어서 테이블에 추가
+                            retrofit.insert(
+                                userId,
+                                lastLocation.latitude,
+                                lastLocation.longitude,
+                                tile
+                            ).enqueue(object : Callback<Boolean> {
+                                override fun onResponse(
+                                    call: Call<Boolean>,
+                                    response: Response<Boolean>
+                                ) {
+                                    if (response.isSuccessful) {
+                                        if (response.body() == true) {
+                                            Log.d(TAG, "업데이트 성공")
+                                        } else
+                                            Log.d(TAG, "업데이트 실패")
+                                    }
+                                }
+                                override fun onFailure(call: Call<Boolean>, t: Throwable) {
+                                    Log.d(TAG, "전송실패 ", t)
+                                }
+                            })
+                            Log.d(TAG, "tile ${tile}")
+                            coorUpdate = true
+                        } //if
+
+                        else {//첫실행 아닐때
+                            retrofit.update(
+                                userId,
+                                lastLocation.latitude,
+                                lastLocation.longitude,
+                                tile
+                            ).enqueue(object : Callback<Boolean> {
+                                override fun onResponse(
+                                    call: Call<Boolean>,
+                                    response: Response<Boolean>
+                                ) {
+                                    if (response.isSuccessful) {
+                                        if (response.body() == true) {
+                                            Log.d(TAG, "업데이트 성공")
+                                        } else
+                                            Log.d(TAG, "업데이트 실패")
+                                    }
+                                }
+
+                                override fun onFailure(call: Call<Boolean>, t: Throwable) {
+                                    Log.d(TAG, "전송실패 ", t)
+                                }
+                            })
+                        }//else
+
+                        //다른 사용자들의 위치정보 불러오기
+                        //tile 올려서 해당 사용자들만 받아오게
+                        retrofit.getWalkingList(tile).enqueue(object:Callback<List<UserCoordinateDogDto>>{
+                            override fun onResponse(
+                                call: Call<List<UserCoordinateDogDto>>,
+                                response: Response<List<UserCoordinateDogDto>>
+                            ) {
+                                if (response.isSuccessful) {
+                                    userCoordinateDogDtoList = response.body()!!
+                                    userCoordinateDogBoolean = true
+
+                                }
+                            }
+                            override fun onFailure(
+                                call: Call<List<UserCoordinateDogDto>>,
+                                t: Throwable
+                            ) {
+                                Log.d(TAG, "getWalkingList fail", t)
+                            }
+                        })
+                        //1초간 대기
+                        delay(1000L)
+                    }//if
+                }//while
+            }//launch
         }
 
         //산책종료 버튼클릭 리스너
         pauseButton.setOnClickListener {
-            //산책결과 프래그먼트 추가해야함
-            Toast.makeText(activity,"산책종료", Toast.LENGTH_SHORT).show()
             isStart = false
 
+            //Bundle설정
+            setBundle()
+            parentFragmentManager.beginTransaction()
+                .add(R.id.main_container, EndWalkFragment(), "endWalk").addToBackStack(null)
+                .commit()
 
-
-            var bundle:Bundle = Bundle()
-            bundle.putSerializable("arraylist", LatLngToSerial())
-            //bundle.putSerializable("arraylist", serialPathList)
-            setFragmentResult("walkEnd",bundle)
-            parentFragmentManager.beginTransaction().add(R.id.main_container, EndWalkFragment(), "endWalk").addToBackStack(null).commit()
-
-
+            //산책 종료 메서드
             endWalk()
-        }
+
+
+            //insert/update 코루틴 종료
+            databaseCoroutine.cancel()
+
+            //서버에 false 전송
+            retrofit.endWalking(userId).enqueue(object:Callback<Boolean>{
+                override fun onResponse(call: Call<Boolean>, response: Response<Boolean>) {
+                    if (response.isSuccessful) {
+                        Log.d(TAG, "endWalking is success");
+                    }
+                }
+                override fun onFailure(
+                    call: Call<Boolean>,
+                    t: Throwable
+                ) {
+                    Log.d(TAG, "endWalking fail", t)
+                }
+            })
+        }//listener
 
         return view
     }
+
+    private fun setView(
+        inflater: LayoutInflater,
+        container: ViewGroup?
+    ): ViewGroup {
+        val view: ViewGroup =
+            inflater.inflate(R.layout.fragment_main, container, false) as ViewGroup
+        startWalkButton = view.findViewById(R.id.startWalkButton)
+        walkTimeTV = view.findViewById(R.id.walkTimeTV)
+        walkDistanceTV = view.findViewById(R.id.walkDistanceTV)
+        pauseButton = view.findViewById(R.id.pauseButton)
+        statusLayout = view.findViewById(R.id.statusLayout)
+        frame = view.findViewById(R.id.map)
+        webView = view.findViewById(R.id.webView)
+        return view
+    }
+
+    private fun setBundle() {
+        var bundle: Bundle = Bundle()
+        bundle.putSerializable("arraylist", LatLngToSerial())
+        bundle.putSerializable("walkDistance", walkDistance)
+        bundle.putSerializable("time", strTime)
+        bundle.putSerializable("startTime", startTime)
+        setFragmentResult("walkEnd", bundle)
+    }
+
+
+    private fun createWebView() {
+        var url =
+            BuildConfig.SERVER + "map?latitude=${lastLocation.latitude}&longitude=${lastLocation.longitude}"
+        webView.apply {
+            webViewClient = object : WebViewClient() {
+                override fun onPageFinished(view: WebView?, url: String?) {
+                    super.onPageFinished(view, url)
+                    webView.evaluateJavascript("javascript:getLocation()") {
+                        Log.d(TAG, it)
+                        tile = it.replace("\"","")
+                    }
+                }
+            }
+            settings.javaScriptEnabled = true
+        }
+        webView.clearCache(true)
+        webView.clearHistory()
+        webView.settings.cacheMode = WebSettings.LOAD_NO_CACHE
+        webView.loadUrl(url)
+    }
+
     fun LatLngToSerial(): ArrayList<SerialLatLng> {
         var tempList = ArrayList<SerialLatLng>()
         var iterator = pathList.iterator()
-        while(iterator.hasNext()){
+        while (iterator.hasNext()) {
             var temp = SerialLatLng(iterator.next())
             tempList.add(temp)
         }
         return tempList
     }
+
     companion object {
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1000
     }
-    fun startWalk(){
-        statusLayout.visibility=View.VISIBLE
-        startWalkButton.visibility=View.GONE
-        frame.layoutParams.height=0
+
+    fun startWalk() {
+        statusLayout.visibility = View.VISIBLE
+        startWalkButton.visibility = View.GONE
+        frame.layoutParams.height = 0
         startTimer()
     }
 
-    fun startTimer(){
-        timer = kotlin.concurrent.timer(period = 1000){
+    fun startTimer() {
+        timer = kotlin.concurrent.timer(period = 1000) {
             time++
             setTimer()
         }
     }
-    fun stopTimer(){
+
+    fun stopTimer() {
         timer.cancel()
     }
-    fun resetTimer(){
+
+    fun resetTimer() {
         timer.cancel()
-        time=0
+        time = 0
         setTimer()
     }
-    fun setTimer(){
+
+    fun setTimer() {
         var hour = TimeUnit.SECONDS.toHours(time)
-        var minute = TimeUnit.SECONDS.toMinutes(time) - hour*60
-        var second = TimeUnit.SECONDS.toSeconds(time) - hour*3600 - minute*60
-        walkTimeTV.text = String.format("%02d",hour) + " : " + String.format("%02d",minute) + " : "  + String.format("%02d",second)
+        var minute = TimeUnit.SECONDS.toMinutes(time) - hour * 60
+        var second = TimeUnit.SECONDS.toSeconds(time) - hour * 3600 - minute * 60
+        strTime = String.format("%02d", hour) + " : " + String.format(
+            "%02d",
+            minute
+        ) + " : " + String.format("%02d", second)
+        walkTimeTV.text = strTime
     }
 
-    fun pathOverlaySettings(){
-        pathOverlay.outlineWidth=0//테두리 없음
-        pathOverlay.width=20//경로선 폭
+    fun pathOverlaySettings() {
+        pathOverlay.outlineWidth = 0//테두리 없음
+        pathOverlay.width = 20//경로선 폭
         pathOverlay.passedColor = Color.RED//지나온 경로선
-        pathOverlay.color= Color.GREEN//경로선 색상
+        pathOverlay.color = Color.GREEN//경로선 색상
     }
 
-    fun endWalk(){
+    fun endWalk() {
         pathList.clear()
-        pathOverlay.map=null
+        pathOverlay.map = null
         walkDistance = 0.0
         //서버에는 time 전달
-        statusLayout.visibility=View.GONE
-        startWalkButton.visibility=View.VISIBLE
+        statusLayout.visibility = View.GONE
+        startWalkButton.visibility = View.VISIBLE
 
-        val layout:ViewGroup.LayoutParams = frame.layoutParams
-        layout.width=ViewGroup.LayoutParams.MATCH_PARENT
-        layout.height=ViewGroup.LayoutParams.MATCH_PARENT
+        val layout: ViewGroup.LayoutParams = frame.layoutParams
+        layout.width = ViewGroup.LayoutParams.MATCH_PARENT
+        layout.height = ViewGroup.LayoutParams.MATCH_PARENT
         frame.layoutParams = layout
         resetTimer()
+        walkDistance = 0.0
+        walkDistanceTV.text="0M"
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int,
-                                            permissions: Array<String>,
-                                            grantResults: IntArray) {
-        if (locationSource.onRequestPermissionsResult(requestCode, permissions,
-                grantResults)) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
+        if (locationSource.onRequestPermissionsResult(
+                requestCode, permissions,
+                grantResults
+            )
+        ) {
             if (!locationSource.isActivated) { // 권한 거부됨
                 naverMap.locationTrackingMode = LocationTrackingMode.None
                 Log.d(TAG, "권한거부")
 
                 return
-            }
-            else{
+            } else {
 
             }
         }
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 
-    fun uiSettings(){
+    fun uiSettings() {
         //naverMap.uiSettings.isCompassEnabled=true
-        naverMap.uiSettings.isLocationButtonEnabled=true//현재위치 버튼 여부
-        naverMap.uiSettings.isZoomControlEnabled=false//줌 버튼 여부
+        naverMap.uiSettings.isLocationButtonEnabled = true//현재위치 버튼 여부
+        naverMap.uiSettings.isZoomControlEnabled = false//줌 버튼 여부
     }
 
     fun setlocationOverlay(): LocationOverlay {
         var locationOverlay: LocationOverlay = naverMap.locationOverlay
-        locationOverlay.icon=overlayImage
+        locationOverlay.icon = overlayImage
         locationOverlay.iconHeight = 100
         locationOverlay.iconWidth = 100
 
         return locationOverlay
     }
+
 
     override fun onMapReady(p0: NaverMap) {
         this.naverMap = p0
@@ -228,29 +419,29 @@ class MainFragment : Fragment(), OnMapReadyCallback{
 
         var locationOverlay = setlocationOverlay()
 
-        var ymarker = Marker()
-        ymarker.position = LatLng(37.514,126.838)
-        ymarker.map = naverMap
-        var zmarker = Marker()
-        zmarker.position = LatLng(37.5133,126.83)
-        zmarker.map = naverMap
+//        var ymarker = Marker()
+//        ymarker.position = LatLng(37.514,126.838)
+//        ymarker.map = naverMap
+//        var zmarker = Marker()
+//        zmarker.position = LatLng(37.5133,126.83)
+//        zmarker.map = naverMap
 
         //옵션 변경될때의 리스너
         naverMap.addOnOptionChangeListener {
-            val mode=naverMap.locationTrackingMode
-            if(mode== LocationTrackingMode.None){
-                naverMap.locationTrackingMode= LocationTrackingMode.NoFollow
+            val mode = naverMap.locationTrackingMode
+            if (mode == LocationTrackingMode.None) {
+                naverMap.locationTrackingMode = LocationTrackingMode.NoFollow
             }
-            if(mode == LocationTrackingMode.NoFollow) {
+            if (mode == LocationTrackingMode.NoFollow) {
                 Log.d(TAG, "mode NoFollow")
-                naverMap.cameraPosition = CameraPosition(LatLng(lastLocation),16.0, 0.0,0.0)
+                naverMap.cameraPosition = CameraPosition(LatLng(lastLocation), 16.0, 0.0, 0.0)
             }
         }
         //위치 업데이트될때의 리스너
         //bearing업데이트일때도 여기로 들어옴
         naverMap.addOnLocationChangeListener { location ->
-            if(naverMap.locationTrackingMode == LocationTrackingMode.NoFollow){
-                locationOverlay.bearing=0f
+            if (naverMap.locationTrackingMode == LocationTrackingMode.NoFollow) {
+                locationOverlay.bearing = 0f
             }
 
             //지도 첫 로딩시
@@ -267,28 +458,77 @@ class MainFragment : Fragment(), OnMapReadyCallback{
                 Log.d(TAG, "첫번째 위치 업데이트")
                 lastLocation = location
             }
+            CoroutineScope(Dispatchers.Main).launch {
+                Log.d(TAG, "in while")
+                if(isStart){
+                    //기존 마커 지우기
+                    if(!markerList.isEmpty()){
+                        for (marker in markerList) {
+                            marker.map=null
+                        }
+                    }
+                    if(userCoordinateDogBoolean){
+                        for (userCoordinateDogDto in userCoordinateDogDtoList) {
+                            if (userId.equals(userCoordinateDogDto.userId)) {
+                                continue
+                            }
+                            //지도에 표시
+                            //일단 확인용으로 이렇게, 나중에는 <유저 아이디, 마커> 이렇게 해봅시다.
+                            var latLng = LatLng(userCoordinateDogDto.latitude, userCoordinateDogDto.longitude)
 
-            if (location == lastLocation){//각도업데이트일때
-                Log.d(TAG, "bearing : ${location.bearing}")
+                            var marker = Marker()
+                            marker.position=latLng
+                            marker.map = naverMap
+                            markerList.add(marker)
+                        }
+
+                    }
+                }else{
+                    //마커 전부 삭제
+                    if(!markerList.isEmpty()){
+                        for (marker in markerList) {
+                            marker.map=null
+                        }
+                    }
+                    markerList.clear()
+                }
+
+
             }
-            else{//위치업데이트일때
-                if(isStart){//산책을 시작했다면
+
+            if (location == lastLocation) {//각도업데이트일때
+                Log.d(TAG, "bearing : ${location.bearing}")
+            } else {//위치업데이트일때
+                if (isStart) {//산책을 시작했다면
                     //pathOverlay.map=null
-                    var updateLocation:LatLng = LatLng(location)
+                    var updateLocation: LatLng = LatLng(location)
                     walkDistance += updateLocation.distanceTo(pathList.last())//마지막 위치와 현재 위치의 거리차이 저장
                     walkDistanceTV.text = walkDistance.toInt().toString() + " M"
                     pathList.add(updateLocation)
-                    serialPathList.add(SerialLatLng(updateLocation))
                     pathOverlay.coords = pathList
                     pathOverlay.map = naverMap
 
-                    realdb.writeNewUser("x", location.latitude, location.longitude) //현재 위치 db전송
-                    ymarker.position = realdb.getValue("y")
-                    ymarker.position = realdb.getValue("z")
+                    if (!tile.isEmpty()) {
+                        //-------------테스트용 userId
 
-                    Log.d("firebase", "ymarker position "+ymarker.position.toString())
+//                        realdb.updateUser(
+//                            userId,
+//                            location.latitude,
+//                            location.longitude,
+//                            tile
+//                        ) //현재 위치 db전송
+                    }
 
-                }else {
+//                    realdb.getValue("1L")
+//                    ymarker.position = realdb.getValue("y")
+//                    ymarker.position = realdb.getValue("z")
+
+//                    Log.d("firebase", "ymarker position "+ymarker.position.toString())
+
+
+
+
+                } else {
                     //textView.text = "이동거리 0M"
                 }
                 Log.d(TAG, "위치업데이트")
@@ -309,4 +549,5 @@ class MainFragment : Fragment(), OnMapReadyCallback{
 //            }
 //        })
     }
+
 }
