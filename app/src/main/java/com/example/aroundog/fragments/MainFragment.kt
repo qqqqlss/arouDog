@@ -16,7 +16,6 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResult
 import com.example.aroundog.BuildConfig
 import com.example.aroundog.R
-import com.example.aroundog.RealtimeLocation
 import com.example.aroundog.SerialLatLng
 import com.example.aroundog.Service.CoordinateService
 import com.example.aroundog.dto.UserCoordinateDogDto
@@ -39,6 +38,7 @@ import java.time.LocalDateTime
 import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
 
 class MainFragment : Fragment(), OnMapReadyCallback {
@@ -66,18 +66,15 @@ class MainFragment : Fragment(), OnMapReadyCallback {
     lateinit var timer: Timer
     var time: Long = 0
 
-    val realdb: RealtimeLocation = RealtimeLocation()
-
     lateinit var strTime: String
     var tile = ""
-    var lastTile = ""
     lateinit var userId: String
     lateinit var retrofit: CoordinateService
     lateinit var databaseCoroutine: Job
 
-    var userCoordinateDogBoolean = false
     lateinit var userCoordinateDogDtoList:List<UserCoordinateDogDto>
-    var markerList = ArrayList<Marker>()
+    var updateCoordinateMap = HashMap<Long, Marker>()//<개id, 마커>
+    var visibleOnMapMap = HashMap<Long, Marker>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -120,14 +117,11 @@ class MainFragment : Fragment(), OnMapReadyCallback {
         //산책시작 버튼 클릭 리스너
         startWalkButton.setOnClickListener {
             Log.d(TAG, "산책시작 버튼 클릭")
-            isStart = true
-            pathList.add(LatLng(lastLocation))//시작위치 지정
-
-            startTime = LocalDateTime.now()//시작시간 지정
 
             startWalk()
             createWebView()//웹뷰 생성, tile 값 지정
 
+            //첫 실행 여부 확인
             var coorUpdate = false
             databaseCoroutine = CoroutineScope(Dispatchers.IO).launch {
                 while (true) {
@@ -182,7 +176,6 @@ class MainFragment : Fragment(), OnMapReadyCallback {
                                             Log.d(TAG, "업데이트 실패")
                                     }
                                 }
-
                                 override fun onFailure(call: Call<Boolean>, t: Throwable) {
                                     Log.d(TAG, "전송실패 ", t)
                                 }
@@ -198,8 +191,46 @@ class MainFragment : Fragment(), OnMapReadyCallback {
                             ) {
                                 if (response.isSuccessful) {
                                     userCoordinateDogDtoList = response.body()!!
-                                    userCoordinateDogBoolean = true
+                                    updateCoordinateMap.clear()
+                                    userCoordinateDogDtoList.forEach { dto ->
+                                        if (!userId.equals(dto.userId)) {//자신의 정보를 제외하고 실행
+                                            if (!visibleOnMapMap.containsKey(dto.dogId)) {//해당 아이디가 지도에 없으면(visibleOnMapMap) 마커 추가
+                                                var latLng = LatLng(
+                                                    dto.latitude,
+                                                    dto.longitude
+                                                )
 
+                                                var marker = Marker().apply {
+                                                    position = latLng
+                                                    captionText = dto.dogName
+                                                }
+                                                CoroutineScope(Dispatchers.Main).launch {
+                                                    marker.map = naverMap
+                                                }
+                                                visibleOnMapMap.put(dto.dogId, marker) //지도에 표시되는 마커를 관리하는 맵에 추가
+                                                updateCoordinateMap.put(dto.dogId, marker) //서버에서 불러온 정보를 저장한 맵에도 추가
+
+                                            } else {//지도에 있으면 position 변경
+                                                var latLng = LatLng(
+                                                    dto.latitude,
+                                                    dto.longitude
+                                                )
+                                                val marker = visibleOnMapMap.get(dto.dogId)
+                                                marker!!.position = latLng
+                                                updateCoordinateMap.put(dto.dogId, marker) //서버에서 불러온 정보이므로 지도에 표시된 여부와 상관없이 추가해야함(불러온 정보가 모두 추가됨)
+                                            }
+                                        }
+                                    }
+
+                                    //산책 종료한사람 삭제
+                                    visibleOnMapMap.forEach { (key, value)->
+                                        if(!updateCoordinateMap.containsKey(key)) {//불러온 updateCoordinateMap에 visibleOnMapMap의 값이 없을때 -> 산책 종료
+                                            CoroutineScope(Dispatchers.Main).launch {
+                                                value.map = null //지도에서 표시안함
+                                                visibleOnMapMap.remove(key) //지도에 표시되는 마커를 관리하는 맵에서 제거
+                                            }
+                                        }
+                                    }
                                 }
                             }
                             override fun onFailure(
@@ -228,10 +259,18 @@ class MainFragment : Fragment(), OnMapReadyCallback {
 
             //산책 종료 메서드
             endWalk()
-
-
+            
             //insert/update 코루틴 종료
             databaseCoroutine.cancel()
+
+            //지도에서 마커 삭제
+            CoroutineScope(Dispatchers.Main).launch {
+                updateCoordinateMap.forEach{ (id, marker)->
+                    marker.map = null
+                }
+                updateCoordinateMap.clear() //서버에서 불러오는 정보 저장하는 맵 초기화
+                visibleOnMapMap.clear() //지도에 표시되는 마커들이 저장된 맵 초기화
+            }
 
             //서버에 false 전송
             retrofit.endWalking(userId).enqueue(object:Callback<Boolean>{
@@ -314,6 +353,9 @@ class MainFragment : Fragment(), OnMapReadyCallback {
     }
 
     fun startWalk() {
+        isStart = true
+        pathList.add(LatLng(lastLocation))//시작위치 지정
+        startTime = LocalDateTime.now()//시작시간 지정
         statusLayout.visibility = View.VISIBLE
         startWalkButton.visibility = View.GONE
         frame.layoutParams.height = 0
@@ -409,7 +451,6 @@ class MainFragment : Fragment(), OnMapReadyCallback {
         return locationOverlay
     }
 
-
     override fun onMapReady(p0: NaverMap) {
         this.naverMap = p0
         naverMap.locationSource = locationSource
@@ -418,13 +459,6 @@ class MainFragment : Fragment(), OnMapReadyCallback {
         uiSettings()//지도 ui세팅
 
         var locationOverlay = setlocationOverlay()
-
-//        var ymarker = Marker()
-//        ymarker.position = LatLng(37.514,126.838)
-//        ymarker.map = naverMap
-//        var zmarker = Marker()
-//        zmarker.position = LatLng(37.5133,126.83)
-//        zmarker.map = naverMap
 
         //옵션 변경될때의 리스너
         naverMap.addOnOptionChangeListener {
@@ -458,43 +492,6 @@ class MainFragment : Fragment(), OnMapReadyCallback {
                 Log.d(TAG, "첫번째 위치 업데이트")
                 lastLocation = location
             }
-            CoroutineScope(Dispatchers.Main).launch {
-                Log.d(TAG, "in while")
-                if(isStart){
-                    //기존 마커 지우기
-                    if(!markerList.isEmpty()){
-                        for (marker in markerList) {
-                            marker.map=null
-                        }
-                    }
-                    if(userCoordinateDogBoolean){
-                        for (userCoordinateDogDto in userCoordinateDogDtoList) {
-                            if (userId.equals(userCoordinateDogDto.userId)) {
-                                continue
-                            }
-                            //지도에 표시
-                            //일단 확인용으로 이렇게, 나중에는 <유저 아이디, 마커> 이렇게 해봅시다.
-                            var latLng = LatLng(userCoordinateDogDto.latitude, userCoordinateDogDto.longitude)
-
-                            var marker = Marker()
-                            marker.position=latLng
-                            marker.map = naverMap
-                            markerList.add(marker)
-                        }
-
-                    }
-                }else{
-                    //마커 전부 삭제
-                    if(!markerList.isEmpty()){
-                        for (marker in markerList) {
-                            marker.map=null
-                        }
-                    }
-                    markerList.clear()
-                }
-
-
-            }
 
             if (location == lastLocation) {//각도업데이트일때
                 Log.d(TAG, "bearing : ${location.bearing}")
@@ -508,46 +505,12 @@ class MainFragment : Fragment(), OnMapReadyCallback {
                     pathOverlay.coords = pathList
                     pathOverlay.map = naverMap
 
-                    if (!tile.isEmpty()) {
-                        //-------------테스트용 userId
-
-//                        realdb.updateUser(
-//                            userId,
-//                            location.latitude,
-//                            location.longitude,
-//                            tile
-//                        ) //현재 위치 db전송
-                    }
-
-//                    realdb.getValue("1L")
-//                    ymarker.position = realdb.getValue("y")
-//                    ymarker.position = realdb.getValue("z")
-
-//                    Log.d("firebase", "ymarker position "+ymarker.position.toString())
-
-
-
-
                 } else {
                     //textView.text = "이동거리 0M"
                 }
                 Log.d(TAG, "위치업데이트")
             }
-
             lastLocation = location
-
         }
-//        //지도 첫번째 로딩될때 리스너 등록
-//        naverMap.addOnLoadListener(object:NaverMap.OnLoadListener{
-//            override fun onLoad() {
-//                var coor:Location? = locationSource.lastLocation
-//                if (coor != null) {
-//                    Log.d(TAG , "first location ${ coor.latitude }, ${coor.longitude}")
-//                    naverMap.moveCamera(CameraUpdate.scrollAndZoomTo(LatLng(coor.latitude,coor.longitude), 16.0))
-//                }
-//                Log.d(TAG, "첫번째 로딩")
-//            }
-//        })
     }
-
 }
