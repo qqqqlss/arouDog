@@ -81,6 +81,9 @@ class MainFragment : Fragment(), OnMapReadyCallback {
     lateinit var dog2:OverlayImage
     lateinit var dog3:OverlayImage
     
+    var aroundUserMap = HashMap<Long, String>() //개id, 유저id
+    var duplicateUserDog = HashSet<Long>()//주인이 중복되는 개 id 저장
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         var mapView = parentFragmentManager.findFragmentById(R.id.map) as MapFragment?
@@ -204,19 +207,30 @@ class MainFragment : Fragment(), OnMapReadyCallback {
                                     userCoordinateDogDtoList.forEach { dto ->
                                         if (!userId.equals(dto.userId)) {//자신의 정보를 제외하고 실행
                                             if (!visibleOnMapMap.containsKey(dto.dogId)) {//해당 아이디가 지도에 없으면(visibleOnMapMap) 마커 추가
-                                                var latLng = LatLng(
-                                                    dto.latitude,
-                                                    dto.longitude
-                                                )
+                                                var latLng: LatLng
+                                                if (!aroundUserMap.containsValue(dto.userId)) {//주인이 중복되지 않는경우
+                                                    latLng = LatLng(
+                                                        dto.latitude,
+                                                        dto.longitude
+                                                    )
+                                                } else {
+                                                    latLng = LatLng(
+                                                        dto.latitude - 0.0001,
+                                                        dto.longitude - 0.0001
+                                                    )
+                                                    duplicateUserDog.add(dto.dogId)//주인이 중복될경우 개id저장
+                                                }
 
                                                 var marker = Marker().apply {
                                                     position = latLng
                                                     captionText = dto.dogName
                                                     icon = setDogImage(dto.dogBreed)//이미지 설정
-                                                    width = 170
-                                                    height = 170
-                                                    setOnClickListener { o->
-                                                        Toast.makeText(context, dto.dogName + " / "+dto.dogAge + "살", Toast.LENGTH_SHORT).show()
+                                                    setOnClickListener { o ->
+                                                        Toast.makeText(
+                                                            context,
+                                                            dto.dogName + " / " + dto.dogAge + "살",
+                                                            Toast.LENGTH_SHORT
+                                                        ).show()
                                                         true
                                                     }
                                                 }
@@ -225,12 +239,21 @@ class MainFragment : Fragment(), OnMapReadyCallback {
                                                 }
                                                 visibleOnMapMap.put(dto.dogId, marker) //지도에 표시되는 마커를 관리하는 맵에 추가
                                                 updateCoordinateMap.put(dto.dogId, marker) //서버에서 불러온 정보를 저장한 맵에도 추가
+                                                aroundUserMap.put(dto.dogId, dto.userId)//개, 유저 매핑
 
                                             } else {//지도에 있으면 position 변경
-                                                var latLng = LatLng(
-                                                    dto.latitude,
-                                                    dto.longitude
-                                                )
+                                                var latLng: LatLng
+                                                if (!duplicateUserDog.contains(dto.dogId)) {//주인이 중복되지 않는경우
+                                                    latLng = LatLng(
+                                                        dto.latitude,
+                                                        dto.longitude
+                                                    )
+                                                } else {//주인이 중복되는 경우
+                                                    latLng = LatLng(
+                                                        dto.latitude - 0.0001,
+                                                        dto.longitude - 0.0001
+                                                    )
+                                                }
                                                 val marker = visibleOnMapMap.get(dto.dogId)
                                                 marker!!.position = latLng
                                                 updateCoordinateMap.put(dto.dogId, marker) //서버에서 불러온 정보이므로 지도에 표시된 여부와 상관없이 추가해야함(불러온 정보가 모두 추가됨)
@@ -244,6 +267,8 @@ class MainFragment : Fragment(), OnMapReadyCallback {
                                             CoroutineScope(Dispatchers.Main).launch {
                                                 value.map = null //지도에서 표시안함
                                                 visibleOnMapMap.remove(key) //지도에 표시되는 마커를 관리하는 맵에서 제거
+                                                duplicateUserDog.remove(key) //중복되는 유저 삭제
+                                                aroundUserMap.remove(key) //개, 유저 매핑에서 삭제
                                             }
                                         }
                                     }
@@ -286,6 +311,8 @@ class MainFragment : Fragment(), OnMapReadyCallback {
                 }
                 updateCoordinateMap.clear() //서버에서 불러오는 정보 저장하는 맵 초기화
                 visibleOnMapMap.clear() //지도에 표시되는 마커들이 저장된 맵 초기화
+                aroundUserMap.clear() //개id, 유저id 해시맵 초기화
+                duplicateUserDog.clear() //중복되는 유저 초기화
             }
 
             //서버에 false 전송
@@ -520,7 +547,7 @@ class MainFragment : Fragment(), OnMapReadyCallback {
             }
 
             if (location == lastLocation) {//각도업데이트일때
-                Log.d(TAG, "bearing : ${location.bearing}")
+
             } else {//위치업데이트일때
                 if (isStart) {//산책을 시작했다면
                     //pathOverlay.map=null
