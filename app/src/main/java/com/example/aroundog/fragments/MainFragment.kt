@@ -1,8 +1,10 @@
 package com.example.aroundog.fragments
 
+import android.content.Context
 import android.graphics.Color
 import android.location.Location
 import android.os.Bundle
+import android.os.VibratorManager
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -12,6 +14,8 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResult
 import com.example.aroundog.BuildConfig
@@ -23,6 +27,7 @@ import com.example.aroundog.dto.UserCoordinateDogDto
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.naver.maps.geometry.LatLng
+import com.naver.maps.geometry.LatLngBounds
 import com.naver.maps.map.*
 import com.naver.maps.map.overlay.LocationOverlay
 import com.naver.maps.map.overlay.Marker
@@ -84,6 +89,9 @@ class MainFragment : Fragment(), OnMapReadyCallback {
     var aroundUserMap = HashMap<Long, String>() //개id, 유저id
     var duplicateUserDog = HashSet<Long>()//주인이 중복되는 개 id 저장
 
+    lateinit var bounds:LatLngBounds
+    var width:Double = 0.0
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         var mapView = parentFragmentManager.findFragmentById(R.id.map) as MapFragment?
@@ -105,6 +113,9 @@ class MainFragment : Fragment(), OnMapReadyCallback {
             requireActivity().getSharedPreferences("userInfo", AppCompatActivity.MODE_PRIVATE)
         userId = user_info_pref.getString("id", "error").toString()
 
+        //환경설정에서 알람을 표시할 영역을 설정하는 변수, 저장 필요, 일단 임의값으로 대체
+        //소수점 다섯째 자리가 약 1m정도씩 차이남
+        width = 0.001 //100m
 
         //retrofit
         var gsonInstance: Gson = GsonBuilder().setLenient().create()
@@ -272,6 +283,19 @@ class MainFragment : Fragment(), OnMapReadyCallback {
                                             }
                                         }
                                     }
+
+                                    //지도에 표시된 개의 마커의 위치를 기준으로 bounds안에 들어와있는지 확인
+                                    if(isStart && bounds != null){
+                                        visibleOnMapMap.forEach{ markerId->
+                                            val markerPosition = markerId.value.position
+                                            if (bounds.contains(markerPosition)) {//좌표가 영역 안에 포함될경우
+                                                CoroutineScope(Dispatchers.Main).launch {
+                                                    Toast.makeText(context, "개 접근중", Toast.LENGTH_SHORT).show()
+                                                }
+                                                Log.d(TAG, "피해요!!!!!")
+                                            }
+                                        }
+                                    }
                                 }
                             }
                             override fun onFailure(
@@ -418,7 +442,9 @@ class MainFragment : Fragment(), OnMapReadyCallback {
     fun startTimer() {
         timer = kotlin.concurrent.timer(period = 1000) {
             time++
-            setTimer()
+            CoroutineScope(Dispatchers.Main).launch {
+                setTimer()
+            }
         }
     }
 
@@ -562,8 +588,15 @@ class MainFragment : Fragment(), OnMapReadyCallback {
                     //textView.text = "이동거리 0M"
                 }
                 Log.d(TAG, "위치업데이트")
+                lastLocation = location
             }
-            lastLocation = location
+            //현재 내 위치 기준 영역 저장
+            bounds = setBounds(location, width)
         }
+    }
+    fun setBounds(location: Location, width: Double) :LatLngBounds {
+        var southWest = LatLng(location.latitude - width, location.longitude - width)
+        var northEast = LatLng(location.latitude + width, location.longitude + width)
+        return LatLngBounds(southWest, northEast)
     }
 }
