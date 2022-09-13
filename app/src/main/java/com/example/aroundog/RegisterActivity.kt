@@ -194,13 +194,18 @@ class RegisterActivity : AppCompatActivity() {
                         .build()
                     val introAPI: IntroService = retrofit.create(IntroService::class.java)
                     introAPI.signUp(id, password, userImage, name, number, email, strRadio, age)
-                        .enqueue(object : Callback<CheckSuccess?> {
+                        .enqueue(object : Callback<Boolean> {
                             override fun onResponse(
-                                call: Call<CheckSuccess?>,
-                                response: Response<CheckSuccess?>
+                                call: Call<Boolean>,
+                                response: Response<Boolean>
                             ) {
                                 loadingDialog!!.dismiss()
                                 if (response.isSuccessful && response.body() != null) { // 성공적으로 받아왔을 때
+                                    Toast.makeText(
+                                        applicationContext,
+                                        "회원가입에 성공했습니다.",
+                                        Toast.LENGTH_LONG
+                                    ).show()
                                     val intent = Intent(
                                         this@RegisterActivity,
                                         MainActivity2::class.java
@@ -222,7 +227,7 @@ class RegisterActivity : AppCompatActivity() {
                                 }
                             }
 
-                            override fun onFailure(call: Call<CheckSuccess?>, t: Throwable) {
+                            override fun onFailure(call: Call<Boolean>, t: Throwable) {
                                 loadingDialog!!.dismiss()
                                 Toast.makeText(
                                     applicationContext,
