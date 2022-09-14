@@ -6,14 +6,16 @@
     android:orientation="vertical">
 
     <TextView
-        android:id="@+id/textViewId"
+        android:id="@+id/textViewUserId"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:text="TextView" />
+        android:layout_margin="20dp"
+        android:text="TextView"
+        android:textColor="#000000"
+        android:textSize="20sp" />
 
     <TextView
-        android:id="@+id/textViewSerialNumber"
+        android:id="@+id/textViewWalkId"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:visibility="gone" />
@@ -21,12 +23,25 @@
     <ImageView
         android:id="@+id/itemImage"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:adjustViewBounds="true" />
+
+    <TextView
+        android:id="@+id/textViewWalkSecond"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="20dp"
+        android:gravity="center"
+        android:text="소요시간 : 0 분 0초"
+        android:textColor="#000000"
+        android:textSize="16sp" />
 
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
+        android:layout_marginTop="20dp"
         android:orientation="horizontal">
 
         <TextView
