@@ -27,7 +27,7 @@ interface IntroService {
         @Field("email") email:String,
         @Field("gender") gender: String,
         @Field("age") age:String
-    ):Call<CheckSuccess>;
+    ):Call<Boolean>;
 
     @GET("/login/idValidate")
     fun idValidate(
