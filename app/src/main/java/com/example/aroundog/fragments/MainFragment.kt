@@ -141,175 +141,16 @@ class MainFragment : Fragment(), OnMapReadyCallback {
         startWalkButton.setOnClickListener {
             Log.d(TAG, "산책시작 버튼 클릭")
 
-            startWalk()
-            createWebView()//웹뷰 생성, tile 값 지정
+            //최신 위치가 저장되었는지 확인
+            if (this::lastLocation.isInitialized) {
+                startWalk()
+                dbProcess()
+                createWebView()//웹뷰 생성, tile 값 지정
+            } else{
+                Toast.makeText(context, "로딩중입니다. 잠시만 기다려주세요", Toast.LENGTH_SHORT).show()
+            }
 
-            //첫 실행 여부 확인
-            var coorUpdate = false
-            databaseCoroutine = CoroutineScope(Dispatchers.IO).launch {
-                while (true) {
-                    if (tile.isEmpty()) {
-                        //타일 값 받을때까지
-                        delay(10L)
-                        continue
-                    }//if
 
-                    if (naverMap != null) {
-                        if (!coorUpdate) {//첫 실행일때는 모든 정보 넣어서 테이블에 추가
-                            retrofit.insert(
-                                userId,
-                                lastLocation.latitude,
-                                lastLocation.longitude,
-                                tile
-                            ).enqueue(object : Callback<Boolean> {
-                                override fun onResponse(
-                                    call: Call<Boolean>,
-                                    response: Response<Boolean>
-                                ) {
-                                    if (response.isSuccessful) {
-                                        if (response.body() == true) {
-                                            Log.d(TAG, "업데이트 성공")
-                                        } else
-                                            Log.d(TAG, "업데이트 실패")
-                                    }
-                                }
-                                override fun onFailure(call: Call<Boolean>, t: Throwable) {
-                                    Log.d(TAG, "전송실패 ", t)
-                                }
-                            })
-                            Log.d(TAG, "tile ${tile}")
-                            coorUpdate = true
-                        } //if
-
-                        else {//첫실행 아닐때
-                            retrofit.update(
-                                userId,
-                                lastLocation.latitude,
-                                lastLocation.longitude,
-                                tile
-                            ).enqueue(object : Callback<Boolean> {
-                                override fun onResponse(
-                                    call: Call<Boolean>,
-                                    response: Response<Boolean>
-                                ) {
-                                    if (response.isSuccessful) {
-                                        if (response.body() == true) {
-                                            Log.d(TAG, "업데이트 성공")
-                                        } else
-                                            Log.d(TAG, "업데이트 실패")
-                                    }
-                                }
-                                override fun onFailure(call: Call<Boolean>, t: Throwable) {
-                                    Log.d(TAG, "전송실패 ", t)
-                                }
-                            })
-                        }//else
-
-                        //다른 사용자들의 위치정보 불러오기
-                        //tile 올려서 해당 사용자들만 받아오게
-                        retrofit.getWalkingList(tile).enqueue(object:Callback<List<UserCoordinateDogDto>>{
-                            override fun onResponse(
-                                call: Call<List<UserCoordinateDogDto>>,
-                                response: Response<List<UserCoordinateDogDto>>
-                            ) {
-                                if (response.isSuccessful) {
-                                    userCoordinateDogDtoList = response.body()!!
-                                    updateCoordinateMap.clear()
-                                    userCoordinateDogDtoList.forEach { dto ->
-                                        if (!userId.equals(dto.userId)) {//자신의 정보를 제외하고 실행
-                                            if (!visibleOnMapMap.containsKey(dto.dogId)) {//해당 아이디가 지도에 없으면(visibleOnMapMap) 마커 추가
-                                                var latLng: LatLng
-                                                if (!aroundUserMap.containsValue(dto.userId)) {//주인이 중복되지 않는경우
-                                                    latLng = LatLng(
-                                                        dto.latitude,
-                                                        dto.longitude
-                                                    )
-                                                } else {
-                                                    latLng = LatLng(
-                                                        dto.latitude - 0.0001,
-                                                        dto.longitude - 0.0001
-                                                    )
-                                                    duplicateUserDog.add(dto.dogId)//주인이 중복될경우 개id저장
-                                                }
-
-                                                var marker = Marker().apply {
-                                                    position = latLng
-                                                    captionText = dto.dogName
-                                                    icon = setDogImage(dto.dogBreed)//이미지 설정
-                                                    setOnClickListener { o ->
-                                                        Toast.makeText(
-                                                            context,
-                                                            dto.dogName + " / " + dto.dogAge + "살",
-                                                            Toast.LENGTH_SHORT
-                                                        ).show()
-                                                        true
-                                                    }
-                                                }
-                                                CoroutineScope(Dispatchers.Main).launch {
-                                                    marker.map = naverMap
-                                                }
-                                                visibleOnMapMap.put(dto.dogId, marker) //지도에 표시되는 마커를 관리하는 맵에 추가
-                                                updateCoordinateMap.put(dto.dogId, marker) //서버에서 불러온 정보를 저장한 맵에도 추가
-                                                aroundUserMap.put(dto.dogId, dto.userId)//개, 유저 매핑
-
-                                            } else {//지도에 있으면 position 변경
-                                                var latLng: LatLng
-                                                if (!duplicateUserDog.contains(dto.dogId)) {//주인이 중복되지 않는경우
-                                                    latLng = LatLng(
-                                                        dto.latitude,
-                                                        dto.longitude
-                                                    )
-                                                } else {//주인이 중복되는 경우
-                                                    latLng = LatLng(
-                                                        dto.latitude - 0.0001,
-                                                        dto.longitude - 0.0001
-                                                    )
-                                                }
-                                                val marker = visibleOnMapMap.get(dto.dogId)
-                                                marker!!.position = latLng
-                                                updateCoordinateMap.put(dto.dogId, marker) //서버에서 불러온 정보이므로 지도에 표시된 여부와 상관없이 추가해야함(불러온 정보가 모두 추가됨)
-                                            }
-                                        }
-                                    }
-
-                                    //산책 종료한사람 삭제
-                                    visibleOnMapMap.forEach { (key, value)->
-                                        if(!updateCoordinateMap.containsKey(key)) {//불러온 updateCoordinateMap에 visibleOnMapMap의 값이 없을때 -> 산책 종료
-                                            CoroutineScope(Dispatchers.Main).launch {
-                                                value.map = null //지도에서 표시안함
-                                                visibleOnMapMap.remove(key) //지도에 표시되는 마커를 관리하는 맵에서 제거
-                                                duplicateUserDog.remove(key) //중복되는 유저 삭제
-                                                aroundUserMap.remove(key) //개, 유저 매핑에서 삭제
-                                            }
-                                        }
-                                    }
-
-                                    //지도에 표시된 개의 마커의 위치를 기준으로 bounds안에 들어와있는지 확인
-                                    if(isStart && bounds != null){
-                                        visibleOnMapMap.forEach{ markerId->
-                                            val markerPosition = markerId.value.position
-                                            if (bounds.contains(markerPosition)) {//좌표가 영역 안에 포함될경우
-                                                CoroutineScope(Dispatchers.Main).launch {
-                                                    Toast.makeText(context, "개 접근중", Toast.LENGTH_SHORT).show()
-                                                }
-                                                Log.d(TAG, "피해요!!!!!")
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                            override fun onFailure(
-                                call: Call<List<UserCoordinateDogDto>>,
-                                t: Throwable
-                            ) {
-                                Log.d(TAG, "getWalkingList fail", t)
-                            }
-                        })
-                        //1초간 대기
-                        delay(1000L)
-                    }//if
-                }//while
-            }//launch
         }
 
         //산책종료 버튼클릭 리스너
@@ -356,6 +197,192 @@ class MainFragment : Fragment(), OnMapReadyCallback {
         }//listener
 
         return view
+    }
+
+    private fun dbProcess() {
+        //첫 실행 여부 확인
+        var coorUpdate = false
+        databaseCoroutine = CoroutineScope(Dispatchers.IO).launch {
+            while (true) {
+                if (tile.isEmpty()) {
+                    //타일 값 받을때까지
+                    delay(10L)
+                    continue
+                }//if
+
+                if (naverMap != null) {
+                    if (!coorUpdate) {//첫 실행일때는 모든 정보 넣어서 테이블에 추가
+                        retrofit.insert(
+                            userId,
+                            lastLocation.latitude,
+                            lastLocation.longitude,
+                            tile
+                        ).enqueue(object : Callback<Boolean> {
+                            override fun onResponse(
+                                call: Call<Boolean>,
+                                response: Response<Boolean>
+                            ) {
+                                if (response.isSuccessful) {
+                                    if (response.body() == true) {
+                                        Log.d(TAG, "업데이트 성공")
+                                    } else
+                                        Log.d(TAG, "업데이트 실패")
+                                }
+                            }
+
+                            override fun onFailure(call: Call<Boolean>, t: Throwable) {
+                                Log.d(TAG, "전송실패 ", t)
+                            }
+                        })
+                        Log.d(TAG, "tile ${tile}")
+                        coorUpdate = true
+                    } //if
+
+                    else {//첫실행 아닐때
+                        retrofit.update(
+                            userId,
+                            lastLocation.latitude,
+                            lastLocation.longitude,
+                            tile
+                        ).enqueue(object : Callback<Boolean> {
+                            override fun onResponse(
+                                call: Call<Boolean>,
+                                response: Response<Boolean>
+                            ) {
+                                if (response.isSuccessful) {
+                                    if (response.body() == true) {
+                                        Log.d(TAG, "업데이트 성공")
+                                    } else
+                                        Log.d(TAG, "업데이트 실패")
+                                }
+                            }
+
+                            override fun onFailure(call: Call<Boolean>, t: Throwable) {
+                                Log.d(TAG, "전송실패 ", t)
+                            }
+                        })
+                    }//else
+
+                    //다른 사용자들의 위치정보 불러오기
+                    //tile 올려서 해당 사용자들만 받아오게
+                    retrofit.getWalkingList(tile)
+                        .enqueue(object : Callback<List<UserCoordinateDogDto>> {
+                            override fun onResponse(
+                                call: Call<List<UserCoordinateDogDto>>,
+                                response: Response<List<UserCoordinateDogDto>>
+                            ) {
+                                if (response.isSuccessful) {
+                                    userCoordinateDogDtoList = response.body()!!
+                                    updateCoordinateMap.clear()
+                                    userCoordinateDogDtoList.forEach { dto ->
+                                        if (!userId.equals(dto.userId)) {//자신의 정보를 제외하고 실행
+                                            if (!visibleOnMapMap.containsKey(dto.dogId)) {//해당 아이디가 지도에 없으면(visibleOnMapMap) 마커 추가
+                                                var latLng: LatLng
+                                                if (!aroundUserMap.containsValue(dto.userId)) {//주인이 중복되지 않는경우
+                                                    latLng = LatLng(
+                                                        dto.latitude,
+                                                        dto.longitude
+                                                    )
+                                                } else {
+                                                    latLng = LatLng(
+                                                        dto.latitude - 0.0001,
+                                                        dto.longitude - 0.0001
+                                                    )
+                                                    duplicateUserDog.add(dto.dogId)//주인이 중복될경우 개id저장
+                                                }
+
+                                                var marker = Marker().apply {
+                                                    position = latLng
+                                                    captionText = dto.dogName
+                                                    icon = setDogImage(dto.dogBreed)//이미지 설정
+                                                    setOnClickListener { o ->
+                                                        Toast.makeText(
+                                                            context,
+                                                            dto.dogName + " / " + dto.dogAge + "살",
+                                                            Toast.LENGTH_SHORT
+                                                        ).show()
+                                                        true
+                                                    }
+                                                }
+                                                CoroutineScope(Dispatchers.Main).launch {
+                                                    marker.map = naverMap
+                                                }
+                                                visibleOnMapMap.put(
+                                                    dto.dogId,
+                                                    marker
+                                                ) //지도에 표시되는 마커를 관리하는 맵에 추가
+                                                updateCoordinateMap.put(
+                                                    dto.dogId,
+                                                    marker
+                                                ) //서버에서 불러온 정보를 저장한 맵에도 추가
+                                                aroundUserMap.put(dto.dogId, dto.userId)//개, 유저 매핑
+
+                                            } else {//지도에 있으면 position 변경
+                                                var latLng: LatLng
+                                                if (!duplicateUserDog.contains(dto.dogId)) {//주인이 중복되지 않는경우
+                                                    latLng = LatLng(
+                                                        dto.latitude,
+                                                        dto.longitude
+                                                    )
+                                                } else {//주인이 중복되는 경우
+                                                    latLng = LatLng(
+                                                        dto.latitude - 0.0001,
+                                                        dto.longitude - 0.0001
+                                                    )
+                                                }
+                                                val marker = visibleOnMapMap.get(dto.dogId)
+                                                marker!!.position = latLng
+                                                updateCoordinateMap.put(
+                                                    dto.dogId,
+                                                    marker
+                                                ) //서버에서 불러온 정보이므로 지도에 표시된 여부와 상관없이 추가해야함(불러온 정보가 모두 추가됨)
+                                            }
+                                        }
+                                    }
+
+                                    //산책 종료한사람 삭제
+                                    visibleOnMapMap.forEach { (key, value) ->
+                                        if (!updateCoordinateMap.containsKey(key)) {//불러온 updateCoordinateMap에 visibleOnMapMap의 값이 없을때 -> 산책 종료
+                                            CoroutineScope(Dispatchers.Main).launch {
+                                                value.map = null //지도에서 표시안함
+                                                visibleOnMapMap.remove(key) //지도에 표시되는 마커를 관리하는 맵에서 제거
+                                                duplicateUserDog.remove(key) //중복되는 유저 삭제
+                                                aroundUserMap.remove(key) //개, 유저 매핑에서 삭제
+                                            }
+                                        }
+                                    }
+
+                                    //지도에 표시된 개의 마커의 위치를 기준으로 bounds안에 들어와있는지 확인
+                                    if (isStart && bounds != null) {
+                                        visibleOnMapMap.forEach { markerId ->
+                                            val markerPosition = markerId.value.position
+                                            if (bounds.contains(markerPosition)) {//좌표가 영역 안에 포함될경우
+                                                CoroutineScope(Dispatchers.Main).launch {
+                                                    Toast.makeText(
+                                                        context,
+                                                        "개 접근중",
+                                                        Toast.LENGTH_SHORT
+                                                    ).show()
+                                                }
+                                                Log.d(TAG, "피해요!!!!!")
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            override fun onFailure(
+                                call: Call<List<UserCoordinateDogDto>>,
+                                t: Throwable
+                            ) {
+                                Log.d(TAG, "getWalkingList fail", t)
+                            }
+                        })
+                    //1초간 대기
+                    delay(1000L)
+                }//if
+            }//while
+        }//launch
     }
 
     private fun setDogImage(dogBreed: DogBreed): OverlayImage {
