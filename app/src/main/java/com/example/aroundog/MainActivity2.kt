@@ -2,16 +2,24 @@
 
 package com.example.aroundog
 
+import android.Manifest
+import android.app.AlertDialog
+import android.content.DialogInterface
 import android.content.Intent
 import android.content.SharedPreferences
-import androidx.appcompat.app.AppCompatActivity
+import android.net.Uri
 import android.os.Bundle
+import android.provider.Settings
+import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.TextView
 import android.widget.Toast
-import com.example.aroundog.Model.User
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import com.example.aroundog.Service.IntroService
 import com.example.aroundog.dto.UserDto
 import okhttp3.OkHttpClient
@@ -21,10 +29,15 @@ import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import kotlin.system.exitProcess
 
 class MainActivity2 : AppCompatActivity(){
     private var backPressedTime : Long = 0
     private var loadingDialog: LoadingDialog? = null
+    lateinit var userPermission: PermissionSupport
+    lateinit var activityResult: ActivityResultLauncher<Intent>
+    lateinit var permissionSupport: PermissionSupport
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -40,6 +53,23 @@ class MainActivity2 : AppCompatActivity(){
         lateinit var user_info_pref: SharedPreferences
         lateinit var user_info_editor: SharedPreferences.Editor
 
+
+        //permissionSupport 생성
+        permissionSupport = PermissionSupport(this, this)
+
+        //권한 설정 페이지에 갔다와서 실행
+        activityResult =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+                if (!permissionSupport.check()) {//권한 설정 페이지에 갔다와서도 없는 권한 있을때
+                    Toast.makeText(this, "권한이 없어 종료합니다", Toast.LENGTH_SHORT).show()
+                    finish()
+                } else {
+                    //권한 있으면 별거 안함
+                }
+            }
+
+        //권한 체크
+        permissionCheck()
 
         // 회원가입 버튼
         if (login_register != null) {
@@ -180,5 +210,80 @@ class MainActivity2 : AppCompatActivity(){
         // 처음 클릭 메시지
         Toast.makeText(this, "'뒤로' 버튼을 한번 더 누르시면 앱이 종료됩니다.", Toast.LENGTH_SHORT).show()
         backPressedTime = System.currentTimeMillis()
+    }
+
+    // 권한 체크
+    private fun permissionCheck() {
+        //https://hellose7.tistory.com/85
+        //https://debbi.tistory.com/31
+        val permissions = permissionSupport.permissions
+        var requestPermissionLauncher =
+            registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result: MutableMap<String, Boolean> ->
+                val denieds = result.filter { !it.value }.map { it.key }
+                when {
+                    denieds.isNotEmpty() -> {
+                        val map = denieds.groupBy { permission ->
+                            if (shouldShowRequestPermissionRationale(permission))//최소실행시 false, 거부한 권한이 있을 경우 true, 다시 묻지 않기까지 선택한 경우 false
+                                "DENIED"
+                            else
+                                "EXPLAINED"
+                        }
+
+                        //한번 거부했을때
+                        if (map["DENIED"] != null) {
+                            Toast.makeText(this, "권한이 필요합니다.", Toast.LENGTH_SHORT).show()
+                            //재요청
+                            ActivityCompat.requestPermissions(
+                                this,
+                                map["DENIED"]!!.toTypedArray(), 0
+                            )
+                        }
+
+                        //두번 이상 거부해서 팝업창이 안뜰때
+                        if (map["EXPLAINED"] != null) {
+                            val builder = AlertDialog.Builder(this)
+                            builder.setTitle("권한설정")
+                                .setMessage(
+                                    "ArounDog을 사용하시려면 설정에서 권한을 허용해주세요."
+                                )
+                                .setPositiveButton("설정") { dialog, i ->
+                                    val intent = Intent(
+                                        Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                                        Uri.fromParts(
+                                            "package",
+                                            applicationContext.packageName,
+                                            null
+                                        )
+                                    )
+                                    activityResult.launch(intent)
+                                }
+                            builder.setNegativeButton("거부") { dialog, i ->
+                                finish()
+                            }
+                            builder.setCancelable(false)
+                            val dialog = builder.create()
+                            dialog.show()
+                        }
+                    }
+                    else -> {
+                        //모든 권한 다 있을때
+                    }
+                }
+            }
+        requestPermissionLauncher.launch(permissions)
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        when (requestCode) {
+            0 -> {
+                Toast.makeText(this, "권한이 없어 종료합니다.", Toast.LENGTH_SHORT).show()
+                exitProcess(1)
+            }
+        }
     }
 }

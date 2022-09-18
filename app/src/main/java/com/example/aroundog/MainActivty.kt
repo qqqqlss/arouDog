@@ -1,11 +1,11 @@
 package com.example.aroundog
 
-import android.os.Build
+import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import com.example.aroundog.databinding.ActivityMainAfterLoginBinding
-import com.example.aroundog.databinding.ActivityMainBinding
 import com.example.aroundog.fragments.AroundWalkFragment
 import com.example.aroundog.fragments.MainFragment
 import com.example.aroundog.fragments.ProfileFragment
@@ -14,14 +14,12 @@ import com.google.android.material.navigation.NavigationBarView
 class MainActivty : AppCompatActivity() {
     private var TAG: String = "MAINTAG"
     private lateinit var binding: ActivityMainAfterLoginBinding
-    lateinit var userPermission: PermissionSupport
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainAfterLoginBinding.inflate(layoutInflater)
         val view = binding.root
         setContentView(view)
-        permissionCheck()
         setFragment()
 
     }
@@ -83,17 +81,18 @@ class MainActivty : AppCompatActivity() {
 
     }
 
-    // 권한 체크
-    private fun permissionCheck() {
-        // SDK 23버전 이하 버전에서는 Permission이 필요하지 않다.
-        if (Build.VERSION.SDK_INT >= 23) {
-            // 방금 전 만들었던 클래스 객체 생성
-            userPermission = PermissionSupport(this, this)
-            // 권한 체크한 후에 리턴이 false로 들어온다면
-            if (!userPermission.check()) {
-                // 권한 요청을 해줍니다.
-                userPermission.requestPermission()
-            }
-        }
+    override fun onPause() {
+        super.onPause()
+        Log.d(TAG, "onPause ON")
+    }
+
+    override fun onStop() {
+        super.onStop()
+        Log.d(TAG, "onStop ON")
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.d(TAG, "onDestroy ON")
     }
 }

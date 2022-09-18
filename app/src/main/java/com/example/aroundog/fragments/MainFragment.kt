@@ -493,27 +493,7 @@ class MainFragment : Fragment(), OnMapReadyCallback {
         walkDistanceTV.text="0M"
     }
 
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String>,
-        grantResults: IntArray
-    ) {
-        if (locationSource.onRequestPermissionsResult(
-                requestCode, permissions,
-                grantResults
-            )
-        ) {
-            if (!locationSource.isActivated) { // 권한 거부됨
-                naverMap.locationTrackingMode = LocationTrackingMode.None
-                Log.d(TAG, "권한거부")
 
-                return
-            } else {
-
-            }
-        }
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-    }
 
     fun uiSettings() {
         //naverMap.uiSettings.isCompassEnabled=true
