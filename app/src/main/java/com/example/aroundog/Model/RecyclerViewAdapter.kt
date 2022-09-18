@@ -219,7 +219,7 @@ class RecyclerViewAdapter(private val data : ArrayList<RecyclerViewItem?> ): Rec
 
 
         fun setItems(viewItem: RecyclerViewItem){
-            this.textViewUserId.text = viewItem.userId
+            this.textViewUserId.text = viewItem.userId + "님의 산책 기록"
             this.textViewWalkId.text = viewItem.id.toString()
             this.imageView.setImageBitmap(viewItem.img)
             this.textViewGood.text = viewItem.good.toString()
