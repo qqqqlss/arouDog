@@ -4,16 +4,19 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.aroundog.databinding.ActivityMainAfterLoginBinding
 import com.example.aroundog.fragments.AroundWalkFragment
 import com.example.aroundog.fragments.MainFragment
 import com.example.aroundog.fragments.ProfileFragment
 import com.google.android.material.navigation.NavigationBarView
+import kotlin.system.exitProcess
 
 class MainActivty : AppCompatActivity() {
     private var TAG: String = "MAINTAG"
     private lateinit var binding: ActivityMainAfterLoginBinding
+    private var backPressedTime : Long = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -94,5 +97,21 @@ class MainActivty : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         Log.d(TAG, "onDestroy ON")
+    }
+    override fun onBackPressed() {
+        if(supportFragmentManager.backStackEntryCount == 0){
+            // 2초내 다시 클릭하면 앱 종료
+            if (System.currentTimeMillis() - backPressedTime < 2000) {
+                super.onBackPressed()
+                exitProcess(1)
+            } else{
+                // 처음 클릭 메시지
+                Toast.makeText(this, "'뒤로' 버튼을 한번 더 누르시면 앱이 종료됩니다.", Toast.LENGTH_SHORT).show()
+                backPressedTime = System.currentTimeMillis()
+                return
+            }
+        }
+        super.onBackPressed()
+
     }
 }
