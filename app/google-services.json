@@ -1,33 +1,42 @@
 {
   "project_info": {
-    "project_number": "240371189227",
-    "project_id": "aroundog-14dd7",
-    "storage_bucket": "aroundog-14dd7.appspot.com"
+    "project_number": "971972751184",
+    "firebase_url": "https://aroundog-5e824-default-rtdb.firebaseio.com",
+    "project_id": "aroundog-5e824",
+    "storage_bucket": "aroundog-5e824.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:240371189227:android:4ec131c385709f902a05ae",
+        "mobilesdk_app_id": "1:971972751184:android:d77b03d3a8bc7b8eb28655",
         "android_client_info": {
           "package_name": "com.example.aroundog"
         }
       },
       "oauth_client": [
         {
-          "client_id": "240371189227-p9ak92d05dgdgkr49focmsllua1fpt5d.apps.googleusercontent.com",
+          "client_id": "971972751184-egkv3cnuhe99fkfqfhhd75ja7k9blmbf.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.aroundog",
+            "certificate_hash": "d7572a8ab62d6aa4d9c268353398564ace98be56"
+          }
+        },
+        {
+          "client_id": "971972751184-o644gmmp0a12l4l7ms34pi5jk0i6oqai.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyCBp1D5hGeuvH4Zl-YVpgZnVhntY2mWOnw"
+          "current_key": "AIzaSyAl1aAbjpyTs83SnINZv0zXSS9ldyiaUCM"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "240371189227-p9ak92d05dgdgkr49focmsllua1fpt5d.apps.googleusercontent.com",
+              "client_id": "971972751184-o644gmmp0a12l4l7ms34pi5jk0i6oqai.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
