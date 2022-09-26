@@ -19,6 +19,7 @@ class PermissionSupport(var activity:Activity, var context:Context) {
         Manifest.permission.CAMERA,
         Manifest.permission.READ_EXTERNAL_STORAGE,
         Manifest.permission.WRITE_EXTERNAL_STORAGE,
+        Manifest.permission.FOREGROUND_SERVICE,
 //        Manifest.permission.READ_LOGS //있으면 실행 안됨
     )
 
@@ -41,5 +42,11 @@ class PermissionSupport(var activity:Activity, var context:Context) {
             return false
         }
         return true
+    }
+    companion object{
+        fun hasLocationPermissions(context: Context): Boolean {
+            return (ContextCompat.checkSelfPermission(context,android.Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                    && ContextCompat.checkSelfPermission(context,android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
+        }
     }
 }

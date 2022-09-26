@@ -1,8 +1,11 @@
 package com.example.aroundog.fragments
 
+import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.graphics.Color
 import android.location.Location
+import android.os.Build
 import android.os.Bundle
 import android.os.VibratorManager
 import android.util.Log
@@ -19,11 +22,15 @@ import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResult
 import com.example.aroundog.BuildConfig
+import com.example.aroundog.MainActivty
 import com.example.aroundog.Model.DogBreed
 import com.example.aroundog.R
 import com.example.aroundog.SerialLatLng
 import com.example.aroundog.Service.CoordinateService
+import com.example.aroundog.Service.NaverMapService
+import com.example.aroundog.Service.Polyline
 import com.example.aroundog.dto.UserCoordinateDogDto
+import com.example.aroundog.utils.*
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.naver.maps.geometry.LatLng
@@ -45,15 +52,15 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
+import kotlin.math.round
 
 
-class MainFragment : Fragment(), OnMapReadyCallback {
+class MainFragment : Fragment(){
 
     private lateinit var locationSource: FusedLocationSource
     private lateinit var naverMap: NaverMap
     private var pathList: ArrayList<LatLng> = ArrayList<LatLng>()
     private var pathOverlay: PathOverlay = PathOverlay()
-    private var isStart: Boolean = false
     private var isFirst: Boolean = true
     lateinit var overlayImage: OverlayImage
     lateinit var compassImage: OverlayImage
@@ -92,42 +99,183 @@ class MainFragment : Fragment(), OnMapReadyCallback {
     lateinit var bounds:LatLngBounds
     var width:Double = 0.0
 
+    lateinit var mainActivty: MainActivty
+    var isTracking = false
+    var pathPoints = mutableListOf<Polyline>()
+    lateinit var locationOverlay:LocationOverlay
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        var mapView = parentFragmentManager.findFragmentById(R.id.map) as MapFragment?
-            ?: MapFragment.newInstance().also {
-                parentFragmentManager.beginTransaction().add(R.id.map, it, "map").commit()
-            }
-        mapView.getMapAsync(this)
 
-        locationSource =
-            FusedLocationSource(this, LOCATION_PERMISSION_REQUEST_CODE)
+        overlayImage = OverlayImage.fromAsset("logo.png") //위치 오버레이 이미지 초기화
 
-        locationSource.isCompassEnabled = true // 나침반 여부 지정
+        pathOverlaySettings() //경로선 오버레이 초기화
 
-        overlayImage = OverlayImage.fromAsset("logo.png")
+        initMapView() //지도생성, 초기화
 
-        pathOverlaySettings()
+        initRetrofit()//retrofit초기화
 
-        var user_info_pref =
-            requireActivity().getSharedPreferences("userInfo", AppCompatActivity.MODE_PRIVATE)
-        userId = user_info_pref.getString("id", "error").toString()
+        initDogImage()//강아지 이미지 초기화
 
         //환경설정에서 알람을 표시할 영역을 설정하는 변수, 저장 필요, 일단 임의값으로 대체
         //소수점 다섯째 자리가 약 1m정도씩 차이남
         width = 0.001 //100m
 
-        //retrofit
+        //저장된 id 정보 가져오기
+        var user_info_pref =
+            requireActivity().getSharedPreferences("userInfo", AppCompatActivity.MODE_PRIVATE)
+        userId = user_info_pref.getString("id", "error").toString()
+    }
+
+    init {
+        // 위치 추적 여부 관찰하여 updateTracking 호출
+        //레이아웃 변경
+        NaverMapService.isTracking.observe(this){
+            //updateTracking(it)
+        }
+        // 경로 변경 관찰
+        NaverMapService.pathPoints.observe(this) {
+            pathPoints = it
+            addLatestPolyline()
+        }
+    }
+
+    /**
+     * 지도 생성, 초기화
+     */
+    private fun initMapView() {
+        locationSource =
+            FusedLocationSource(this, LOCATION_PERMISSION_REQUEST_CODE)
+        locationSource.isCompassEnabled = true // 나침반 여부 지정
+        
+        var mapView = parentFragmentManager.findFragmentById(R.id.map) as MapFragment?
+            ?: MapFragment.newInstance().also {
+                parentFragmentManager.beginTransaction().add(R.id.map, it, "map").commit()
+            }
+
+        mapView.getMapAsync {
+            naverMap = it
+            naverMap.locationSource = locationSource
+            naverMap.locationTrackingMode = LocationTrackingMode.NoFollow
+
+            uiSettings()//지도 ui세팅
+            locationOverlay = setlocationOverlay()//위치 오버레이 설정
+
+            //지도 옵션 변경 리스너
+            naverMap.addOnOptionChangeListener {
+
+                val mode = naverMap.locationTrackingMode
+                Log.d(TAG, "option change : $mode")
+
+                //None이면 지도에서 마커 없어짐
+                if (mode == LocationTrackingMode.None) {
+                    naverMap.locationTrackingMode = LocationTrackingMode.NoFollow
+                }
+
+                //face -> NoFollow면 카메라 현재 위치에서 정북방향으로 회전되게
+                if (mode == LocationTrackingMode.NoFollow) {
+                    Log.d(TAG, "mode NoFollow")
+                    if (this::lastLocation.isInitialized) {
+                        if(isTracking){
+                            naverMap.cameraPosition =
+                                CameraPosition(pathPoints.last().last(), 16.0, 0.0, 0.0)
+                        }else{
+                            naverMap.cameraPosition =
+                                CameraPosition(LatLng(lastLocation), 16.0, 0.0, 0.0)
+                        }
+
+                    }
+                }
+            }
+
+            //위치 업데이트 리스너
+            naverMap.addOnLocationChangeListener { location ->
+                Log.d(TAG, "location change in MainFragment : $location")
+
+                //NoFollow모드에서는 지도 회전 안되게 변경
+                if (naverMap.locationTrackingMode == LocationTrackingMode.NoFollow) {
+                    locationOverlay.bearing = 0f
+                }
+
+                //지도 첫 로딩시
+                if (isFirst) {
+                    naverMap.moveCamera(
+                        CameraUpdate.scrollAndZoomTo(
+                            LatLng(
+                                location
+                            ), 16.0
+                        )
+                    )
+                    isFirst = false
+                    Log.d(TAG, "첫번째 위치 업데이트")
+                }
+
+                //산책중일땐 pathPoints의 마지막 위치로 위치 오버레이를 지정함
+                if(isTracking){
+                    locationOverlay.position = pathPoints.last().last()
+                }
+                lastLocation = location
+            }
+        }//getMapAsync
+    }//initMapView
+
+    /**
+     * Retrofit초기화
+     */
+    private fun initRetrofit() {
         var gsonInstance: Gson = GsonBuilder().setLenient().create()
         retrofit = Retrofit.Builder()
             .baseUrl(BuildConfig.SERVER)
             .addConverterFactory(GsonConverterFactory.create(gsonInstance))
             .build()
             .create(CoordinateService::class.java)
+    }
 
+    /**
+     * 강아지 이미지 초기화
+     */
+    private fun initDogImage() {
         dog1 = OverlayImage.fromResource(R.drawable.dog1)
         dog2 = OverlayImage.fromResource(R.drawable.dog2)
         dog3 = OverlayImage.fromResource(R.drawable.dog3)
+    }
+
+    // 경로 표시 (마지막 전, 마지막 경로 연결)
+    private fun addLatestPolyline(){
+        if(pathPoints.isNotEmpty() && pathPoints.last().size > 2){
+            val preLastLatLng = pathPoints.last()[pathPoints.last().size - 2] // 마지막 전 경로
+            val lastLatLng = pathPoints.last().last() // 마지막 경로
+
+            walkDistance += preLastLatLng.distanceTo(lastLatLng)//마지막 위치와 현재 위치의 거리차이 저장
+            walkDistanceTV.text = walkDistance.toInt().toString() + " M"
+            Log.d(TAG, "walkDistance : $walkDistance")
+
+            //------------------------일시정지 이전거는 출력 안되는 문제 발생할지도?--
+            pathOverlay.coords = pathPoints.last()
+            pathOverlay.map=naverMap
+            locationOverlay.position = lastLatLng//위치 오버레이 위치 지정
+
+            bounds = setBounds(lastLatLng, width)//현재 내 위치 기준 영역 저장
+        }
+    }
+
+    private fun updateTracking(isTracking: Boolean) {
+        this.isTracking = isTracking
+        if (!isTracking) {
+            statusLayout.visibility = View.VISIBLE
+            startWalkButton.visibility = View.GONE
+//            imgPause.visibility = View.INVISIBLE
+//            imgStart.visibility = View.VISIBLE
+//            imgStop.visibility = View.VISIBLE
+        }
+        else if (isTracking) {
+            statusLayout.visibility = View.GONE
+            startWalkButton.visibility = View.VISIBLE
+
+//            imgPause.visibility = View.VISIBLE
+//            imgStart.visibility = View.GONE
+//            imgStop.visibility = View.GONE
+        }
     }
 
     override fun onCreateView(//인터페이스를 그리기위해 호출
@@ -139,23 +287,24 @@ class MainFragment : Fragment(), OnMapReadyCallback {
 
         //산책시작 버튼 클릭 리스너
         startWalkButton.setOnClickListener {
-            Log.d(TAG, "산책시작 버튼 클릭")
-
             //최신 위치가 저장되었는지 확인
             if (this::lastLocation.isInitialized) {
+                Log.d(TAG, "산책시작 버튼 클릭")
                 startWalk()
                 dbProcess()
                 createWebView()//웹뷰 생성, tile 값 지정
-            } else{
+                sendCommandToService(ACTION_SHOW_RUNNING_ACTIVITY)
+                sendCommandToService(ACTION_START_OR_RESUME_SERVICE)
+            } else {
                 Toast.makeText(context, "로딩중입니다. 잠시만 기다려주세요", Toast.LENGTH_SHORT).show()
             }
-
-
         }
 
         //산책종료 버튼클릭 리스너
         pauseButton.setOnClickListener {
-            isStart = false
+            stopRun()
+            endWalk()
+            Log.d(TAG, "end walk : $pathPoints")
 
             //Bundle설정
             setBundle()
@@ -163,9 +312,6 @@ class MainFragment : Fragment(), OnMapReadyCallback {
                 .add(R.id.main_container, EndWalkFragment(), "endWalk").addToBackStack(null)
                 .commit()
 
-            //산책 종료 메서드
-            endWalk()
-            
             //insert/update 코루틴 종료
             databaseCoroutine.cancel()
 
@@ -194,9 +340,31 @@ class MainFragment : Fragment(), OnMapReadyCallback {
                     Log.d(TAG, "endWalking fail", t)
                 }
             })
+            
+            //-------------------카메라 중심을 마지막 위치로 바꾸는 코드 추가할 것-------------
+            
         }//listener
-
         return view
+    }
+
+    private fun stopRun() {
+        sendCommandToService(ACTION_STOP_SERVICE)
+    }
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        mainActivty = context as MainActivty
+    }
+
+    private fun sendCommandToService(action : String) {
+        var intent = Intent(context, NaverMapService::class.java)
+        intent.action = action
+        if (Build.VERSION.SDK_INT >= 26) {
+            context!!.startForegroundService(intent);
+        }
+        else {
+            context!!.startService(intent);
+        }
     }
 
     private fun dbProcess() {
@@ -353,7 +521,7 @@ class MainFragment : Fragment(), OnMapReadyCallback {
                                     }
 
                                     //지도에 표시된 개의 마커의 위치를 기준으로 bounds안에 들어와있는지 확인
-                                    if (isStart && bounds != null) {
+                                    if (isTracking && bounds != null) {
                                         visibleOnMapMap.forEach { markerId ->
                                             val markerPosition = markerId.value.position
                                             if (bounds.contains(markerPosition)) {//좌표가 영역 안에 포함될경우
@@ -457,8 +625,6 @@ class MainFragment : Fragment(), OnMapReadyCallback {
     }
 
     fun startWalk() {
-        isStart = true
-        pathList.add(LatLng(lastLocation))//시작위치 지정
         startTime = LocalDateTime.now()//시작시간 지정
         statusLayout.visibility = View.VISIBLE
         startWalkButton.visibility = View.GONE
@@ -496,6 +662,9 @@ class MainFragment : Fragment(), OnMapReadyCallback {
         walkTimeTV.text = strTime
     }
 
+    /**
+     * 경로선 오버레이 초기화
+     */
     fun pathOverlaySettings() {
         pathOverlay.outlineWidth = 0//테두리 없음
         pathOverlay.width = 20//경로선 폭
@@ -528,6 +697,9 @@ class MainFragment : Fragment(), OnMapReadyCallback {
         naverMap.uiSettings.isZoomControlEnabled = false//줌 버튼 여부
     }
 
+    /**
+     * 위치 오버레이 설정
+     */
     fun setlocationOverlay(): LocationOverlay {
         var locationOverlay: LocationOverlay = naverMap.locationOverlay
         locationOverlay.icon = overlayImage
@@ -537,73 +709,9 @@ class MainFragment : Fragment(), OnMapReadyCallback {
         return locationOverlay
     }
 
-    override fun onMapReady(p0: NaverMap) {
-        this.naverMap = p0
-        naverMap.locationSource = locationSource
-        naverMap.locationTrackingMode = LocationTrackingMode.NoFollow
-
-        uiSettings()//지도 ui세팅
-
-        var locationOverlay = setlocationOverlay()
-
-        //옵션 변경될때의 리스너
-        naverMap.addOnOptionChangeListener {
-            val mode = naverMap.locationTrackingMode
-            if (mode == LocationTrackingMode.None) {
-                naverMap.locationTrackingMode = LocationTrackingMode.NoFollow
-            }
-            if (mode == LocationTrackingMode.NoFollow) {
-                Log.d(TAG, "mode NoFollow")
-                naverMap.cameraPosition = CameraPosition(LatLng(lastLocation), 16.0, 0.0, 0.0)
-            }
-        }
-        //위치 업데이트될때의 리스너
-        //bearing업데이트일때도 여기로 들어옴
-        naverMap.addOnLocationChangeListener { location ->
-            if (naverMap.locationTrackingMode == LocationTrackingMode.NoFollow) {
-                locationOverlay.bearing = 0f
-            }
-
-            //지도 첫 로딩시
-            if (isFirst) {
-                naverMap.moveCamera(
-                    CameraUpdate.scrollAndZoomTo(
-                        LatLng(
-                            location.latitude,
-                            location.longitude
-                        ), 16.0
-                    )
-                )
-                isFirst = false
-                Log.d(TAG, "첫번째 위치 업데이트")
-                lastLocation = location
-            }
-
-            if (location == lastLocation) {//각도업데이트일때
-
-            } else {//위치업데이트일때
-                if (isStart) {//산책을 시작했다면
-                    //pathOverlay.map=null
-                    var updateLocation: LatLng = LatLng(location)
-                    walkDistance += updateLocation.distanceTo(pathList.last())//마지막 위치와 현재 위치의 거리차이 저장
-                    walkDistanceTV.text = walkDistance.toInt().toString() + " M"
-                    pathList.add(updateLocation)
-                    pathOverlay.coords = pathList
-                    pathOverlay.map = naverMap
-
-                } else {
-                    //textView.text = "이동거리 0M"
-                }
-                Log.d(TAG, "위치업데이트")
-                lastLocation = location
-            }
-            //현재 내 위치 기준 영역 저장
-            bounds = setBounds(location, width)
-        }
-    }
-    fun setBounds(location: Location, width: Double) :LatLngBounds {
-        var southWest = LatLng(location.latitude - width, location.longitude - width)
-        var northEast = LatLng(location.latitude + width, location.longitude + width)
+    fun setBounds(latLng: LatLng, width: Double) :LatLngBounds {
+        var southWest = LatLng(latLng.latitude - width, latLng.longitude - width)
+        var northEast = LatLng(latLng.latitude + width, latLng.longitude + width)
         return LatLngBounds(southWest, northEast)
     }
 }
