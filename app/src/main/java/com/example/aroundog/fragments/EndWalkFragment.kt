@@ -11,6 +11,7 @@ import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.setFragmentResultListener
 import com.example.aroundog.BuildConfig
@@ -120,14 +121,27 @@ class EndWalkFragment : Fragment(){
                 CameraUpdate.fitBounds(bounds, 100)//오버레이가 다 보일수 있게 카메라 이동시키는 CameraUpdate 생성
 
             naverMap.moveCamera(cameraUpdate)//카메라 이동
+        }
+    }
 
-            exitButton.setOnClickListener {
-                naverMap.takeSnapshot(false) { img ->
-                    sendToDB(img)
-                    requireActivity().supportFragmentManager.beginTransaction().remove(this)
-                        .commit()
-                }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        Log.d(TAG, "onViewCreated")
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                takeSnapshotAndSendDB()
             }
+        })
+    }
+
+    /**
+     * 모든 경로를 포함하는 스냅샷 생성, db에 산책 정보 전송
+     */
+    private fun takeSnapshotAndSendDB() {
+        naverMap.takeSnapshot(false) { img ->
+            sendToDB(img)
+            requireActivity().supportFragmentManager.beginTransaction()
+                .remove(this@EndWalkFragment)
+                .commit()
         }
     }
 
@@ -147,6 +161,10 @@ class EndWalkFragment : Fragment(){
 
         var view:ViewGroup = inflater.inflate(R.layout.fragment_end_walk, container,false) as ViewGroup
         exitButton = view.findViewById<ImageButton>(R.id.exitButton)
+
+        exitButton.setOnClickListener {
+            takeSnapshotAndSendDB()
+        }
 
         hideBottomNavigation(true)
 
