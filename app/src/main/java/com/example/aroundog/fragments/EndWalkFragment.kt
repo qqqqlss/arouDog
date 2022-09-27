@@ -15,7 +15,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.setFragmentResultListener
 import com.example.aroundog.BuildConfig
 import com.example.aroundog.R
-import com.example.aroundog.SerialLatLng
+import com.example.aroundog.Service.Polyline
 import com.example.aroundog.Service.WalkService
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.gson.Gson
@@ -26,7 +26,11 @@ import com.naver.maps.map.CameraUpdate
 import com.naver.maps.map.MapFragment
 import com.naver.maps.map.NaverMap
 import com.naver.maps.map.OnMapReadyCallback
-import com.naver.maps.map.overlay.PathOverlay
+import com.naver.maps.map.overlay.MultipartPathOverlay
+import com.naver.maps.map.overlay.MultipartPathOverlay.ColorPart
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import okhttp3.MediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
@@ -46,11 +50,9 @@ import kotlin.collections.ArrayList
 import kotlin.concurrent.thread
 
 
-class EndWalkFragment : Fragment(), OnMapReadyCallback {
+class EndWalkFragment : Fragment(){
     private val TAG = "ENDWALKFRAGMENT"
-    lateinit var pathList:ArrayList<LatLng>
     lateinit var mapFragment:MapFragment
-    lateinit var gsonInstance: Gson
     lateinit var retrofit:Retrofit
     lateinit var walkRetrofit:WalkService
     val gson:Gson = Gson()
@@ -60,32 +62,78 @@ class EndWalkFragment : Fragment(), OnMapReadyCallback {
     lateinit var time:String
     lateinit var walkDistance:String
     lateinit var startTime:LocalDateTime
+    lateinit var pathPoints:MutableList<Polyline>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        mapFragment = parentFragmentManager.findFragmentById(R.id.endWalk_container) as MapFragment?
-            ?: MapFragment.newInstance().also {
-                parentFragmentManager.beginTransaction().add(R.id.endWalk_container, it).commit()
-            }
+        
+        initMapView()//지도생성, 초기화
 
-        mapFragment.getMapAsync(this)
+        initRetrofit()//retrofit 초기화
 
-        gsonInstance = GsonBuilder().setLenient().create()
+        //저장된 id 정보 가져오기
+        var user_info_pref = requireActivity().getSharedPreferences("userInfo", AppCompatActivity.MODE_PRIVATE)
+        userId = user_info_pref.getString("id","error").toString()
 
+    }
 
+    /**
+     * retrofit초기화
+     */
+    private fun initRetrofit() {
+        var gsonInstance = GsonBuilder().setLenient().create()
         retrofit = Retrofit.Builder()
             .baseUrl(BuildConfig.SERVER)
             .addConverterFactory(GsonConverterFactory.create(gsonInstance))
             .build()
         walkRetrofit = retrofit.create(WalkService::class.java)
+    }
 
+    /**
+     * 지도생성, 초기화
+     */
+    private fun initMapView() {
+        mapFragment = parentFragmentManager.findFragmentById(R.id.endWalk_container) as MapFragment?
+            ?: MapFragment.newInstance().also {
+                parentFragmentManager.beginTransaction().add(R.id.endWalk_container, it).commit()
+            }
 
-        var user_info_pref = requireActivity().getSharedPreferences("userInfo", AppCompatActivity.MODE_PRIVATE)
-        userId = user_info_pref.getString("id","error").toString()
+        mapFragment.getMapAsync { map ->
+            this.naverMap = map
+            var multipartPath = MultipartPathOverlay()
+            val colorList = ArrayList<ColorPart>()
+            val colorPart = ColorPart(
+                Color.RED,   // 지나갈 경로선의 선 색상을 빨간색으로 지정
+                Color.WHITE, // 지나갈 경로선의 테두리 색상을 흰색으로 지정
+                Color.GRAY,  // 지나온 경로선의 선 색상을 회색으로 지정
+                Color.LTGRAY // 지나온 경로선의 테두리 색상을 밝은 회색으로 지정
+            )
+            for (i in 0 until pathPoints.size step 1) {
+                colorList.add(colorPart)
+            }
+            multipartPath.coordParts = pathPoints
+            multipartPath.colorParts = colorList
+            multipartPath.map = naverMap
+
+            var bounds: LatLngBounds = multipartPath.bounds//그려진 오버레이의 영역 리턴
+            var cameraUpdate: CameraUpdate =
+                CameraUpdate.fitBounds(bounds, 100)//오버레이가 다 보일수 있게 카메라 이동시키는 CameraUpdate 생성
+
+            naverMap.moveCamera(cameraUpdate)//카메라 이동
+
+            exitButton.setOnClickListener {
+                naverMap.takeSnapshot(false) { img ->
+                    sendToDB(img)
+                    requireActivity().supportFragmentManager.beginTransaction().remove(this)
+                        .commit()
+                }
+            }
+        }
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
+        Log.d(TAG, "onDestroyView")
         hideBottomNavigation(false)
         requireActivity().supportFragmentManager.beginTransaction().remove(this).commit()//현재 프래그먼트 제거
         parentFragmentManager.beginTransaction().remove(mapFragment).commit()//현재 프래그먼트의 지도 프래그먼트 제거
@@ -106,47 +154,27 @@ class EndWalkFragment : Fragment(), OnMapReadyCallback {
         var walkDistance_end:TextView = view.findViewById(R.id.walkDistanceTV_end)
         
         setFragmentResultListener("walkEnd"){ key, bundle ->
-            var serialLatLngList = bundle.getSerializable("arraylist") as ArrayList<SerialLatLng>
+            pathPoints = bundle.getSerializable("pathPoints") as MutableList<Polyline>
             time = bundle.getSerializable("time") as String
             startTime = bundle.getSerializable("startTime") as LocalDateTime
             walkDistance = round((bundle.getSerializable("walkDistance") as Double)).toString()
-            pathList = SerialoLatLng(serialLatLngList)//ArrayList<SerialLatLng>을 ArrayList<LatLng>으로 변경
-            timeTV.text="산책시간\n"+time
+            timeTV.text = "산책시간\n" + time
             walkDistance_end.text = "이동거리\n" + walkDistance + "m"
+
+            //pathOverlay는 2개 미만이거나 null인 원소 있으면 예외 발생
+            for (polyline in pathPoints) {
+                if(polyline.size < 2){
+                    Toast.makeText(context, "너무 짧아 저장되지 않았습니다.", Toast.LENGTH_SHORT).show()
+                    requireActivity().supportFragmentManager.beginTransaction().remove(this).commit()
+                }
+            }
         }
         return view
     }
 
-    override fun onMapReady(naverMap: NaverMap) {
-        this.naverMap = naverMap
-        var pathOverlay:PathOverlay = PathOverlay()
-        //pathList가 1일 경우 에러
-        if(pathList.size < 2){
-            pathList.add(pathList[0])
-        }
-        pathOverlay.coords=pathList
-        pathOverlay.outlineWidth=0//테두리 없음
-        pathOverlay.width=20//경로선 폭
-        pathOverlay.passedColor = Color.RED//지나온 경로선
-        pathOverlay.color= Color.GREEN//경로선 색상
-        pathOverlay.map=naverMap
-
-        var bounds:LatLngBounds = pathOverlay.bounds//그려진 오버레이의 영역 리턴
-        var cameraUpdate:CameraUpdate = CameraUpdate.fitBounds(bounds,100)//오버레이가 다 보일수 있게 카메라 이동시키는 CameraUpdate 생성
-
-        naverMap.moveCamera(cameraUpdate)//카메라 이동
-
-        exitButton.setOnClickListener{
-
-            naverMap.takeSnapshot(false){
-                sendToDB(it)
-                Log.d(TAG, "실행됨")
-                requireActivity().supportFragmentManager.beginTransaction().remove(this).commit()
-            }
-
-        }
-    }
-
+    /**
+     * 산책 정보를 db에 전송
+     */
     fun sendToDB(bitmap: Bitmap){
         thread(start = true){
             if(userId == "error"){
@@ -159,8 +187,8 @@ class EndWalkFragment : Fragment(), OnMapReadyCallback {
             val startTimeFormat = startTime.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"))
 
             var file: File = getImage(endTimeFormat, bitmap) //이미지 생성
-            var params = getParams(startTimeFormat, endTimeFormat) //파라미터 설정
             var image: MultipartBody.Part = getParamImage(file) //이미지 설정
+            var params = setParams(startTimeFormat, endTimeFormat) //파라미터 설정
 
             walkRetrofit.addWalk(userId, params, image).enqueue(object:Callback<Void>{
                 override fun onResponse(call: Call<Void>, response: Response<Void>) {
@@ -170,7 +198,6 @@ class EndWalkFragment : Fragment(), OnMapReadyCallback {
                         Log.d(TAG, "실패 ")
                     }
                 }
-
                 override fun onFailure(call: Call<Void>, t: Throwable) {
                     Log.d(TAG, "전송 실패 ${t.toString()}")
                 }
@@ -179,6 +206,9 @@ class EndWalkFragment : Fragment(), OnMapReadyCallback {
 
     }
 
+    /**
+     * 이미지 생성
+     */
     private fun getImage(endTimeFormat: String, bitmap: Bitmap): File {
         val fileName = endTimeFormat + "#" + userId + ".jpg"
         Log.d(TAG, "fileName : $fileName")
@@ -201,6 +231,9 @@ class EndWalkFragment : Fragment(), OnMapReadyCallback {
         return file
     }
 
+    /**
+     * 이미지를 multipart/form-data 파라미터 형식으로 변경
+     */
     private fun getParamImage(file: File): MultipartBody.Part {
         var requestFile: RequestBody =
             RequestBody.create(MediaType.parse("multipart/form-data"), file)
@@ -209,21 +242,21 @@ class EndWalkFragment : Fragment(), OnMapReadyCallback {
         return image
     }
 
-    private fun getParams(
+    /**
+     * 파라미터 설정
+     */
+    private fun setParams(
         startTimeFormat: String?,
         endTimeFormat: String?
     ): HashMap<String, RequestBody> {
 
-        val firstLatLng: LatLng = pathList.get(0)
-        val lastLatLng: LatLng = pathList.get(pathList.size-1)
-        val historyCenter:String = "{\"latitude\":" + (firstLatLng.latitude + lastLatLng.latitude)/2 + ",\"longitude\":" + (firstLatLng.longitude + lastLatLng.longitude)/2 + "}"
+        var historyCenter = calCenterLatLng()//좌표들 중심좌표 계산
 
-
-        var history: String = gson.toJson(pathList)
+        var history: String = gson.toJson(pathPoints)
         var course: RequestBody =
             RequestBody.create(MediaType.parse("multipart/form-data"), history)
         var courseCenter: RequestBody =
-            RequestBody.create(MediaType.parse("multipart/form-data"), historyCenter)
+            RequestBody.create(MediaType.parse("multipart/form-data"), historyCenter.toString())
         var startTime: RequestBody =
             RequestBody.create(MediaType.parse("multipart/form-data"), startTimeFormat)
         var endTime: RequestBody =
@@ -237,14 +270,35 @@ class EndWalkFragment : Fragment(), OnMapReadyCallback {
         return params
     }
 
-    fun SerialoLatLng(list:ArrayList<SerialLatLng>):ArrayList<LatLng>{
-        var temp = ArrayList<LatLng>()
-        val iterator = list.iterator()
-        while(iterator.hasNext()){
-            temp.add(iterator.next().latLng)
+    /**
+     * 좌표들의 중심좌표 계산
+     */
+    private fun calCenterLatLng(): LatLng {
+        var centerList = ArrayList<LatLng>()
+        for (pathPoint in pathPoints) {
+            var firstLatLng = pathPoint.first()
+            var lastLatLng = pathPoint.last()
+            var center = LatLng(
+                (firstLatLng.latitude + lastLatLng.latitude) / 2,
+                (firstLatLng.longitude + lastLatLng.longitude) / 2
+            )
+            centerList.add(center)
         }
-        return temp
+
+        var centerLatitude = 0.0
+        var centerLongitude = 0.0
+        for (latLng in centerList) {
+            centerLatitude += latLng.latitude
+            centerLongitude += latLng.longitude
+        }
+        var historyCenter =
+            LatLng(centerLatitude / centerList.size, centerLongitude / centerList.size)
+        return historyCenter
     }
+
+    /**
+     * 네비게이션바 VISIBLE/GONE 처리
+     */
     fun hideBottomNavigation(set:Boolean){
         var bottomNavigationView:BottomNavigationView = activity?.findViewById(R.id.bottom_nav) as BottomNavigationView
         if(set)

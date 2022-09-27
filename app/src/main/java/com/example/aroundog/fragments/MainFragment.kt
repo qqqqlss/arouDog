@@ -1,13 +1,11 @@
 package com.example.aroundog.fragments
 
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.location.Location
 import android.os.Build
 import android.os.Bundle
-import android.os.VibratorManager
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -17,15 +15,12 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResult
 import com.example.aroundog.BuildConfig
 import com.example.aroundog.MainActivty
 import com.example.aroundog.Model.DogBreed
 import com.example.aroundog.R
-import com.example.aroundog.SerialLatLng
 import com.example.aroundog.Service.CoordinateService
 import com.example.aroundog.Service.NaverMapService
 import com.example.aroundog.Service.Polyline
@@ -52,7 +47,6 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
-import kotlin.math.round
 
 
 class MainFragment : Fragment(){
@@ -303,11 +297,10 @@ class MainFragment : Fragment(){
         //산책종료 버튼클릭 리스너
         pauseButton.setOnClickListener {
             stopRun()
+            setBundle()//Bundle설정
             endWalk()
             Log.d(TAG, "end walk : $pathPoints")
 
-            //Bundle설정
-            setBundle()
             parentFragmentManager.beginTransaction()
                 .add(R.id.main_container, EndWalkFragment(), "endWalk").addToBackStack(null)
                 .commit()
@@ -581,7 +574,7 @@ class MainFragment : Fragment(){
 
     private fun setBundle() {
         var bundle: Bundle = Bundle()
-        bundle.putSerializable("arraylist", LatLngToSerial())
+        bundle.putSerializable("pathPoints", pathPoints as java.io.Serializable)
         bundle.putSerializable("walkDistance", walkDistance)
         bundle.putSerializable("time", strTime)
         bundle.putSerializable("startTime", startTime)
@@ -608,16 +601,6 @@ class MainFragment : Fragment(){
         webView.clearHistory()
         webView.settings.cacheMode = WebSettings.LOAD_NO_CACHE
         webView.loadUrl(url)
-    }
-
-    fun LatLngToSerial(): ArrayList<SerialLatLng> {
-        var tempList = ArrayList<SerialLatLng>()
-        var iterator = pathList.iterator()
-        while (iterator.hasNext()) {
-            var temp = SerialLatLng(iterator.next())
-            tempList.add(temp)
-        }
-        return tempList
     }
 
     companion object {
