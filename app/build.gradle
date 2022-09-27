@@ -107,4 +107,7 @@ dependencies {
 
     //디슈거링
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.1.5'
+
+    //lifecycle service
+    implementation "androidx.lifecycle:lifecycle-service:2.5.1"
 }
