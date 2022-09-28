@@ -1,11 +1,11 @@
 package com.example.aroundog.fragments
 
+import android.animation.ObjectAnimator
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.location.Location
-import android.os.Build
-import android.os.Bundle
+import android.os.*
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -45,8 +45,6 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.time.LocalDateTime
 import java.util.*
 import java.util.concurrent.TimeUnit
-import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
 
 
 class MainFragment : Fragment(){
@@ -97,6 +95,8 @@ class MainFragment : Fragment(){
     var isTracking = false
     var pathPoints = mutableListOf<Polyline>()
     lateinit var locationOverlay:LocationOverlay
+    lateinit var imageView:ImageView
+    lateinit var boundCoroutine:Job
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -279,6 +279,14 @@ class MainFragment : Fragment(){
 
         val view: ViewGroup = setView(inflater, container)
 
+        inflater.inflate(R.layout.warning, view, true)
+        imageView = view.findViewById<ImageView>(R.id.warning)
+        imageView.visibility = View.INVISIBLE
+
+        val fadeIn = ObjectAnimator.ofFloat(imageView, "alpha", 0f, 1f)
+        fadeIn.repeatCount = -1
+        fadeIn.duration = 1500
+        fadeIn.repeatMode = ObjectAnimator.REVERSE
         //산책시작 버튼 클릭 리스너
         startWalkButton.setOnClickListener {
             //최신 위치가 저장되었는지 확인
@@ -289,6 +297,51 @@ class MainFragment : Fragment(){
                 createWebView()//웹뷰 생성, tile 값 지정
                 sendCommandToService(ACTION_SHOW_RUNNING_ACTIVITY)
                 sendCommandToService(ACTION_START_OR_RESUME_SERVICE)
+
+                boundCoroutine = CoroutineScope(Dispatchers.Main).launch {
+                    var isWarning = false
+                    //안드로이드 버전에 따라 다르게 저장
+                    var vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                        val vibratorManager =
+                            context!!.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+                        vibratorManager.defaultVibrator;
+                    } else {
+                        context!!.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+                    }
+//                    val notification: Uri =
+//                        RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+//                    val ringtone = RingtoneManager.getRingtone(context,notification)
+
+                    while(true){
+                        //위험 개 있을때
+                        if(checkBound()){
+                            if(!isWarning){//경고중이 아닐때
+                                //애니메이션 실행
+                                isWarning = true
+                                animationStatus(fadeIn, true)
+                            }
+                            //이미 경고중일때
+                            else{
+                                //할거없음
+                            }
+
+                            //소리, 진동 으로알림(공통)
+                            //안드로이드 버전에 따라 다르게
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                                vibrator.vibrate(VibrationEffect.createOneShot(500,255))
+                            } else {
+                                vibrator.vibrate(500L)
+                            }
+//                            ringtone.play()
+                        }
+                        //위험 개 없을때
+                        else{
+                            isWarning = false
+                            animationStatus(fadeIn, false)
+                        }
+                        delay(2000)
+                    }
+                }
             } else {
                 Toast.makeText(context, "로딩중입니다. 잠시만 기다려주세요", Toast.LENGTH_SHORT).show()
             }
@@ -307,6 +360,10 @@ class MainFragment : Fragment(){
 
             //insert/update 코루틴 종료
             databaseCoroutine.cancel()
+
+            //영역 확인 코루틴 종료
+            boundCoroutine.cancel()
+            animationStatus(fadeIn, false)
 
             //지도에서 마커 삭제
             CoroutineScope(Dispatchers.Main).launch {
@@ -338,6 +395,34 @@ class MainFragment : Fragment(){
             
         }//listener
         return view
+    }
+
+    private fun checkBound():Boolean{
+        //bound가 초기화 되었다면
+        if(this::bounds.isInitialized) {
+ //        지도에 표시된 개의 마커의 위치를 기준으로 bounds안에 들어와있는지 확인
+            if (isTracking && bounds != null) {
+                visibleOnMapMap.forEach { markerId ->
+                    val markerPosition = markerId.value.position
+                    if (bounds.contains(markerPosition)) {//좌표가 영역 안에 포함될경우
+                        return true
+                    }
+                }
+            }
+        }
+        else{
+        }
+        return false
+    }
+
+    fun animationStatus(fadeIn:ObjectAnimator, boolean:Boolean){
+        if(boolean){
+            imageView.visibility = View.VISIBLE
+            fadeIn.start()
+        }else{
+            fadeIn.cancel()
+            imageView.visibility = View.INVISIBLE
+        }
     }
 
     private fun stopRun() {
@@ -514,21 +599,6 @@ class MainFragment : Fragment(){
                                     }
 
                                     //지도에 표시된 개의 마커의 위치를 기준으로 bounds안에 들어와있는지 확인
-                                    if (isTracking && bounds != null) {
-                                        visibleOnMapMap.forEach { markerId ->
-                                            val markerPosition = markerId.value.position
-                                            if (bounds.contains(markerPosition)) {//좌표가 영역 안에 포함될경우
-                                                CoroutineScope(Dispatchers.Main).launch {
-                                                    Toast.makeText(
-                                                        context,
-                                                        "개 접근중",
-                                                        Toast.LENGTH_SHORT
-                                                    ).show()
-                                                }
-                                                Log.d(TAG, "피해요!!!!!")
-                                            }
-                                        }
-                                    }
                                 }
                             }
 
