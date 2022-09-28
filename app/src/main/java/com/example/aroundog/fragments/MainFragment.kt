@@ -125,6 +125,7 @@ class MainFragment : Fragment(){
         // 위치 추적 여부 관찰하여 updateTracking 호출
         //레이아웃 변경
         NaverMapService.isTracking.observe(this){
+            isTracking = it
             //updateTracking(it)
         }
         // 경로 변경 관찰
@@ -206,7 +207,9 @@ class MainFragment : Fragment(){
 
                 //산책중일땐 pathPoints의 마지막 위치로 위치 오버레이를 지정함
                 if(isTracking){
-                    locationOverlay.position = pathPoints.last().last()
+                    if(pathPoints.isNotEmpty() && pathPoints.last().isNotEmpty()){
+                        locationOverlay.position = pathPoints.last().last()
+                    }
                 }
                 lastLocation = location
             }
@@ -251,6 +254,16 @@ class MainFragment : Fragment(){
 
             bounds = setBounds(lastLatLng, width)//현재 내 위치 기준 영역 저장
         }
+        else{
+            if(pathPoints.isNotEmpty()){
+                if(pathPoints.last().isEmpty()){//pathPoints.last()가 비어있으면(초기화 되면)
+                    //현재 위치 두번 저장(경로 오버레이는 2개 미만이면 오류나기때문
+                    pathPoints.last().add(LatLng(lastLocation))
+                    pathPoints.last().add(LatLng(lastLocation))
+                    bounds = setBounds(LatLng(lastLocation), width)//현재 내 위치 기준 영역 저장
+                }
+            }
+        }
     }
 
     private fun updateTracking(isTracking: Boolean) {
@@ -287,11 +300,11 @@ class MainFragment : Fragment(){
         fadeIn.repeatCount = -1
         fadeIn.duration = 1500
         fadeIn.repeatMode = ObjectAnimator.REVERSE
+
         //산책시작 버튼 클릭 리스너
         startWalkButton.setOnClickListener {
             //최신 위치가 저장되었는지 확인
             if (this::lastLocation.isInitialized) {
-                Log.d(TAG, "산책시작 버튼 클릭")
                 startWalk()
                 dbProcess()
                 createWebView()//웹뷰 생성, tile 값 지정
@@ -342,6 +355,7 @@ class MainFragment : Fragment(){
                         delay(2000)
                     }
                 }
+
             } else {
                 Toast.makeText(context, "로딩중입니다. 잠시만 기다려주세요", Toast.LENGTH_SHORT).show()
             }
@@ -353,7 +367,6 @@ class MainFragment : Fragment(){
             setBundle()//Bundle설정
             endWalk()
             Log.d(TAG, "end walk : $pathPoints")
-
             parentFragmentManager.beginTransaction()
                 .add(R.id.main_container, EndWalkFragment(), "endWalk").addToBackStack(null)
                 .commit()
@@ -411,6 +424,7 @@ class MainFragment : Fragment(){
             }
         }
         else{
+
         }
         return false
     }
@@ -597,8 +611,6 @@ class MainFragment : Fragment(){
                                             }
                                         }
                                     }
-
-                                    //지도에 표시된 개의 마커의 위치를 기준으로 bounds안에 들어와있는지 확인
                                 }
                             }
 
