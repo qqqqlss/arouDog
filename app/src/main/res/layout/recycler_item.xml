@@ -11,7 +11,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="20dp"
         android:text="TextView"
-        android:textColor="#000000"
+        android:textColor="@color/black"
         android:textSize="20sp" />
 
     <TextView
@@ -34,7 +34,7 @@
         android:layout_margin="20dp"
         android:gravity="center"
         android:text="소요시간 : 0 분 0초"
-        android:textColor="#000000"
+        android:textColor="@color/black"
         android:textSize="16sp" />
 
     <LinearLayout

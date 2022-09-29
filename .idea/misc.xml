@@ -17,10 +17,15 @@
         <entry key="..\:/Users/hyeonmin/Desktop/Aroundog/app/src/main/res/menu/bottom_navigation.xml" value="0.1" />
         <entry key="..\:/Users/hyeonmin/Desktop/arounDog/app/src/main/res/layout/activity_register.xml" value="0.25104166666666666" />
         <entry key="..\:/Users/hyeonmin/Desktop/arounDog/app/src/main/res/layout/dialog_user_image.xml" value="0.25104166666666666" />
+        <entry key="..\:/d/arounDog/app/src/main/res/layout/activity_find.xml" value="0.2046875" />
+        <entry key="..\:/d/arounDog/app/src/main/res/layout/activity_login.xml" value="0.2046875" />
         <entry key="..\:/d/arounDog/app/src/main/res/layout/activity_main.xml" value="0.2015625" />
         <entry key="..\:/d/arounDog/app/src/main/res/layout/fragment_around_walk.xml" value="0.2015625" />
         <entry key="..\:/d/arounDog/app/src/main/res/layout/fragment_end_walk.xml" value="0.2015625" />
         <entry key="..\:/d/arounDog/app/src/main/res/layout/fragment_profile.xml" value="0.2015625" />
+        <entry key="..\:/d/arounDog/app/src/main/res/layout/recycler_item.xml" value="0.2046875" />
+        <entry key="..\:/d/arounDog/app/src/main/res/layout/recycler_loading.xml" value="0.2046875" />
+        <entry key="..\:/d/arounDog/app/src/main/res/layout/warning.xml" value="0.2046875" />
       </map>
     </option>
   </component>
