@@ -16,6 +16,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.setFragmentResultListener
 import com.example.aroundog.BuildConfig
 import com.example.aroundog.R
+import com.example.aroundog.Service.NaverMapService
 import com.example.aroundog.Service.Polyline
 import com.example.aroundog.Service.WalkService
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -64,6 +65,7 @@ class EndWalkFragment : Fragment(){
     lateinit var walkDistance:String
     lateinit var startTime:LocalDateTime
     lateinit var pathPoints:MutableList<Polyline>
+    lateinit var tile:String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -176,6 +178,7 @@ class EndWalkFragment : Fragment(){
             time = bundle.getSerializable("time") as String
             startTime = bundle.getSerializable("startTime") as LocalDateTime
             walkDistance = round((bundle.getSerializable("walkDistance") as Double)).toString()
+            tile = bundle.getSerializable("tile") as String
             timeTV.text = "산책시간\n" + time
             walkDistance_end.text = "이동거리\n" + walkDistance + "m"
 
@@ -279,12 +282,15 @@ class EndWalkFragment : Fragment(){
             RequestBody.create(MediaType.parse("multipart/form-data"), startTimeFormat)
         var endTime: RequestBody =
             RequestBody.create(MediaType.parse("multipart/form-data"), endTimeFormat)
+        var tile: RequestBody =
+            RequestBody.create(MediaType.parse("multipart/form-data"), tile)
 
         var params = HashMap<String, RequestBody>()
         params.put("course", course)
         params.put("courseCenter", courseCenter)
         params.put("startTime", startTime)
         params.put("endTime", endTime)
+        params.put("tile", tile)
         return params
     }
 
