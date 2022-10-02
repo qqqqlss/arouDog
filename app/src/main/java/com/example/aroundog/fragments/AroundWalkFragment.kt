@@ -82,7 +82,7 @@ class AroundWalkFragment : Fragment() {
                                 //에러일경우
                                 if(bitmap ==null)
                                     bitmap = BitmapFactory.decodeResource(resources,R.drawable.error2)
-                                addItem(it.walkId, bitmap, it.userId, it.good, it.bad, it.walkSecond, it.checkGood, it.checkBad)
+                                addItem(userId, it.walkId, bitmap, it.userId, it.good, it.bad, it.walkSecond, it.checkGood, it.checkBad)
                             }
                         }
                         totalCount += list!!.size
@@ -195,7 +195,7 @@ class AroundWalkFragment : Fragment() {
                                         //에러일경우
 //                            bitmap = BitmapFactory.decodeResource(resources,R.drawable.error2)
                                         //userId는 long값
-                                        addItem(it.walkId, bitmap, it.userId, it.good, it.bad, it.walkSecond, it.checkGood, it.checkBad)
+                                        addItem(userId, it.walkId, bitmap, it.userId, it.good, it.bad, it.walkSecond, it.checkGood, it.checkBad)
                                     }
                                 }
                                 totalCount += list!!.size
@@ -216,8 +216,8 @@ class AroundWalkFragment : Fragment() {
     }
 
 
-    fun addItem(walkId:Long, bitmap: Bitmap, userId:String, good:Int, bad:Int, walkSecond:Long, checkGood:Boolean, checkBad:Boolean){
-        var item:RecyclerViewItem = RecyclerViewItem(walkId, bitmap, userId, good, bad, walkSecond, checkGood, checkBad)
+    fun addItem(loginUserId:String, walkId:Long, bitmap: Bitmap, userId:String, good:Int, bad:Int, walkSecond:Long, checkGood:Boolean, checkBad:Boolean){
+        var item:RecyclerViewItem = RecyclerViewItem(loginUserId, walkId, bitmap, userId, good, bad, walkSecond, checkGood, checkBad)
         mList.add(item)
     }
 

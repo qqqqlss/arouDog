@@ -3,6 +3,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.example.aroundog.BuildConfig
 import com.example.aroundog.Model.RecyclerViewItem
@@ -188,6 +189,7 @@ class RecyclerViewAdapter(private val data : ArrayList<RecyclerViewItem?> ): Rec
                 } else {
                     Toast.makeText(view.context, "좋아요는 한번만 누를 수 있습니다!", Toast.LENGTH_SHORT).show()
                 }
+                Log.d(TAG, "buttonGood : {userId : $userId, walkId : $walkId}")
             })
             buttonBad.setOnClickListener(View.OnClickListener {
                 if (!checkBad) {//기존에 싫어요버튼을 누르지 않았을때
@@ -197,6 +199,7 @@ class RecyclerViewAdapter(private val data : ArrayList<RecyclerViewItem?> ): Rec
                 } else {
                     Toast.makeText(view.context, "싫어요는 한번만 누를 수 있습니다!", Toast.LENGTH_SHORT).show()
                 }
+                Log.d(TAG, "buttonBad : {userId : $userId, walkId : $walkId}")
             })
 
         }
@@ -224,7 +227,7 @@ class RecyclerViewAdapter(private val data : ArrayList<RecyclerViewItem?> ): Rec
             this.textViewGood.text = viewItem.good.toString()
             this.checkGood = viewItem.checkGood;
             this.checkBad = viewItem.checkBad;
-            this.userId = viewItem.userId
+            this.userId = viewItem.loginUserId
             this.textViewBad.text = viewItem.bad.toString()
             this.walkId = viewItem.walkId
 
