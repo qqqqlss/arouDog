@@ -3,7 +3,7 @@ package com.example.aroundog.dto
 import java.time.LocalDateTime
 
 data class WalkListDto(
-    var id:Long,
+    var walkId:Long,
     var userId: String,
     var courseCenter: String,
     var good: Int,
@@ -11,6 +11,8 @@ data class WalkListDto(
     var img: String,
     var startTime: LocalDateTime,
     var endTime: LocalDateTime,
+    var checkGood:Boolean,
+    var checkBad:Boolean,
     var walkSecond: Long
 ) {
 }

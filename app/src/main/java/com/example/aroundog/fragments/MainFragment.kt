@@ -17,6 +17,7 @@ import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResult
+import androidx.lifecycle.MutableLiveData
 import com.example.aroundog.BuildConfig
 import com.example.aroundog.MainActivty
 import com.example.aroundog.Model.DogBreed
@@ -97,6 +98,12 @@ class MainFragment : Fragment(){
     lateinit var locationOverlay:LocationOverlay
     lateinit var imageView:ImageView
     lateinit var boundCoroutine:Job
+
+
+    companion object {
+        private const val LOCATION_PERMISSION_REQUEST_CODE = 1000
+        val firstTile = MutableLiveData<String>()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -187,6 +194,7 @@ class MainFragment : Fragment(){
             naverMap.addOnLocationChangeListener { location ->
                 Log.d(TAG, "location change in MainFragment : $location")
 
+                lastLocation = location
                 //NoFollow모드에서는 지도 회전 안되게 변경
                 if (naverMap.locationTrackingMode == LocationTrackingMode.NoFollow) {
                     locationOverlay.bearing = 0f
@@ -202,6 +210,7 @@ class MainFragment : Fragment(){
                         )
                     )
                     isFirst = false
+                    createWebView()
                     Log.d(TAG, "첫번째 위치 업데이트")
                 }
 
@@ -211,7 +220,6 @@ class MainFragment : Fragment(){
                         locationOverlay.position = pathPoints.last().last()
                     }
                 }
-                lastLocation = location
             }
         }//getMapAsync
     }//initMapView
@@ -660,6 +668,7 @@ class MainFragment : Fragment(){
         bundle.putSerializable("walkDistance", walkDistance)
         bundle.putSerializable("time", strTime)
         bundle.putSerializable("startTime", startTime)
+        bundle.putSerializable("tile", tile)
         setFragmentResult("walkEnd", bundle)
     }
 
@@ -674,6 +683,7 @@ class MainFragment : Fragment(){
                     webView.evaluateJavascript("javascript:getLocation()") {
                         Log.d(TAG, it)
                         tile = it.replace("\"","")
+                        firstTile.postValue(tile)
                     }
                 }
             }
@@ -685,9 +695,6 @@ class MainFragment : Fragment(){
         webView.loadUrl(url)
     }
 
-    companion object {
-        private const val LOCATION_PERMISSION_REQUEST_CODE = 1000
-    }
 
     fun startWalk() {
         startTime = LocalDateTime.now()//시작시간 지정

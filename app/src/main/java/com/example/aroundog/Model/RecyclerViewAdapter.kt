@@ -151,6 +151,7 @@ class RecyclerViewAdapter(private val data : ArrayList<RecyclerViewItem?> ): Rec
 
     class ItemViewHolder(view: View) :RecyclerView.ViewHolder(view) {
         private val TAG = "RECYCLERVIEWADAPTER"
+        var userId = ""
         var textViewUserId: TextView
         var textViewWalkId: TextView
         var imageView: ImageView
@@ -159,8 +160,9 @@ class RecyclerViewAdapter(private val data : ArrayList<RecyclerViewItem?> ): Rec
         var buttonGood: ImageButton
         var buttonBad: ImageButton
         var textViewWalkSecond:TextView
-        var clickGood: Boolean = false
-        var clickBad: Boolean = false
+        var checkGood: Boolean = false
+        var checkBad: Boolean = false
+        var walkId:Long = 0
 
         val retrofit = Retrofit.Builder()
             .baseUrl(BuildConfig.SERVER)
@@ -179,19 +181,19 @@ class RecyclerViewAdapter(private val data : ArrayList<RecyclerViewItem?> ): Rec
             textViewWalkSecond = view.findViewById(R.id.textViewWalkSecond)
 
             buttonGood.setOnClickListener(View.OnClickListener {
-                if (!clickGood) {//기존에 좋아요버튼을 누르지 않았을때 => 어플 껐다 키면 쓸모없어짐
-                    sendDB(textViewWalkId.text.toString().toLong(), "good")
+                if (!checkGood) {//기존에 좋아요버튼을 누르지 않았을때 => 어플 껐다 키면 쓸모없어짐
+                    sendDB(userId, walkId, "good")
                     textViewGood.text = (textViewGood.text.toString().toInt() + 1).toString()
-                    clickGood = true
+                    checkGood = true
                 } else {
                     Toast.makeText(view.context, "좋아요는 한번만 누를 수 있습니다!", Toast.LENGTH_SHORT).show()
                 }
             })
             buttonBad.setOnClickListener(View.OnClickListener {
-                if (!clickBad) {//기존에 싫어요버튼을 누르지 않았을때
-                    sendDB(textViewWalkId.text.toString().toLong(), "bad")
+                if (!checkBad) {//기존에 싫어요버튼을 누르지 않았을때
+                    sendDB(userId, walkId, "bad")
                     textViewBad.text = (textViewBad.text.toString().toInt() - 1).toString()
-                    clickBad = true
+                    checkBad = true
                 } else {
                     Toast.makeText(view.context, "싫어요는 한번만 누를 수 있습니다!", Toast.LENGTH_SHORT).show()
                 }
@@ -199,10 +201,9 @@ class RecyclerViewAdapter(private val data : ArrayList<RecyclerViewItem?> ): Rec
 
         }
 
-        fun sendDB(walkId:Long, button: String) {
-            retrofit.clickButton(walkId, button)
-                .enqueue(object : Callback<Void> {
-                    override fun onResponse(
+        fun sendDB(userId:String, walkId:Long, button:String){
+            retrofit.clickButton(userId, walkId, button).enqueue(object:Callback<Void>{
+                override fun onResponse(
                         call: Call<Void>,
                         response: Response<Void>
                     ) {
@@ -213,23 +214,19 @@ class RecyclerViewAdapter(private val data : ArrayList<RecyclerViewItem?> ): Rec
                     override fun onFailure(call: Call<Void>, t: Throwable) {
 
                     }
-                })
-
+            })
         }
 
 
         fun setItems(viewItem: RecyclerViewItem){
             this.textViewUserId.text = viewItem.userId + "님의 산책 기록"
-            this.textViewWalkId.text = viewItem.id.toString()
             this.imageView.setImageBitmap(viewItem.img)
             this.textViewGood.text = viewItem.good.toString()
-            var bad:String
-            if (viewItem.bad == 0) {
-                bad = viewItem.bad.toString()
-            } else {
-                bad = "-" + viewItem.bad.toString()
-            }
-            this.textViewBad.text = bad //마이너스 추가
+            this.checkGood = viewItem.checkGood;
+            this.checkBad = viewItem.checkBad;
+            this.userId = viewItem.userId
+            this.textViewBad.text = viewItem.bad.toString()
+            this.walkId = viewItem.walkId
 
 
             var totalSecond = viewItem.walkSecond

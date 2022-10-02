@@ -15,6 +15,8 @@ interface WalkService {
 
     @GET("/walk/good")
     fun getWalkListOrderedByGood(
+        @Query("userId") userId:String,
+        @Query("tile") tile:String,
         @Query("start") first: Int,
         @Query("size") last: Int
     ): Call<List<WalkListDto>>
@@ -22,6 +24,14 @@ interface WalkService {
     @FormUrlEncoded
     @POST("/walk/button")
     fun clickButton(
+        @Field("walkId") walkId:Long,
+        @Field("button") button:String
+    ):Call<Void>
+
+    @FormUrlEncoded
+    @POST("/walk/button")
+    fun clickButton(
+        @Field("userId") userId:String,
         @Field("walkId") walkId:Long,
         @Field("button") button:String
     ):Call<Void>

@@ -14,6 +14,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -21,6 +22,7 @@ import com.example.aroundog.BuildConfig
 import com.example.aroundog.Model.GetWalkHistory
 import com.example.aroundog.Model.RecyclerViewItem
 import com.example.aroundog.R
+import com.example.aroundog.Service.NaverMapService
 import com.example.aroundog.Service.RetrofitService
 import com.example.aroundog.Service.WalkService
 import com.example.aroundog.dto.WalkListDto
@@ -40,9 +42,69 @@ class AroundWalkFragment : Fragment() {
     lateinit var mRecyclerView:RecyclerView
     lateinit var mAdapter: RecyclerViewAdapter
     lateinit var mList:ArrayList<RecyclerViewItem?>
+    lateinit var userId:String
+    var tile:String = ""
+
+    init {
+        MainFragment.firstTile.observe(this){
+            tile = it
+            Log.d(TAG, tile)
+            var gsonInstance: Gson = GsonBuilder().registerTypeAdapter(LocalDateTime::class.java,
+                object : JsonDeserializer<LocalDateTime> {
+                    override fun deserialize(
+                        json: JsonElement?,
+                        typeOfT: Type?,
+                        context: JsonDeserializationContext?
+                    ): LocalDateTime {
+                        return LocalDateTime.parse(json!!.asString, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"))
+                    }
+                }).setLenient().create()
+            retrofit = Retrofit.Builder()
+                .baseUrl(BuildConfig.SERVER)
+                .addConverterFactory(GsonConverterFactory.create(gsonInstance))
+                .build()
+                .create(WalkService::class.java)
+
+            retrofit.getWalkListOrderedByGood(userId, tile, totalCount, itemSize).enqueue(object:Callback<List<WalkListDto>>{
+                override fun onResponse(
+                    call: Call<List<WalkListDto>>,
+                    response: Response<List<WalkListDto>>
+                ) {
+                    if (response.isSuccessful) {
+
+                        var list = response.body()
+                        Log.d("sex", list.toString())
+                        if (list != null) {
+                            list.forEach {
+                                var bitmap:Bitmap
+                                var byteArray:ByteArray = Base64.decode(it.img, Base64.DEFAULT)
+                                bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
+                                //에러일경우
+                                if(bitmap ==null)
+                                    bitmap = BitmapFactory.decodeResource(resources,R.drawable.error2)
+                                addItem(it.walkId, bitmap, it.userId, it.good, it.bad, it.walkSecond, it.checkGood, it.checkBad)
+                            }
+                        }
+                        totalCount += list!!.size
+                        mAdapter.notifyItemRangeChanged(totalCount, itemSize)
+                    }
+                    Log.d("sex", "fail")
+
+                }
+
+                override fun onFailure(call: Call<List<WalkListDto>>, t: Throwable) {
+                    Log.d(TAG, "fail", t)
+                }
+            })
+        }
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
+        //저장된 id 정보 가져오기
+        var user_info_pref =
+            requireActivity().getSharedPreferences("userInfo", AppCompatActivity.MODE_PRIVATE)
+        userId = user_info_pref.getString("id", "error").toString()
     }
     var isLoading:Boolean = false
     lateinit var retrofit:WalkService
@@ -69,54 +131,8 @@ class AroundWalkFragment : Fragment() {
         mRecyclerView.layoutManager = LinearLayoutManager(context, RecyclerView.VERTICAL, false)
 
 
-        var gsonInstance: Gson = GsonBuilder().registerTypeAdapter(LocalDateTime::class.java,
-            object : JsonDeserializer<LocalDateTime> {
-                override fun deserialize(
-                    json: JsonElement?,
-                    typeOfT: Type?,
-                    context: JsonDeserializationContext?
-                ): LocalDateTime {
-                    return LocalDateTime.parse(json!!.asString, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"))
-                }
-            }).setLenient().create()
 
-        retrofit = Retrofit.Builder()
-            .baseUrl(BuildConfig.SERVER)
-            .addConverterFactory(GsonConverterFactory.create(gsonInstance))
-            .build()
-            .create(WalkService::class.java)
 
-        retrofit.getWalkListOrderedByGood(totalCount, itemSize).enqueue(object:Callback<List<WalkListDto>>{
-            override fun onResponse(
-                call: Call<List<WalkListDto>>,
-                response: Response<List<WalkListDto>>
-            ) {
-                if (response.isSuccessful) {
-
-                    var list = response.body()
-                    Log.d("sex", list.toString())
-                    if (list != null) {
-                        list.forEach {
-                            var bitmap:Bitmap
-                            var byteArray:ByteArray = Base64.decode(it.img, Base64.DEFAULT)
-                            bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
-                            //에러일경우
-                            if(bitmap ==null)
-                                bitmap = BitmapFactory.decodeResource(resources,R.drawable.error2)
-                            addItem(it.id, bitmap, it.userId, it.good, it.bad, it.walkSecond)
-                        }
-                    }
-                    totalCount += list!!.size
-                    mAdapter.notifyItemRangeChanged(totalCount, itemSize)
-                }
-                Log.d("sex", "fail")
-
-            }
-
-            override fun onFailure(call: Call<List<WalkListDto>>, t: Throwable) {
-                Log.d(TAG, "fail", t)
-            }
-        })
 
 
 
@@ -153,7 +169,7 @@ class AroundWalkFragment : Fragment() {
         mAdapter.notifyItemInserted(mList.size - 1)
         Handler(Looper.getMainLooper()).postDelayed({
 
-                retrofit.getWalkListOrderedByGood(totalCount + 1, itemSize)
+                retrofit.getWalkListOrderedByGood(userId, tile, totalCount + 1, itemSize)
                     .enqueue(object : Callback<List<WalkListDto>> {
                         override fun onResponse(
                             call: Call<List<WalkListDto>>,
@@ -178,7 +194,8 @@ class AroundWalkFragment : Fragment() {
                                             )
                                         //에러일경우
 //                            bitmap = BitmapFactory.decodeResource(resources,R.drawable.error2)
-                                        addItem(it.id, bitmap, it.userId, it.good, it.bad, it.walkSecond)
+                                        //userId는 long값
+                                        addItem(it.walkId, bitmap, it.userId, it.good, it.bad, it.walkSecond, it.checkGood, it.checkBad)
                                     }
                                 }
                                 totalCount += list!!.size
@@ -199,8 +216,8 @@ class AroundWalkFragment : Fragment() {
     }
 
 
-    fun addItem(id:Long, bitmap: Bitmap, userId:String, good:Int, bad:Int, walkSecond:Long){
-        var item:RecyclerViewItem = RecyclerViewItem(id, bitmap, userId, good, bad, walkSecond)
+    fun addItem(walkId:Long, bitmap: Bitmap, userId:String, good:Int, bad:Int, walkSecond:Long, checkGood:Boolean, checkBad:Boolean){
+        var item:RecyclerViewItem = RecyclerViewItem(walkId, bitmap, userId, good, bad, walkSecond, checkGood, checkBad)
         mList.add(item)
     }
 
