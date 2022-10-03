@@ -33,44 +33,44 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_gravity="bottom"
-            android:layout_weight="3"
+            android:layout_weight="2"
             android:background="#FFFFFF"
             android:gravity="center_vertical"
             android:orientation="horizontal"
             android:visibility="gone"
-            android:weightSum="10">
-
-            <TextView
-                android:id="@+id/walkDistanceTV"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="3"
-                android:gravity="center"
-                android:text="0 M"
-                android:textColor="#000000" />
-
-            <ImageButton
-                android:id="@+id/pauseButton"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="3"
-                android:src="@android:drawable/ic_media_pause" />
+            android:weightSum="6">
 
             <TextView
                 android:id="@+id/walkTimeTV"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="3"
+                android:layout_weight="2"
                 android:gravity="center"
                 android:text="text"
                 android:textColor="#000000"
                 android:textSize="20sp" />
 
             <ImageButton
+                android:id="@+id/pauseButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:src="@android:drawable/ic_media_pause" />
+
+            <TextView
+                android:id="@+id/walkDistanceTV"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="0 M"
+                android:textColor="#000000" />
+
+            <ImageButton
                 android:id="@+id/cameraButton"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="3"
+                android:layout_weight="1"
                 android:src="@android:drawable/ic_menu_camera" />
 
 
