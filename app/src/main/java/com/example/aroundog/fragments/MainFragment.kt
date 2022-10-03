@@ -312,7 +312,6 @@ class MainFragment : Fragment(){
     private fun createImageFile(): File {
         // Create an image file name
         val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())
-//        val storageDir: File = getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
         val storageDir = File(
             Environment.getExternalStorageDirectory().toString() + "/Pictures",
             "Aroundog"
@@ -353,6 +352,15 @@ class MainFragment : Fragment(){
                     startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO)
                 }
             }
+        }
+        galleryAddPic()
+    }
+    //갤러리 갱신
+    private fun galleryAddPic() {
+        Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE).also { mediaScanIntent ->
+            val f = File(currentPhotoPath)
+            mediaScanIntent.data = Uri.fromFile(f)
+            context!!.sendBroadcast(mediaScanIntent)
         }
     }
 
