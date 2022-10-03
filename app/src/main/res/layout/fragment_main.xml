@@ -33,7 +33,7 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_gravity="bottom"
-            android:layout_weight="2"
+            android:layout_weight="3"
             android:background="#FFFFFF"
             android:gravity="center_vertical"
             android:orientation="horizontal"
@@ -53,7 +53,7 @@
                 android:id="@+id/pauseButton"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="4"
+                android:layout_weight="3"
                 android:src="@android:drawable/ic_media_pause" />
 
             <TextView
@@ -65,6 +65,14 @@
                 android:text="text"
                 android:textColor="#000000"
                 android:textSize="20sp" />
+
+            <ImageButton
+                android:id="@+id/cameraButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="3"
+                android:src="@android:drawable/ic_menu_camera" />
+
 
         </LinearLayout>
 
