@@ -5,7 +5,10 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.location.Location
+import android.net.Uri
 import android.os.*
+import android.os.Environment.getExternalStoragePublicDirectory
+import android.provider.MediaStore
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -15,6 +18,8 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat.startActivityForResult
+import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResult
 import com.example.aroundog.BuildConfig
@@ -42,6 +47,9 @@ import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.io.File
+import java.io.IOException
+import java.text.SimpleDateFormat
 import java.time.LocalDateTime
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -66,10 +74,12 @@ class MainFragment : Fragment(){
     lateinit var walkDistanceTV: TextView
     lateinit var walkTimeTV: TextView
     lateinit var pauseButton: ImageButton
+    lateinit var cameraButton: ImageButton
     lateinit var statusLayout: LinearLayout
     lateinit var webView: WebView
     lateinit var timer: Timer
     var time: Long = 0
+    lateinit var currentPhotoPath: String
 
     lateinit var strTime: String
     var tile = ""
@@ -97,6 +107,10 @@ class MainFragment : Fragment(){
     lateinit var locationOverlay:LocationOverlay
     lateinit var imageView:ImageView
     lateinit var boundCoroutine:Job
+    //카메라
+    val REQUEST_IMAGE_CAPTURE = 1
+    val REQUEST_TAKE_PHOTO = 1
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -285,6 +299,55 @@ class MainFragment : Fragment(){
         }
     }
 
+    //사진 기능
+    @Throws(IOException::class)
+    private fun createImageFile(): File {
+        // Create an image file name
+        val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())
+//        val storageDir: File = getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
+        val storageDir = File(
+            Environment.getExternalStorageDirectory().toString() + "/Pictures",
+            "Aroundog"
+        )
+        if (!storageDir.exists()) {
+            Log.i("mCurrentPhotoPath1", storageDir.toString())
+            storageDir.mkdirs()
+        }
+        return File.createTempFile(
+            "JPEG_${timeStamp}_", /* prefix */
+            ".jpg", /* suffix */
+            storageDir /* directory */
+        ).apply {
+            // Save a file: path for use with ACTION_VIEW intents
+            currentPhotoPath = absolutePath
+        }
+    }
+    private fun dispatchTakePictureIntent() {
+        Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { takePictureIntent ->
+            // Ensure that there's a camera activity to handle the intent
+            val packageManager = activity!!.packageManager
+            takePictureIntent.resolveActivity(packageManager)!!.also {
+                // Create the File where the photo should go
+                val photoFile: File? = try {
+                    createImageFile()
+                } catch (ex: IOException) {
+                    // Error occurred while creating the File
+                    null
+                }
+                // Continue only if the File was successfully created
+                photoFile.also {
+                    val photoURI: Uri = FileProvider.getUriForFile(
+                        requireContext(),
+                        "com.example.android.provider",
+                        it!!
+                    )
+                    takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
+                    startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO)
+                }
+            }
+        }
+    }
+
     override fun onCreateView(//인터페이스를 그리기위해 호출
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -360,6 +423,11 @@ class MainFragment : Fragment(){
                 Toast.makeText(context, "로딩중입니다. 잠시만 기다려주세요", Toast.LENGTH_SHORT).show()
             }
         }
+    
+        //카메라 버튼클릭 리스너
+        cameraButton.setOnClickListener{
+            dispatchTakePictureIntent()
+        }
 
         //산책종료 버튼클릭 리스너
         pauseButton.setOnClickListener {
@@ -403,9 +471,9 @@ class MainFragment : Fragment(){
                     Log.d(TAG, "endWalking fail", t)
                 }
             })
-            
+
             //-------------------카메라 중심을 마지막 위치로 바꾸는 코드 추가할 것-------------
-            
+
         }//listener
         return view
     }
@@ -648,6 +716,7 @@ class MainFragment : Fragment(){
         walkTimeTV = view.findViewById(R.id.walkTimeTV)
         walkDistanceTV = view.findViewById(R.id.walkDistanceTV)
         pauseButton = view.findViewById(R.id.pauseButton)
+        cameraButton = view.findViewById(R.id.cameraButton)
         statusLayout = view.findViewById(R.id.statusLayout)
         frame = view.findViewById(R.id.map)
         webView = view.findViewById(R.id.webView)
