@@ -30,15 +30,14 @@
 
 ## 서버
 
-![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/8ed7de8a-d963-4b3a-8d1d-5b196c6e654f/Untitled.png)
-
+![Untitled](https://user-images.githubusercontent.com/54983139/193743481-d3762456-f786-4eb8-908a-70202afb49cd.png)
 - Spring boot 사용
 - API
 - 
 
 ## 데이터베이스(221003 업데이트)
 
-![db.png](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/0773ad50-6f93-43fb-bb00-3387b4294991/db.png)
+![db](https://user-images.githubusercontent.com/54983139/193743503-a7729231-5d8c-432d-9305-a92d9a63406e.png)
 
 | walk | 산책 후 저장되는 산책에 대한 정보 |
 | --- | --- |
