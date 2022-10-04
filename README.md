@@ -1,7 +1,4 @@
 # 도그트리오
-
-[GitHub - qqqqlss/arounDog: dog](https://github.com/qqqqlss/arounDog)
-
 주변의 추천 산책로를 확인하거나 산책중 비선호 견종이 접근하면 알림을 울리는 기능을 가진 반려동물 산책 앱.
 
 ## 팀원
