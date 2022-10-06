@@ -11,16 +11,16 @@
         android:id="@+id/find_toolbar"
         android:layout_width="match_parent"
         android:layout_height="60dp"
-        android:background="@color/green">
+        android:background="@color/brown">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="아이디 / 비밀번호 찾기"
             android:layout_gravity="center"
+            android:fontFamily="@font/nanum_square_eb"
+            android:text="아이디 / 비밀번호 찾기"
             android:textColor="@color/white"
-            android:textSize="30sp"
-            android:fontFamily="@font/nanum_square_eb" />
+            android:textSize="24sp" />
 
     </androidx.appcompat.widget.Toolbar>
 
@@ -41,11 +41,11 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@color/transparent"
-            android:text="아이디 찾기"
             android:fontFamily="@font/nanum_square"
-            android:textStyle="bold"
+            android:text="아이디 찾기"
+            android:textColor="@color/brown"
             android:textSize="20sp"
-            android:textColor="@color/green"/>
+            android:textStyle="bold" />
 
         <Button
             android:id="@+id/find_pw"
@@ -68,9 +68,9 @@
         <View
             android:id="@+id/find_id_line"
             android:layout_width="match_parent"
-            android:layout_weight="1"
             android:layout_height="2dp"
-            android:background="@color/green" />
+            android:layout_weight="1"
+            android:background="@color/brown" />
         <View
             android:id="@+id/find_pw_line"
             android:layout_width="match_parent"

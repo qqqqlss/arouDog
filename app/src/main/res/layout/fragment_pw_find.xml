@@ -12,6 +12,7 @@
         android:layout_marginTop="25dp">
 
         <EditText
+            android:id="@+id/findPwUserIdET"
             android:layout_width="350dp"
             android:layout_height="50dp"
             android:layout_centerHorizontal="true"
@@ -24,6 +25,7 @@
             android:textSize="15sp" />
 
         <ImageButton
+            android:id="@+id/findPwValidateButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
@@ -35,11 +37,35 @@
             android:background="@color/transparent"
             android:src="@drawable/ic_register_not_check" />
     </RelativeLayout>
+    <TextView
+        android:id="@+id/findPwUserIdNullTV"
+        android:layout_width="330dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="6dp"
+        android:fontFamily="@font/nanum_square"
+        android:text="가입되지 않은 아이디입니다. 아이디를 확인해주세요"
+        android:textColor="#FF0000"
+        android:textSize="11sp"
+        android:visibility="gone" />
 
     <TextView
-        android:layout_width="wrap_content"
+        android:id="@+id/findPwValidateCheckFalseTV"
+        android:layout_width="330dp"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="40dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="6dp"
+        android:fontFamily="@font/nanum_square"
+        android:text="아이디가 존재하는지 확인해주세요!"
+        android:textColor="#FF0000"
+        android:textSize="11sp"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/findPwValidateCheckTV"
+        android:layout_width="330dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
         android:layout_marginTop="8dp"
         android:fontFamily="@font/nanum_square"
         android:text="입력 후 아이디가 존재하는지 확인해주세요."
@@ -47,6 +73,7 @@
         android:textSize="10sp" />
 
     <EditText
+        android:id="@+id/findPwUserNameET"
         android:layout_width="350dp"
         android:layout_height="50dp"
         android:layout_gravity="center"
@@ -54,13 +81,14 @@
         android:background="@drawable/style_rounded_login"
         android:fontFamily="@font/nanum_barun_gothic_light"
         android:hint="이용자님의 이름을 입력해주세요."
-        android:inputType="textPassword"
+        android:inputType="text"
         android:paddingLeft="17dp"
         android:textColor="@color/black"
         android:textColorHint="@color/black"
         android:textSize="15sp" />
 
     <EditText
+        android:id="@+id/findPwEmailET"
         android:layout_width="350dp"
         android:layout_height="50dp"
         android:layout_gravity="center"
@@ -68,12 +96,26 @@
         android:background="@drawable/style_rounded_login"
         android:fontFamily="@font/nanum_barun_gothic_light"
         android:hint="이용자님의 이메일을 입력해주세요."
+        android:inputType="textEmailAddress"
         android:paddingLeft="17dp"
         android:textColor="@color/black"
         android:textColorHint="@color/black"
         android:textSize="15sp" />
 
+    <TextView
+        android:id="@+id/findPwCheckTV"
+        android:layout_width="330dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="4dp"
+        android:fontFamily="@font/nanum_square"
+        android:text="비어있는 항목이 있어요! 모두 입력해주세요."
+        android:textColor="#FF0000"
+        android:textSize="11sp"
+        android:visibility="gone" />
+
     <Button
+        android:id="@+id/findPwButton"
         android:layout_width="350dp"
         android:layout_height="50dp"
         android:layout_gravity="center"
