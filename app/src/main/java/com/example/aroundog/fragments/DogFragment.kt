@@ -1,21 +1,24 @@
 package com.example.aroundog.fragments
 
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentTransaction
+import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
+import com.example.aroundog.Model.DogSliderAdapter
 import com.example.aroundog.R
 import com.example.aroundog.dto.DogDto
 
 class DogFragment : Fragment() {
-    private var param1: String? = null
-    private var param2: String? = null
     private var dogDto:DogDto? = null
 
 
@@ -39,7 +42,6 @@ class DogFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
         val view: ViewGroup = setView(inflater, container)
 
         profileDogNameTV.text = dogDto?.dogName
@@ -48,6 +50,13 @@ class DogFragment : Fragment() {
         profileDogHeightTV.text = dogDto?.dogHeight.toString()
         profileDogWeightTV.text = dogDto?.dogWeight.toString()
         profileDogBreedTV.text = dogDto?.breed.toString()
+
+
+        var imgList = arrayListOf<Int>()
+        imgList.add(R.drawable.error)
+        imgList.add(R.drawable.error1)
+        imgList.add(R.drawable.error2)
+        imgViewPager.adapter = DogSliderAdapter(imgList)
         return view
     }
 
