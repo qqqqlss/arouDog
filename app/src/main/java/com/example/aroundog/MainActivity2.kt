@@ -21,7 +21,11 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import com.example.aroundog.Service.IntroService
+import com.example.aroundog.dto.DogDto
+import com.example.aroundog.dto.UserAndDogDto
 import com.example.aroundog.dto.UserDto
+import com.google.gson.GsonBuilder
+import com.google.gson.reflect.TypeToken
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Call
@@ -52,6 +56,8 @@ class MainActivity2 : AppCompatActivity(){
         val login_stay_cb: CheckBox? = findViewById(R.id.login_stay_cb)
         lateinit var user_info_pref: SharedPreferences
         lateinit var user_info_editor: SharedPreferences.Editor
+        lateinit var dog_info_pref: SharedPreferences
+        lateinit var dog_info_editor: SharedPreferences.Editor
 
 
         //permissionSupport 생성
@@ -138,25 +144,44 @@ class MainActivity2 : AppCompatActivity(){
 
                     val introAPI = retrofit.create(IntroService::class.java)
 
-                    introAPI.login(id, pw).enqueue(object : Callback<UserDto> {
-                        override fun onResponse(call: Call<UserDto>, response: Response<UserDto>) {
+                    introAPI.login(id, pw).enqueue(object : Callback<List<UserAndDogDto>> {
+                        override fun onResponse(call: Call<List<UserAndDogDto>>, response: Response<List<UserAndDogDto>>) {
                             loadingDialog?.dismiss()
                             if (response.isSuccessful) { // 성공적으로 받아왔을 때
-                                if (response.body()!!.isSuccess) { // 아이디, 비밀번호가 일치했을 때
-                                    val userdata = response.body() // 유저 데이터를 호출한 데이터베이스로부터 받아와 변수에 저장
-                                    if (userdata != null) {
-                                        user_info_editor.putString("id", userdata.userId)
-                                        user_info_editor.putString("password", userdata.password)
-                                        user_info_editor.putString("name", userdata.userName)
-                                        user_info_editor.putString("phone", userdata.phone)
-                                        user_info_editor.putString("email", userdata.email)
-                                        user_info_editor.putString("email", userdata.email)
-                                        user_info_editor.putInt("age", userdata.age)
-                                        user_info_editor.putString("gender",
-                                            userdata.gender.toString()
-                                        )
-                                    }
+                                if (response.body()!![0].isSuccess()) { // 아이디, 비밀번호가 일치했을 때
+                                    val userAndDogList = response.body() // 유저 데이터를 호출한 데이터베이스로부터 받아와 변수에 저장
+
+                                    //유저 정보 저장
+                                    user_info_editor.putString("id", userAndDogList!![0].userId)
+                                    user_info_editor.putString("password", userAndDogList!![0].password)
+                                    user_info_editor.putInt("userAge", userAndDogList!![0].userAge)
+                                    user_info_editor.putInt("image", userAndDogList!![0].image)
+                                    user_info_editor.putString("userName", userAndDogList!![0].userName)
+                                    user_info_editor.putString("phone", userAndDogList!![0].phone)
+                                    user_info_editor.putString("email", userAndDogList!![0].email)
+                                    user_info_editor.putString("userGender",
+                                        userAndDogList!![0].userGender.toString()
+                                    )
                                     user_info_editor.commit() // 세션 영역에 해당 유저의 정보를 넣음
+
+                                    dog_info_pref = getSharedPreferences("dogInfo", MODE_PRIVATE) // 세션 영역에 저장할 유저 정보
+                                    dog_info_editor = dog_info_pref.edit()
+
+                                    var dogList = arrayListOf<DogDto>()
+                                    //강아지 정보 리스트로 저장
+                                    userAndDogList!!.forEach { userAndDogDto ->
+                                        var dog = DogDto(userAndDogDto.dogId, userAndDogDto.dogName, userAndDogDto.dogAge, userAndDogDto.dogWeight, userAndDogDto.dogHeight, userAndDogDto.dogGender, userAndDogDto.breed)
+                                        dogList.add(dog)
+                                    }
+                                    //Json 으로 만들기 위한 Gson
+                                    var makeGson = GsonBuilder().create()
+                                    var type:TypeToken<List<DogDto>> = object:TypeToken<List<DogDto>>(){}
+                                    var dogStr = makeGson.toJson(dogList, type.type)
+
+                                    dog_info_editor.putString("dogList", dogStr)
+                                    dog_info_editor.commit()
+
+
                                     if (login_stay_cb != null) {
                                         if (login_stay_cb.isChecked) { // 로그인 상태 유지가 체크되어 있다면
                                             user_info_editor.putBoolean(
@@ -188,7 +213,7 @@ class MainActivity2 : AppCompatActivity(){
                             }
                         }
 
-                        override fun onFailure(call: Call<UserDto>, t: Throwable) {
+                        override fun onFailure(call: Call<List<UserAndDogDto>>, t: Throwable) {
                             loadingDialog?.dismiss()
                             Toast.makeText(applicationContext, "서버 네트워크가 닫혀있습니다.", Toast.LENGTH_LONG)
                                 .show()
