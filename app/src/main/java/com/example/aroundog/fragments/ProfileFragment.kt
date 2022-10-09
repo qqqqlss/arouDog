@@ -50,6 +50,8 @@ class ProfileFragment : Fragment() {
     var listStr = dog_info_pref.getString("dogList", "")
     dogList = makeGson.fromJson<List<DogDto>>(listStr, type.type)
 
+    var dogFragment = DogFragment.newInstance(dogList[0])
+    childFragmentManager.beginTransaction().replace(R.id.dogInfoFragment, dogFragment,"dog").commit()
     }
 
     override fun onCreateView(
@@ -60,12 +62,6 @@ class ProfileFragment : Fragment() {
 
 
         profileUserNameTV.text = userName
-        profileDogNameTV.text = dogList[0].dogName
-        profileDogGenderTV.text = dogList[0].dogGender.toString()
-        profileDogAgeTV.text = dogList[0].dogAge.toString()
-        profileDogHeightTV.text = dogList[0].dogHeight.toString()
-        profileDogWeightTV.text = dogList[0].dogWeight.toString()
-        profileDogBreedTV.text = dogList[0].breed.toString()
         return view
     }
 
@@ -78,13 +74,6 @@ class ProfileFragment : Fragment() {
 
         profileUserNameTV = view.findViewById(R.id.profileUserNameTV)
         profileUserConfig = view.findViewById(R.id.profileUserConfig)
-        imgViewPager = view.findViewById(R.id.imgViewPager)
-        profileDogNameTV = view.findViewById(R.id.profileDogNameTV)
-        profileDogGenderTV = view.findViewById(R.id.profileDogGenderTV)
-        profileDogAgeTV = view.findViewById(R.id.profileDogAgeTV)
-        profileDogHeightTV = view.findViewById(R.id.profileDogHeightTV)
-        profileDogWeightTV = view.findViewById(R.id.profileDogWeightTV)
-        profileDogBreedTV = view.findViewById(R.id.profileDogBreedTV)
 
         return view
     }
