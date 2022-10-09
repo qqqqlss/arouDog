@@ -4,7 +4,7 @@ import com.example.aroundog.BuildConfig
 import com.example.aroundog.Model.CheckSuccess
 import com.example.aroundog.Model.Gender
 import com.example.aroundog.Model.User
-import com.example.aroundog.dto.UserDto
+import com.example.aroundog.dto.UserAndDogDto
 import retrofit2.Call
 import retrofit2.http.*
 
@@ -14,7 +14,7 @@ interface IntroService {
     fun login(
         @Query("userId") userId: String,
         @Query("password") password: String
-    ): Call<UserDto>
+    ): Call<List<UserAndDogDto>>
 
     @FormUrlEncoded
     @POST("/user/register")
