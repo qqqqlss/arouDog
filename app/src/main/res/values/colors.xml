@@ -24,5 +24,6 @@
     <!-- arounDog   -->
     <color name="brown">#ebdab3</color>
     <color name="yellow">#F7CA4E</color>
+    <color name="lightGray">#aaabac</color>
 
 </resources>

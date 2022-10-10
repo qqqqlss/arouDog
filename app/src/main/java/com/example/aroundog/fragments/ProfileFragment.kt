@@ -116,14 +116,20 @@ class ProfileFragment : Fragment() {
             .replace(R.id.dogInfoFragment, initFragment, dogList[0].dogId.toString())
             .commitAllowingStateLoss()
 
+        var buttonList= arrayListOf<Button>()
+        var first = true
         //dogList 전체 추가
         dogList.forEach { dogDto ->
             idList.add(dogDto.dogId.toInt())//아이디 리스트에 추가(클릭 리스너에서 사용)
             var dogFragment = DogFragment.newInstance(dogDto)//프래그먼트 생성
             var style = ContextThemeWrapper(context, R.style.borderLessButton)
             var button = Button(style, null, R.style.borderLessButton).apply {
+                buttonList.add(this)
                 text = dogDto.dogName
                 id = dogDto.dogId.toInt()
+                textColor = resources.getColor(R.color.lightGray)
+                textSize = 14F
+                setTypeface(this.typeface, Typeface.NORMAL)
 
                 //버튼 id == 프래그먼트 태그
                 setOnClickListener { view ->
@@ -147,7 +153,28 @@ class ProfileFragment : Fragment() {
                             }
                         }
                     }
+
+                    //클릭된 버튼 크기, 색 변경
+                    for (button in buttonList) {
+                        if (button == view) {
+                            button.textColor = resources.getColor(R.color.brown)
+                            button.setTypeface(button.typeface, Typeface.BOLD)
+                            button.textSize = 16F
+                        } else {
+                            button.textColor = resources.getColor(R.color.lightGray)
+                            button.setTypeface(button.typeface, Typeface.NORMAL)
+                            button.textSize = 14F
+                        }
+                    }
                 }
+            }
+
+            //첫 로딩 시 첫번째 버튼을 선택된 상태로 만듦
+            if(first){
+                button.textColor = resources.getColor(R.color.brown)
+                button.setTypeface(button.typeface, Typeface.BOLD)
+                button.textSize = 16F
+                first=false
             }
             profileButtonLayout.addView(button)
         }
@@ -166,6 +193,7 @@ class ProfileFragment : Fragment() {
         profileTotalMinuteTV = view.findViewById(R.id.profileTotalMinuteTV)
         profileTotalDistanceTV = view.findViewById(R.id.profileTotalDistanceTV)
         profileTotalCountTV = view.findViewById(R.id.profileTotalCountTV)
+
 
         return view
     }
