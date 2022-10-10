@@ -1,6 +1,9 @@
 package com.example.aroundog.fragments
 
+import android.graphics.Color
+import android.graphics.Typeface
 import android.os.Bundle
+import android.util.Log
 import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
 import android.view.View
@@ -10,10 +13,22 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import com.example.aroundog.BuildConfig
 import com.example.aroundog.R
+import com.example.aroundog.Service.WalkService
 import com.example.aroundog.dto.DogDto
+import com.example.aroundog.dto.WalkWeekSummaryDto
+import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
+import org.jetbrains.anko.backgroundColor
+import org.jetbrains.anko.custom.style
+import org.jetbrains.anko.textColor
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 
 
 class ProfileFragment : Fragment() {
@@ -25,6 +40,13 @@ class ProfileFragment : Fragment() {
     lateinit var profileButtonLayout: LinearLayout
     var idList = arrayListOf<Int>()
 
+    lateinit var retrofit: WalkService
+    lateinit var userId:String
+
+    lateinit var profileTotalMinuteTV:TextView
+    lateinit var profileTotalDistanceTV:TextView
+    lateinit var profileTotalCountTV:TextView
+
 //    https://greensky0026.tistory.com/224
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,6 +57,7 @@ class ProfileFragment : Fragment() {
         var user_info_pref =
             requireActivity().getSharedPreferences("userInfo", AppCompatActivity.MODE_PRIVATE)
         userName = user_info_pref.getString("userName", "").toString()
+        userId = user_info_pref.getString("id", "").toString()
 
 
         var dog_info_pref =
@@ -42,6 +65,35 @@ class ProfileFragment : Fragment() {
         var listStr = dog_info_pref.getString("dogList", "")
 
         dogList = makeGson.fromJson<List<DogDto>>(listStr, type.type)
+
+        var gsonInstance: Gson = GsonBuilder().setLenient().create()
+        retrofit = Retrofit.Builder()
+            .baseUrl(BuildConfig.SERVER)
+            .addConverterFactory(GsonConverterFactory.create(gsonInstance))
+            .build()
+            .create(WalkService::class.java)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        retrofit.getWalkWeekSummary(userId).enqueue(object:Callback<WalkWeekSummaryDto>{
+            override fun onResponse(
+                call: Call<WalkWeekSummaryDto>,
+                response: Response<WalkWeekSummaryDto>
+            ) {
+                if (response.isSuccessful) {
+                    var walkWeekSummaryDto = response.body()
+                    profileTotalMinuteTV.text = (walkWeekSummaryDto!!.second / 60).toString()
+                    profileTotalDistanceTV.text = walkWeekSummaryDto!!.distance.toString() + " M"
+                    profileTotalCountTV.text = walkWeekSummaryDto!!.count.toString() + " 회"
+                }
+            }
+
+            override fun onFailure(call: Call<WalkWeekSummaryDto>, t: Throwable) {
+                Log.d(TAG, "retrofit fail", t)
+            }
+
+        })
     }
 
     override fun onCreateView(
@@ -111,6 +163,9 @@ class ProfileFragment : Fragment() {
         profileUserNameTV = view.findViewById(R.id.profileUserNameTV)
         profileUserConfig = view.findViewById(R.id.profileUserConfig)
         profileButtonLayout = view.findViewById(R.id.profileButtonLayout)
+        profileTotalMinuteTV = view.findViewById(R.id.profileTotalMinuteTV)
+        profileTotalDistanceTV = view.findViewById(R.id.profileTotalDistanceTV)
+        profileTotalCountTV = view.findViewById(R.id.profileTotalCountTV)
 
         return view
     }

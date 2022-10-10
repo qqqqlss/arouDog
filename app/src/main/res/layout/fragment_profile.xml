@@ -80,28 +80,28 @@
         android:padding="10dp">
 
         <TextView
-            android:id="@+id/textView4"
+            android:id="@+id/profileTotalMinuteTV"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:gravity="center"
-            android:text="산책정보 1" />
+            android:text="총시간" />
 
         <TextView
-            android:id="@+id/textView5"
+            android:id="@+id/profileTotalDistanceTV"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:gravity="center"
-            android:text="산책정보 2" />
+            android:text="총거리" />
 
         <TextView
-            android:id="@+id/textView6"
+            android:id="@+id/profileTotalCountTV"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:gravity="center"
-            android:text="산책정보 3" />
+            android:text="횟수" />
     </LinearLayout>
 
     <LinearLayout
