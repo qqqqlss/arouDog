@@ -170,7 +170,7 @@ class MainActivity2 : AppCompatActivity(){
                                     var dogList = arrayListOf<DogDto>()
                                     //강아지 정보 리스트로 저장
                                     userAndDogList!!.forEach { userAndDogDto ->
-                                        var dog = DogDto(userAndDogDto.dogId, userAndDogDto.dogName, userAndDogDto.dogAge, userAndDogDto.dogWeight, userAndDogDto.dogHeight, userAndDogDto.dogGender, userAndDogDto.breed)
+                                        var dog = DogDto(userAndDogDto.dogId, userAndDogDto.dogName, userAndDogDto.dogAge, userAndDogDto.dogWeight, userAndDogDto.dogHeight, userAndDogDto.dogGender, userAndDogDto.breed, userAndDogDto.dogImgList)
                                         dogList.add(dog)
                                     }
                                     //Json 으로 만들기 위한 Gson

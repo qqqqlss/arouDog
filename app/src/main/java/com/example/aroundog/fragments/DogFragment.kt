@@ -1,7 +1,10 @@
 package com.example.aroundog.fragments
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.drawable.Drawable
 import android.os.Bundle
+import android.util.Base64
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -17,6 +20,7 @@ import androidx.viewpager2.widget.ViewPager2
 import com.example.aroundog.Model.DogSliderAdapter
 import com.example.aroundog.R
 import com.example.aroundog.dto.DogDto
+import com.example.aroundog.dto.ImgDto
 
 class DogFragment : Fragment() {
     private var dogDto:DogDto? = null
@@ -51,12 +55,15 @@ class DogFragment : Fragment() {
         profileDogWeightTV.text = dogDto?.dogWeight.toString()
         profileDogBreedTV.text = dogDto?.breed.toString()
 
+        if (dogDto!!.dogImgList.isNullOrEmpty()) {
+            var error = arrayListOf<ImgDto>()
+            error.add(ImgDto("error", "error"))
+            imgViewPager.adapter = DogSliderAdapter(error)
+        }else{
+            imgViewPager.adapter = DogSliderAdapter(dogDto!!.dogImgList)
+        }
 
-        var imgList = arrayListOf<Int>()
-        imgList.add(R.drawable.error)
-        imgList.add(R.drawable.error1)
-        imgList.add(R.drawable.error2)
-        imgViewPager.adapter = DogSliderAdapter(imgList)
+
         return view
     }
 
