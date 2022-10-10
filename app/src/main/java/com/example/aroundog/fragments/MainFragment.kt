@@ -746,6 +746,7 @@ class MainFragment : Fragment(){
         bundle.putSerializable("time", strTime)
         bundle.putSerializable("startTime", startTime)
         bundle.putSerializable("tile", tile)
+        bundle.putSerializable("second", time)
         setFragmentResult("walkEnd", bundle)
     }
 
