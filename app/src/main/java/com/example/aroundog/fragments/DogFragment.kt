@@ -1,21 +1,13 @@
 package com.example.aroundog.fragments
 
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.graphics.drawable.Drawable
 import android.os.Bundle
-import android.util.Base64
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentActivity
-import androidx.fragment.app.FragmentTransaction
-import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.example.aroundog.Model.DogSliderAdapter
 import com.example.aroundog.R
@@ -33,12 +25,17 @@ class DogFragment : Fragment() {
     lateinit var profileDogHeightTV:TextView
     lateinit var profileDogWeightTV:TextView
     lateinit var profileDogBreedTV:TextView
+    lateinit var profileDogInfoLayout:LinearLayout
+    var hasDog = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            dogDto = it.getSerializable("dog") as DogDto
-            Log.d("DOGFRAGMENT", "$dogDto")
+            hasDog = it.getBoolean("hasDog")
+            if(hasDog){//등록된 강아지가 있는 경우
+                dogDto = it.getSerializable("dog") as DogDto
+                Log.d("DOGFRAGMENT", "$dogDto")
+            }
         }
     }
 
@@ -48,19 +45,31 @@ class DogFragment : Fragment() {
     ): View? {
         val view: ViewGroup = setView(inflater, container)
 
-        profileDogNameTV.text = dogDto?.dogName
-        profileDogGenderTV.text = dogDto?.dogGender.toString()
-        profileDogAgeTV.text = dogDto?.dogAge.toString()
-        profileDogHeightTV.text = dogDto?.dogHeight.toString()
-        profileDogWeightTV.text = dogDto?.dogWeight.toString()
-        profileDogBreedTV.text = dogDto?.breed.toString()
+        if(hasDog){//강아지가 있는 경우
+            profileDogNameTV.text = dogDto?.dogName
+            profileDogGenderTV.text = dogDto?.dogGender.toString()
+            profileDogAgeTV.text = dogDto?.dogAge.toString()
+            profileDogHeightTV.text = dogDto?.dogHeight.toString()
+            profileDogWeightTV.text = dogDto?.dogWeight.toString()
+            profileDogBreedTV.text = dogDto?.breed.toString()
 
-        if (dogDto!!.dogImgList.isNullOrEmpty()) {
-            var error = arrayListOf<ImgDto>()
-            error.add(ImgDto("error", "error"))
-            imgViewPager.adapter = DogSliderAdapter(error)
-        }else{
-            imgViewPager.adapter = DogSliderAdapter(dogDto!!.dogImgList)
+            //dogDto.dogId == null 등록된 개가 없는 경우
+            //dogDto.dogId != null && dogDto.dogImgList == null : 개는 있는데 사진이 없음
+            //
+            if (dogDto!!.dogImgList.isNullOrEmpty()) {
+                var emptyImg = arrayListOf<ImgDto>()
+                emptyImg.add(ImgDto("emptyImg", "emptyImg"))
+                imgViewPager.adapter = DogSliderAdapter(emptyImg)
+
+            }else{
+                imgViewPager.adapter = DogSliderAdapter(dogDto!!.dogImgList)
+            }
+
+        }else{//강아지가 없는 경우
+            var emptyDog = arrayListOf<ImgDto>()
+            emptyDog.add(ImgDto("emptyDog", "emptyDog"))
+            imgViewPager.adapter = DogSliderAdapter(emptyDog)
+            profileDogInfoLayout.visibility = View.INVISIBLE
         }
 
 
@@ -69,10 +78,19 @@ class DogFragment : Fragment() {
 
     companion object {
         @JvmStatic
-        fun newInstance(dog:DogDto) =
+        fun newInstanceWithDog(dog:DogDto) =
             DogFragment().apply {
                 arguments = Bundle().apply {
                     putSerializable("dog", dog)
+                    putBoolean("hasDog", true)
+                }
+            }
+
+        @JvmStatic
+        fun newInstanceWithoutDog() =
+            DogFragment().apply {
+                arguments = Bundle().apply {
+                    putBoolean("hasDog", false)
                 }
             }
     }
@@ -91,6 +109,7 @@ class DogFragment : Fragment() {
         profileDogHeightTV = view.findViewById(R.id.profileDogHeightTV)
         profileDogWeightTV = view.findViewById(R.id.profileDogWeightTV)
         profileDogBreedTV = view.findViewById(R.id.profileDogBreedTV)
+        profileDogInfoLayout = view.findViewById(R.id.profileDogInfoLayout)
 
         return view
     }

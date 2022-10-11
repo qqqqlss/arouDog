@@ -166,19 +166,23 @@ class MainActivity2 : AppCompatActivity(){
 
                                     dog_info_pref = getSharedPreferences("dogInfo", MODE_PRIVATE) // 세션 영역에 저장할 유저 정보
                                     dog_info_editor = dog_info_pref.edit()
+                                    if(userAndDogList!![0].dogId != 0L) {//등록된 강아지가 있는지 확인
+                                        var dogList = arrayListOf<DogDto>()
+                                        //강아지 정보 리스트로 저장
+                                        userAndDogList!!.forEach { userAndDogDto ->
+                                            var dog = DogDto(userAndDogDto.dogId, userAndDogDto.dogName, userAndDogDto.dogAge, userAndDogDto.dogWeight, userAndDogDto.dogHeight, userAndDogDto.dogGender, userAndDogDto.breed, userAndDogDto.dogImgList)
+                                            dogList.add(dog)
+                                        }
+                                        //Json 으로 만들기 위한 Gson
+                                        var makeGson = GsonBuilder().create()
+                                        var type:TypeToken<List<DogDto>> = object:TypeToken<List<DogDto>>(){}
+                                        var dogStr = makeGson.toJson(dogList, type.type)
 
-                                    var dogList = arrayListOf<DogDto>()
-                                    //강아지 정보 리스트로 저장
-                                    userAndDogList!!.forEach { userAndDogDto ->
-                                        var dog = DogDto(userAndDogDto.dogId, userAndDogDto.dogName, userAndDogDto.dogAge, userAndDogDto.dogWeight, userAndDogDto.dogHeight, userAndDogDto.dogGender, userAndDogDto.breed, userAndDogDto.dogImgList)
-                                        dogList.add(dog)
+                                        dog_info_editor.putBoolean("hasDog", true)
+                                        dog_info_editor.putString("dogList", dogStr)
+                                    }else{//강아지 없을때
+                                        dog_info_editor.putBoolean("hasDog", false)
                                     }
-                                    //Json 으로 만들기 위한 Gson
-                                    var makeGson = GsonBuilder().create()
-                                    var type:TypeToken<List<DogDto>> = object:TypeToken<List<DogDto>>(){}
-                                    var dogStr = makeGson.toJson(dogList, type.type)
-
-                                    dog_info_editor.putString("dogList", dogStr)
                                     dog_info_editor.commit()
 
 

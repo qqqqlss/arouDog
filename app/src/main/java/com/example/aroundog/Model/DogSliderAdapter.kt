@@ -26,7 +26,19 @@ class DogSliderAdapter(val imgList: List<ImgDto>): RecyclerView.Adapter<DogSlide
         init {
             dogSlider = view.findViewById(R.id.dogSlider)
             dogSlider.setOnClickListener {
+                //path에 따라 리스너 달라지게
+                //emptyImg시 이미지 추가 화면
+                //emptyDog시 강아지 추가 화면
+
                 Toast.makeText(view.context, "${path}", Toast.LENGTH_SHORT).show()
+            }
+            dogSlider.setOnLongClickListener {
+                //삭제 예 아니오 다이얼로그
+
+
+                //false일 경우 길게 누르고있을때 onlongclicklistiner, 손 뗄때 onclick발생
+                //true일 경우 longclick만 발생
+                return@setOnLongClickListener (true)
             }
         }
     }
@@ -39,9 +51,13 @@ class DogSliderAdapter(val imgList: List<ImgDto>): RecyclerView.Adapter<DogSlide
         holder.path = imgList[position].path
 
         var bitmap: Bitmap
-        if (imgList[position].path == "error") {//비어있는경우
+        if (imgList[position].path == "emptyImg") {//이미지가 없는 경우
             holder.dogSlider.setImageResource(R.drawable.error2)
-        } else {
+        }
+        else if(imgList[position].path == "emptyDog"){//강아지가 없는 경우
+
+        }
+        else {
             var byteArray: ByteArray = Base64.decode(imgList[position].img, Base64.DEFAULT)
             bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
             Log.d(TAG, "itemList is not null")

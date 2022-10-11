@@ -1,6 +1,5 @@
 package com.example.aroundog.fragments
 
-import android.graphics.Color
 import android.graphics.Typeface
 import android.os.Bundle
 import android.util.Log
@@ -21,8 +20,6 @@ import com.example.aroundog.dto.WalkWeekSummaryDto
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
-import org.jetbrains.anko.backgroundColor
-import org.jetbrains.anko.custom.style
 import org.jetbrains.anko.textColor
 import retrofit2.Call
 import retrofit2.Callback
@@ -46,6 +43,9 @@ class ProfileFragment : Fragment() {
     lateinit var profileTotalMinuteTV:TextView
     lateinit var profileTotalDistanceTV:TextView
     lateinit var profileTotalCountTV:TextView
+    var hasDog:Boolean = false
+    var buttonList = arrayListOf<Button>()
+    lateinit var style:ContextThemeWrapper
 
 //    https://greensky0026.tistory.com/224
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -63,6 +63,7 @@ class ProfileFragment : Fragment() {
         var dog_info_pref =
             requireActivity().getSharedPreferences("dogInfo", AppCompatActivity.MODE_PRIVATE)
         var listStr = dog_info_pref.getString("dogList", "")
+        hasDog = dog_info_pref.getBoolean("hasDog", false)
 
         dogList = makeGson.fromJson<List<DogDto>>(listStr, type.type)
 
@@ -72,6 +73,8 @@ class ProfileFragment : Fragment() {
             .addConverterFactory(GsonConverterFactory.create(gsonInstance))
             .build()
             .create(WalkService::class.java)
+
+        style = ContextThemeWrapper(context, R.style.borderLessButton)
     }
 
     override fun onResume() {
@@ -110,75 +113,60 @@ class ProfileFragment : Fragment() {
     }
 
     private fun addDogFragments() {
-        //dogList의 첫번째 원소를 이용한 강아지 프래그먼트 추가
-        var initFragment = DogFragment.newInstance(dogList[0])
-        childFragmentManager.beginTransaction()
-            .replace(R.id.dogInfoFragment, initFragment, dogList[0].dogId.toString())
-            .commitAllowingStateLoss()
+        if(hasDog) {//강아지 있을때
+            //dogList의 첫번째 원소를 이용한 강아지 프래그먼트 추가
+            var initFragment = DogFragment.newInstanceWithDog(dogList[0])
+            childFragmentManager.beginTransaction()
+                .replace(R.id.dogInfoFragment, initFragment, dogList[0].dogId.toString())
+                .commitAllowingStateLoss()
 
-        var buttonList= arrayListOf<Button>()
-        var first = true
-        //dogList 전체 추가
-        dogList.forEach { dogDto ->
-            idList.add(dogDto.dogId.toInt())//아이디 리스트에 추가(클릭 리스너에서 사용)
-            var dogFragment = DogFragment.newInstance(dogDto)//프래그먼트 생성
-            var style = ContextThemeWrapper(context, R.style.borderLessButton)
-            var button = Button(style, null, R.style.borderLessButton).apply {
-                buttonList.add(this)
-                text = dogDto.dogName
-                id = dogDto.dogId.toInt()
-                textColor = resources.getColor(R.color.lightGray)
-                textSize = 14F
-                setTypeface(this.typeface, Typeface.NORMAL)
 
-                //버튼 id == 프래그먼트 태그
-                setOnClickListener { view ->
-                    if (childFragmentManager.findFragmentByTag(view.id.toString()) != null) {//해당 태그를 가진 프래그먼트가 있을때
-                        childFragmentManager.beginTransaction()
-                            .show(childFragmentManager.findFragmentByTag(view.id.toString())!!)
-                            .commit()
-                    } else {
-                        childFragmentManager.beginTransaction()
-                            .add(R.id.dogInfoFragment, dogFragment, view.id.toString())
-                            .commit()
-                    }
+            var first = true
+            //dogList 전체 추가
+            dogList.forEach { dogDto ->
 
-                    //다른 프래그먼트 hide
-                    for (id in idList) {
-                        if (view.id != id) {//자신은 제외
-                            if (childFragmentManager.findFragmentByTag(id.toString()) != null) {
-                                childFragmentManager.beginTransaction()
-                                    .hide(childFragmentManager.findFragmentByTag(id.toString())!!)
-                                    .commit()
-                            }
-                        }
-                    }
+                var dogFragment = DogFragment.newInstanceWithDog(dogDto)//프래그먼트 생성
+                var button = Button(style, null, R.style.borderLessButton).apply {
+                    buttonList.add(this)
+                    text = dogDto.dogName
+                    id = dogDto.dogId.toInt()
+                    textColor = resources.getColor(R.color.lightGray)
+                    textSize = 14F
+                    setTypeface(this.typeface, Typeface.NORMAL)
+                    idList.add(dogDto.dogId.toInt())//아이디 리스트에 추가(클릭 리스너에서 사용)
 
-                    //클릭된 버튼 크기, 색 변경
-                    for (button in buttonList) {
-                        if (button == view) {
-                            button.textColor = resources.getColor(R.color.brown)
-                            button.setTypeface(button.typeface, Typeface.BOLD)
-                            button.textSize = 16F
-                        } else {
-                            button.textColor = resources.getColor(R.color.lightGray)
-                            button.setTypeface(button.typeface, Typeface.NORMAL)
-                            button.textSize = 14F
-                        }
-                    }
+                    setOnClickListener(ButtonClickListener(dogFragment))
                 }
-            }
 
-            //첫 로딩 시 첫번째 버튼을 선택된 상태로 만듦
-            if(first){
-                button.textColor = resources.getColor(R.color.brown)
-                button.setTypeface(button.typeface, Typeface.BOLD)
-                button.textSize = 16F
-                first=false
-            }
-            profileButtonLayout.addView(button)
+                //첫 로딩 시 첫번째 버튼을 선택된 상태로 만듦
+                if (first) {
+                    button.textColor = resources.getColor(R.color.brown)
+                    button.setTypeface(button.typeface, Typeface.BOLD)
+                    button.textSize = 16F
+                    first = false
+                }
+                profileButtonLayout.addView(button)
+            }//dogList.forEach
         }
+
+        //강아지 추가 띄우는 프래그먼트
+        var initFragment = DogFragment.newInstanceWithoutDog()
+
+        var button = Button(style, null, R.style.borderLessButton).apply {
+            buttonList.add(this)
+            text = "+"
+            id = -1
+            textColor = resources.getColor(R.color.lightGray)
+            textSize = 14F
+            setTypeface(this.typeface, Typeface.NORMAL)
+            idList.add(-1)
+            setOnClickListener(ButtonClickListener(initFragment))
+        }
+        profileButtonLayout.addView(button)
+
+
     }
+
 
     private fun setView(
         inflater: LayoutInflater,
@@ -196,5 +184,43 @@ class ProfileFragment : Fragment() {
 
 
         return view
+    }
+    inner class ButtonClickListener(var fragment:Fragment):View.OnClickListener{
+        override fun onClick(view: View) {
+            //button id == 프래그먼트 태그
+            if (childFragmentManager.findFragmentByTag(view.id.toString()) != null) {//해당 태그를 가진 프래그먼트가 있을때
+                childFragmentManager.beginTransaction()
+                    .show(childFragmentManager.findFragmentByTag(view.id.toString())!!)
+                    .commit()
+            } else {
+                childFragmentManager.beginTransaction()
+                    .add(R.id.dogInfoFragment, fragment, view.id.toString())
+                    .commit()
+            }
+
+            //다른 프래그먼트 hide
+            for (id in idList) {
+                if (view.id != id) {//자신은 제외
+                    if (childFragmentManager.findFragmentByTag(id.toString()) != null) {
+                        childFragmentManager.beginTransaction()
+                            .hide(childFragmentManager.findFragmentByTag(id.toString())!!)
+                            .commit()
+                    }
+                }
+            }
+
+            //클릭된 버튼 크기, 색 변경
+            for (button in buttonList) {
+                if (button == view) {
+                    button.textColor = resources.getColor(R.color.brown)
+                    button.setTypeface(button.typeface, Typeface.BOLD)
+                    button.textSize = 16F
+                } else {
+                    button.textColor = resources.getColor(R.color.lightGray)
+                    button.setTypeface(button.typeface, Typeface.NORMAL)
+                    button.textSize = 14F
+                }
+            }
+        }
     }
 }
