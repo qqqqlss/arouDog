@@ -130,11 +130,15 @@ class ProfileFragment : Fragment() {
         }
 
         //강아지 추가 띄우는 프래그먼트
-        var addFragment = DogFragment.newInstanceWithoutDog()
+        var addFragment = DogFragment.newInstanceAddDog()
         childFragmentManager.beginTransaction()//프래그먼트 생성(등록된 강아지 없는 경우 버튼을 클릭해야지만 프래그먼트가 생성되기때문에)
             .add(R.id.dogInfoFragment, addFragment,"-1")
             .commit()
         addButton("+", -1, addFragment)
+
+        if (hasDog) {
+            childFragmentManager.beginTransaction().hide(addFragment).commit()
+        }
 
         //첫 버튼에 클릭된 효과
         var firstButton = buttonList[0]

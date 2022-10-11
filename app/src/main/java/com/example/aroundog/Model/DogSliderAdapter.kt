@@ -55,7 +55,7 @@ class DogSliderAdapter(val imgList: List<ImgDto>): RecyclerView.Adapter<DogSlide
             holder.dogSlider.setImageResource(R.drawable.error2)
         }
         else if(imgList[position].path == "emptyDog"){//강아지가 없는 경우
-
+            holder.dogSlider.setImageResource(R.drawable.add_dog)
         }
         else {
             var byteArray: ByteArray = Base64.decode(imgList[position].img, Base64.DEFAULT)

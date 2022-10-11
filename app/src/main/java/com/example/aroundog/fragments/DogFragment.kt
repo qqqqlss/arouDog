@@ -55,7 +55,6 @@ class DogFragment : Fragment() {
 
             //dogDto.dogId == null 등록된 개가 없는 경우
             //dogDto.dogId != null && dogDto.dogImgList == null : 개는 있는데 사진이 없음
-            //
             if (dogDto!!.dogImgList.isNullOrEmpty()) {
                 var emptyImg = arrayListOf<ImgDto>()
                 emptyImg.add(ImgDto("emptyImg", "emptyImg"))
@@ -87,7 +86,7 @@ class DogFragment : Fragment() {
             }
 
         @JvmStatic
-        fun newInstanceWithoutDog() =
+        fun newInstanceAddDog() =
             DogFragment().apply {
                 arguments = Bundle().apply {
                     putBoolean("hasDog", false)
