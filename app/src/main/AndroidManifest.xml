@@ -26,6 +26,14 @@
         android:usesCleartextTraffic="true"
         tools:ignore="ExtraText"
         tools:targetApi="n">
+        <activity
+            android:name=".AddDogActivity"
+            android:exported="false">
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value="" />
+        </activity>
+
         <service
             android:name=".Service.NaverMapService"
             android:foregroundServiceType="location"></service>

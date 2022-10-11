@@ -1,5 +1,6 @@
 package com.example.aroundog.Model
 
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.drawable.Drawable
@@ -11,9 +12,9 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
+import com.example.aroundog.AddDogActivity
 import com.example.aroundog.R
 import com.example.aroundog.dto.ImgDto
-import org.jetbrains.anko.find
 
 class DogSliderAdapter(val imgList: List<ImgDto>): RecyclerView.Adapter<DogSliderAdapter.ViewHolder>() {
     val TAG = "DOGSLIDERADAPTER"
@@ -31,8 +32,11 @@ class DogSliderAdapter(val imgList: List<ImgDto>): RecyclerView.Adapter<DogSlide
                 //path에 따라 리스너 달라지게
                 //emptyImg시 이미지 추가 화면
                 //emptyDog시 강아지 추가 화면
+                if (id==-200L) {
+                    val intent = Intent(view.context, AddDogActivity::class.java)
+                    view.context.startActivity(intent)
+                }
 
-                Toast.makeText(view.context, "${path}", Toast.LENGTH_SHORT).show()
                 Toast.makeText(view.context, "path : ${path}, id : $id", Toast.LENGTH_SHORT).show()
             }
             dogSlider.setOnLongClickListener {
