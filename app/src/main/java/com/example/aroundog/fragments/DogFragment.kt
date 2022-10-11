@@ -57,7 +57,7 @@ class DogFragment : Fragment() {
             //dogDto.dogId != null && dogDto.dogImgList == null : 개는 있는데 사진이 없음
             if (dogDto!!.dogImgList.isNullOrEmpty()) {
                 var emptyImg = arrayListOf<ImgDto>()
-                emptyImg.add(ImgDto("emptyImg", "emptyImg"))
+                emptyImg.add(ImgDto(-100, "emptyImg", "emptyImg"))
                 imgViewPager.adapter = DogSliderAdapter(emptyImg)
 
             }else{
@@ -66,7 +66,7 @@ class DogFragment : Fragment() {
 
         }else{//강아지가 없는 경우
             var emptyDog = arrayListOf<ImgDto>()
-            emptyDog.add(ImgDto("emptyDog", "emptyDog"))
+            emptyDog.add(ImgDto(-200,"emptyDog", "emptyDog"))
             imgViewPager.adapter = DogSliderAdapter(emptyDog)
             profileDogInfoLayout.visibility = View.INVISIBLE
         }

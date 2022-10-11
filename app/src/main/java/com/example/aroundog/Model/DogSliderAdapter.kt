@@ -23,6 +23,8 @@ class DogSliderAdapter(val imgList: List<ImgDto>): RecyclerView.Adapter<DogSlide
         var dogSlider:ImageView
         var view = view
         var path: String = ""
+        var id:Long = 0
+
         init {
             dogSlider = view.findViewById(R.id.dogSlider)
             dogSlider.setOnClickListener {
@@ -31,6 +33,7 @@ class DogSliderAdapter(val imgList: List<ImgDto>): RecyclerView.Adapter<DogSlide
                 //emptyDog시 강아지 추가 화면
 
                 Toast.makeText(view.context, "${path}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(view.context, "path : ${path}, id : $id", Toast.LENGTH_SHORT).show()
             }
             dogSlider.setOnLongClickListener {
                 //삭제 예 아니오 다이얼로그
@@ -49,6 +52,7 @@ class DogSliderAdapter(val imgList: List<ImgDto>): RecyclerView.Adapter<DogSlide
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.path = imgList[position].path
+        holder.id = imgList[position].id
 
         var bitmap: Bitmap
         if (imgList[position].path == "emptyImg") {//이미지가 없는 경우
