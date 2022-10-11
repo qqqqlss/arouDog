@@ -86,7 +86,7 @@ class ProfileFragment : Fragment() {
             ) {
                 if (response.isSuccessful) {
                     var walkWeekSummaryDto = response.body()
-                    profileTotalMinuteTV.text = (walkWeekSummaryDto!!.second / 60).toString()
+                    profileTotalMinuteTV.text = String.format("%.1f 분",(walkWeekSummaryDto!!.second / 60.0))
                     profileTotalDistanceTV.text = walkWeekSummaryDto!!.distance.toString() + " M"
                     profileTotalCountTV.text = walkWeekSummaryDto!!.count.toString() + " 회"
                 }
