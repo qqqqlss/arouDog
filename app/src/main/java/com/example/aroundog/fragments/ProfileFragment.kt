@@ -121,46 +121,44 @@ class ProfileFragment : Fragment() {
                 .commitAllowingStateLoss()
 
 
-            var first = true
             //dogList 전체 추가
             dogList.forEach { dogDto ->
 
                 var dogFragment = DogFragment.newInstanceWithDog(dogDto)//프래그먼트 생성
-                var button = Button(style, null, R.style.borderLessButton).apply {
-                    buttonList.add(this)
-                    text = dogDto.dogName
-                    id = dogDto.dogId.toInt()
-                    textColor = resources.getColor(R.color.lightGray)
-                    textSize = 14F
-                    setTypeface(this.typeface, Typeface.NORMAL)
-                    idList.add(dogDto.dogId.toInt())//아이디 리스트에 추가(클릭 리스너에서 사용)
-
-                    setOnClickListener(ButtonClickListener(dogFragment))
-                }
-
-                //첫 로딩 시 첫번째 버튼을 선택된 상태로 만듦
-                if (first) {
-                    button.textColor = resources.getColor(R.color.brown)
-                    button.setTypeface(button.typeface, Typeface.BOLD)
-                    button.textSize = 16F
-                    first = false
-                }
-                profileButtonLayout.addView(button)
+                addButton(dogDto.dogName, dogDto.dogId.toInt(), dogFragment)
             }//dogList.forEach
         }
 
         //강아지 추가 띄우는 프래그먼트
-        var initFragment = DogFragment.newInstanceWithoutDog()
+        var addFragment = DogFragment.newInstanceWithoutDog()
+        childFragmentManager.beginTransaction()//프래그먼트 생성(등록된 강아지 없는 경우 버튼을 클릭해야지만 프래그먼트가 생성되기때문에)
+            .add(R.id.dogInfoFragment, addFragment,"-1")
+            .commit()
+        addButton("+", -1, addFragment)
 
+        //첫 버튼에 클릭된 효과
+        var firstButton = buttonList[0]
+        firstButton.textColor = resources.getColor(R.color.brown)
+        firstButton.setTypeface(firstButton.typeface, Typeface.BOLD)
+        firstButton.textSize = 16F
+
+    }
+    
+    private fun addButton(
+        buttonText: String,
+        buttonId:Int,
+        fragment: DogFragment
+    ) {
         var button = Button(style, null, R.style.borderLessButton).apply {
             buttonList.add(this)
-            text = "+"
-            id = -1
+            text = buttonText
+            id = buttonId
             textColor = resources.getColor(R.color.lightGray)
             textSize = 14F
             setTypeface(this.typeface, Typeface.NORMAL)
-            idList.add(-1)
-            setOnClickListener(ButtonClickListener(initFragment))
+            idList.add(buttonId)//아이디 리스트에 추가(클릭 리스너에서 사용)
+
+            setOnClickListener(ButtonClickListener(fragment))
         }
         profileButtonLayout.addView(button)
 
