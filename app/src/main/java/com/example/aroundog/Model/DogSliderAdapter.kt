@@ -1,9 +1,13 @@
 package com.example.aroundog.Model
 
+import android.app.AlertDialog
+import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.drawable.Drawable
+import android.net.Uri
+import android.provider.Settings
 import android.util.Base64
 import android.util.Log
 import android.view.LayoutInflater
@@ -13,10 +17,20 @@ import android.widget.ImageView
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.example.aroundog.AddDogActivity
+import com.example.aroundog.BuildConfig
 import com.example.aroundog.R
+import com.example.aroundog.Service.DogService
 import com.example.aroundog.dto.ImgDto
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 
-class DogSliderAdapter(val imgList: List<ImgDto>): RecyclerView.Adapter<DogSliderAdapter.ViewHolder>() {
+class DogSliderAdapter(var imgList: MutableList<ImgDto>): RecyclerView.Adapter<DogSliderAdapter.ViewHolder>() {
+
     val TAG = "DOGSLIDERADAPTER"
 
 
@@ -25,6 +39,21 @@ class DogSliderAdapter(val imgList: List<ImgDto>): RecyclerView.Adapter<DogSlide
         var view = view
         var path: String = ""
         var id:Long = 0
+
+        var gsonInstance: Gson = GsonBuilder().setLenient().create()
+        var retrofit = Retrofit.Builder()
+            .baseUrl(BuildConfig.SERVER)
+            .addConverterFactory(GsonConverterFactory.create(gsonInstance))
+            .build()
+            .create(DogService::class.java)
+
+        //ViewHolder에 어댑터 등록(아이템 삭제하기 위해)
+        lateinit var adapter:DogSliderAdapter
+
+        fun linkAdapter(adapter: DogSliderAdapter):ViewHolder{
+            this.adapter = adapter
+            return this
+        }
 
         init {
             dogSlider = view.findViewById(R.id.dogSlider)
@@ -41,8 +70,46 @@ class DogSliderAdapter(val imgList: List<ImgDto>): RecyclerView.Adapter<DogSlide
             }
             dogSlider.setOnLongClickListener {
                 //삭제 예 아니오 다이얼로그
+                if(path!="emptyImg" && path!="emptyDog"){
+                    //강아지 사진 길게 누를 시 삭제
+                    val builder = AlertDialog.Builder(view.context)
+                    builder.setTitle("사진 삭제")
+                        .setMessage(
+                            "사진을 삭제하시겠어요?"
+                        )
+                        .setPositiveButton("삭제", object:DialogInterface.OnClickListener{
+                            override fun onClick(dialog: DialogInterface?, which: Int) {
 
+                                retrofit.deleteDog(id).enqueue(object:Callback<Boolean>{
+                                    override fun onResponse(
+                                        call: Call<Boolean>,
+                                        response: Response<Boolean>
+                                    ) {
+                                        if (response.isSuccessful) {
+                                            if (response.body() == true) {
+                                                adapter.imgList.removeAt(adapterPosition)
+                                                adapter.notifyItemRemoved(adapterPosition)
 
+                                                Toast.makeText(view.context, "삭제 완료", Toast.LENGTH_SHORT).show()
+                                            } else {
+                                                Toast.makeText(view.context, "삭제 실패", Toast.LENGTH_SHORT).show()
+                                            }
+                                        }
+                                    }
+
+                                    override fun onFailure(call: Call<Boolean>, t: Throwable) {
+                                        Toast.makeText(view.context, "삭제 실패", Toast.LENGTH_SHORT).show()
+                                    }
+                                })
+                            }
+                        })
+                    builder.setNegativeButton("취소") { dialog, i ->
+                        dialog.dismiss()
+                    }
+                    val dialog = builder.create()
+                    dialog.show()
+                }
+                
                 //false일 경우 길게 누르고있을때 onlongclicklistiner, 손 뗄때 onclick발생
                 //true일 경우 longclick만 발생
                 return@setOnLongClickListener (true)
@@ -51,7 +118,8 @@ class DogSliderAdapter(val imgList: List<ImgDto>): RecyclerView.Adapter<DogSlide
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        return ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.dog_slider, parent, false))
+        var view = LayoutInflater.from(parent.context).inflate(R.layout.dog_slider, parent, false)
+        return ViewHolder(view).linkAdapter(this)//뷰홀더에 어댑터를 동록한 뒤 뷰홀더 리턴
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
