@@ -144,7 +144,7 @@ class ProfileFragment : Fragment() {
         var firstButton = buttonList[0]
         firstButton.textColor = resources.getColor(R.color.brown)
         firstButton.setTypeface(firstButton.typeface, Typeface.BOLD)
-        firstButton.textSize = 16F
+        firstButton.textSize = 20F
 
     }
     
@@ -216,10 +216,10 @@ class ProfileFragment : Fragment() {
                 if (button == view) {
                     button.textColor = resources.getColor(R.color.brown)
                     button.setTypeface(button.typeface, Typeface.BOLD)
-                    button.textSize = 16F
+                    button.textSize = 20F
                 } else {
                     button.textColor = resources.getColor(R.color.lightGray)
-                    button.setTypeface(button.typeface, Typeface.NORMAL)
+                    button.setTypeface(Typeface.create(button.typeface, Typeface.NORMAL))//BOLD할때처럼 하면 적용 안딤
                     button.textSize = 14F
                 }
             }
