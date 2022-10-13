@@ -1,5 +1,6 @@
 package com.example.aroundog.fragments
 
+import android.content.DialogInterface
 import android.graphics.Typeface
 import android.os.Bundle
 import android.util.Log
@@ -10,10 +11,13 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.example.aroundog.BuildConfig
 import com.example.aroundog.R
+import com.example.aroundog.Service.DogService
 import com.example.aroundog.Service.WalkService
 import com.example.aroundog.dto.DogDto
 import com.example.aroundog.dto.WalkWeekSummaryDto
@@ -21,10 +25,7 @@ import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import org.jetbrains.anko.textColor
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
-import retrofit2.Retrofit
+import retrofit2.*
 import retrofit2.converter.gson.GsonConverterFactory
 
 
@@ -37,7 +38,9 @@ class ProfileFragment : Fragment() {
     lateinit var profileButtonLayout: LinearLayout
     var idList = arrayListOf<Int>()
 
-    lateinit var retrofit: WalkService
+    lateinit var retrofit:Retrofit
+    lateinit var walkService:WalkService
+    lateinit var dogService:DogService
     lateinit var userId:String
 
     lateinit var profileTotalMinuteTV:TextView
@@ -72,14 +75,17 @@ class ProfileFragment : Fragment() {
             .baseUrl(BuildConfig.SERVER)
             .addConverterFactory(GsonConverterFactory.create(gsonInstance))
             .build()
-            .create(WalkService::class.java)
+
+
+        walkService = retrofit.create(WalkService::class.java)
+        dogService = retrofit.create(DogService::class.java)
 
         style = ContextThemeWrapper(context, R.style.borderLessButton)
     }
 
     override fun onResume() {
         super.onResume()
-        retrofit.getWalkWeekSummary(userId).enqueue(object:Callback<WalkWeekSummaryDto>{
+        walkService.getWalkWeekSummary(userId).enqueue(object:Callback<WalkWeekSummaryDto>{
             override fun onResponse(
                 call: Call<WalkWeekSummaryDto>,
                 response: Response<WalkWeekSummaryDto>
@@ -163,6 +169,57 @@ class ProfileFragment : Fragment() {
             idList.add(buttonId)//아이디 리스트에 추가(클릭 리스너에서 사용)
 
             setOnClickListener(ButtonClickListener(fragment))
+
+            if (id != -1) {
+                setOnLongClickListener {
+                    //다이얼로그 뿌리고 true면 삭제, retrofit 강아지 삭제 통신도 필요(cascade도 해야할듯)
+                    val builder = AlertDialog.Builder(view!!.context) //context만 하면 이상하게 나옴
+                    builder.setTitle("강아지 삭제")
+                        .setMessage(
+                            "강아지를 삭제하시겠어요?"
+                        )
+                        .setPositiveButton("삭제", object : DialogInterface.OnClickListener {
+                            override fun onClick(dialog: DialogInterface?, which: Int) {
+                                dogService.deleteDog(id.toLong()).enqueue(object:Callback<Boolean>{
+                                    override fun onResponse(
+                                        call: Call<Boolean>,
+                                        response: Response<Boolean>
+                                    ) {
+                                        if (response.isSuccessful) {
+                                            if (response.body() == true) {
+                                                profileButtonLayout.removeView(it)
+
+                                                var index = buttonList.indexOf(it)
+                                                if (index == 0) {//삭제할게 첫 인덱스면
+                                                    //첫 버튼에 클릭된 효과
+                                                    var firstButton = buttonList[1]//두번째꺼 글자 형식 변경
+                                                    firstButton.textColor = resources.getColor(R.color.brown)
+                                                    firstButton.setTypeface(firstButton.typeface, Typeface.BOLD)
+                                                    firstButton.textSize = 20F
+                                                }
+                                                buttonList.remove(it)
+                                                Toast.makeText(context, "삭제 완료", Toast.LENGTH_SHORT).show()
+                                            } else{
+                                                Toast.makeText(context, "삭제 실패", Toast.LENGTH_SHORT).show()
+                                            }
+                                        }
+                                    }
+
+                                    override fun onFailure(call: Call<Boolean>, t: Throwable) {
+                                        Toast.makeText(context, "삭제 실패", Toast.LENGTH_SHORT).show()
+                                    }
+                                })
+                            }
+                        })
+                        .setNegativeButton("취소") { dialog, i ->
+                            dialog.dismiss()
+                        }
+                    val dialog = builder.create()
+                    dialog.show()
+
+                    return@setOnLongClickListener true
+                }
+            }
         }
         profileButtonLayout.addView(button)
 

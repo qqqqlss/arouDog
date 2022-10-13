@@ -22,8 +22,14 @@ interface DogService {
         @Field("gender") gender:String
     ): Call<Boolean>
 
-    @DELETE("/dog/{dogImgId}")
+    @DELETE("/dogImg/{dogImgId}")
     fun deleteDogImg(
         @Path("dogImgId") dogImgId:Long
     ):Call<Boolean>
+
+    @DELETE("/dog/{dogId}")
+    fun deleteDog(
+        @Path("dogId") dogId:Long
+    ):Call<Boolean>
+    
 }
