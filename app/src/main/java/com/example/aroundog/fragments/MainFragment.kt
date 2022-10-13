@@ -816,10 +816,12 @@ class MainFragment : Fragment(){
      * 경로선 오버레이 초기화
      */
     fun pathOverlaySettings() {
-        pathOverlay.outlineWidth = 0//테두리 없음
-        pathOverlay.width = 20//경로선 폭
-        pathOverlay.passedColor = Color.RED//지나온 경로선
-        pathOverlay.color = Color.GREEN//경로선 색상
+        pathOverlay.outlineWidth = 5//테두리 없음
+        pathOverlay.width = 30//경로선 폭
+        pathOverlay.passedColor = Color.rgb(235, 218, 179)//지나온 경로선
+        pathOverlay.color = Color.rgb(235, 218, 179)//경로선 색상
+        pathOverlay.patternImage = OverlayImage.fromResource(R.drawable.path_pattern) //경로 패턴이미지
+        pathOverlay.patternInterval = 40 //경로 패턴 간격
     }
 
     fun endWalk() {

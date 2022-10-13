@@ -30,6 +30,7 @@ import com.naver.maps.map.NaverMap
 import com.naver.maps.map.OnMapReadyCallback
 import com.naver.maps.map.overlay.MultipartPathOverlay
 import com.naver.maps.map.overlay.MultipartPathOverlay.ColorPart
+import com.naver.maps.map.overlay.OverlayImage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -107,7 +108,7 @@ class EndWalkFragment : Fragment(){
             var multipartPath = MultipartPathOverlay()
             val colorList = ArrayList<ColorPart>()
             val colorPart = ColorPart(
-                Color.RED,   // 지나갈 경로선의 선 색상을 빨간색으로 지정
+                Color.rgb(235, 218, 179),   // 지나갈 경로선의 선 색상을 빨간색으로 지정
                 Color.WHITE, // 지나갈 경로선의 테두리 색상을 흰색으로 지정
                 Color.GRAY,  // 지나온 경로선의 선 색상을 회색으로 지정
                 Color.LTGRAY // 지나온 경로선의 테두리 색상을 밝은 회색으로 지정
@@ -117,6 +118,10 @@ class EndWalkFragment : Fragment(){
             }
             multipartPath.coordParts = pathPoints
             multipartPath.colorParts = colorList
+            multipartPath.outlineWidth = 5//테두리 없음
+            multipartPath.width = 30//경로선 폭
+            multipartPath.patternImage = OverlayImage.fromResource(R.drawable.path_pattern)
+            multipartPath.patternInterval = 40
             multipartPath.map = naverMap
 
             var bounds: LatLngBounds = multipartPath.bounds//그려진 오버레이의 영역 리턴
