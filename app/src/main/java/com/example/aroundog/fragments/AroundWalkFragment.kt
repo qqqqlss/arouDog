@@ -25,6 +25,7 @@ import com.example.aroundog.R
 import com.example.aroundog.Service.NaverMapService
 import com.example.aroundog.Service.RetrofitService
 import com.example.aroundog.Service.WalkService
+import com.example.aroundog.Util
 import com.example.aroundog.dto.WalkListDto
 import com.google.gson.*
 import kotlinx.coroutines.CoroutineScope
@@ -84,7 +85,9 @@ class AroundWalkFragment : Fragment() {
                                     bitmap = BitmapFactory.decodeResource(resources,R.drawable.error2)
                                 addItem(userId, it.walkId, bitmap, it.userId, it.good, it.bad, it.walkSecond, it.checkGood, it.checkBad)
                             }
+
                         }
+                        Util.progressOffInFragment()
                         totalCount += list!!.size
                         mAdapter.notifyItemRangeChanged(totalCount, itemSize)
                     }
@@ -101,6 +104,7 @@ class AroundWalkFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
+        Util.progressOnInFragment(this)
         //저장된 id 정보 가져오기
         var user_info_pref =
             requireActivity().getSharedPreferences("userInfo", AppCompatActivity.MODE_PRIVATE)

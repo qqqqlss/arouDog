@@ -4,10 +4,11 @@ import android.animation.ObjectAnimator
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
+import android.graphics.drawable.AnimationDrawable
+import android.graphics.drawable.ColorDrawable
 import android.location.Location
 import android.net.Uri
 import android.os.*
-import android.os.Environment.getExternalStoragePublicDirectory
 import android.provider.MediaStore
 import android.util.Log
 import android.view.LayoutInflater
@@ -18,7 +19,8 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat.startActivityForResult
+import androidx.appcompat.app.AppCompatDialog
+import androidx.appcompat.app.AppCompatDialogFragment
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResult
@@ -30,6 +32,7 @@ import com.example.aroundog.R
 import com.example.aroundog.Service.CoordinateService
 import com.example.aroundog.Service.NaverMapService
 import com.example.aroundog.Service.Polyline
+import com.example.aroundog.Util
 import com.example.aroundog.dto.UserCoordinateDogDto
 import com.example.aroundog.utils.*
 import com.google.gson.Gson
@@ -113,24 +116,30 @@ class MainFragment : Fragment(){
     val REQUEST_TAKE_PHOTO = 1
 
 
-
     companion object {
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1000
         val firstTile = MutableLiveData<String>()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+
         super.onCreate(savedInstanceState)
 
         overlayImage = OverlayImage.fromAsset("logo.png") //위치 오버레이 이미지 초기화
 
+
         pathOverlaySettings() //경로선 오버레이 초기화
+
+        // 초기화 전로딩
+        Util.progressOnInFragment(this)
 
         initMapView() //지도생성, 초기화
 
         initRetrofit()//retrofit초기화
 
         initDogImage()//강아지 이미지 초기화
+
+
 
         //환경설정에서 알람을 표시할 영역을 설정하는 변수, 저장 필요, 일단 임의값으로 대체
         //소수점 다섯째 자리가 약 1m정도씩 차이남
@@ -226,6 +235,8 @@ class MainFragment : Fragment(){
                     isFirst = false
                     createWebView()
                     Log.d(TAG, "첫번째 위치 업데이트")
+                    //초기화 후 로딩 화면 끔
+                    Util.progressOffInFragment()
                 }
 
                 //산책중일땐 pathPoints의 마지막 위치로 위치 오버레이를 지정함
