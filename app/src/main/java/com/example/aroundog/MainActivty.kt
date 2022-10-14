@@ -1,11 +1,16 @@
 package com.example.aroundog
 
 import android.content.Intent
+import android.graphics.Color
+import android.graphics.drawable.AnimationDrawable
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDialog
 import com.example.aroundog.databinding.ActivityMainAfterLoginBinding
 import com.example.aroundog.fragments.AroundWalkFragment
 import com.example.aroundog.fragments.MainFragment
@@ -17,6 +22,7 @@ class MainActivty : AppCompatActivity() {
     private var TAG: String = "MAINTAG"
     private lateinit var binding: ActivityMainAfterLoginBinding
     private var backPressedTime : Long = 0
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

@@ -87,6 +87,7 @@ class AroundWalkFragment : Fragment() {
                             }
 
                         }
+                        //성공 시 로딩 화면 끄기
                         Util.progressOffInFragment()
                         totalCount += list!!.size
                         mAdapter.notifyItemRangeChanged(totalCount, itemSize)
@@ -104,6 +105,7 @@ class AroundWalkFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
+        //로딩화면
         Util.progressOnInFragment(this)
         //저장된 id 정보 가져오기
         var user_info_pref =
@@ -133,11 +135,6 @@ class AroundWalkFragment : Fragment() {
 
         mRecyclerView.adapter = mAdapter
         mRecyclerView.layoutManager = LinearLayoutManager(context, RecyclerView.VERTICAL, false)
-
-
-
-
-
 
 
         mRecyclerView.addOnScrollListener(object: RecyclerView.OnScrollListener(){
