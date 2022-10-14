@@ -5,9 +5,6 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.drawable.Drawable
-import android.net.Uri
-import android.provider.Settings
 import android.util.Base64
 import android.util.Log
 import android.view.LayoutInflater
@@ -38,7 +35,7 @@ class DogSliderAdapter(var imgList: MutableList<ImgDto>): RecyclerView.Adapter<D
         var dogSlider:ImageView
         var view = view
         var path: String = ""
-        var id:Long = 0
+        var dogImgId:Long = 0
 
         var gsonInstance: Gson = GsonBuilder().setLenient().create()
         var retrofit = Retrofit.Builder()
@@ -61,12 +58,12 @@ class DogSliderAdapter(var imgList: MutableList<ImgDto>): RecyclerView.Adapter<D
                 //path에 따라 리스너 달라지게
                 //emptyImg시 이미지 추가 화면
                 //emptyDog시 강아지 추가 화면
-                if (id==-200L) {
+                if (dogImgId==-200L) {
                     val intent = Intent(view.context, AddDogActivity::class.java)
                     view.context.startActivity(intent)
                 }
 
-                Toast.makeText(view.context, "path : ${path}, id : $id", Toast.LENGTH_SHORT).show()
+                Toast.makeText(view.context, "path : ${path}, id : $dogImgId", Toast.LENGTH_SHORT).show()
             }
             dogSlider.setOnLongClickListener {
                 //삭제 예 아니오 다이얼로그
@@ -80,7 +77,7 @@ class DogSliderAdapter(var imgList: MutableList<ImgDto>): RecyclerView.Adapter<D
                         .setPositiveButton("삭제", object:DialogInterface.OnClickListener{
                             override fun onClick(dialog: DialogInterface?, which: Int) {
 
-                                retrofit.deleteDog(id).enqueue(object:Callback<Boolean>{
+                                retrofit.deleteDogImg(dogImgId).enqueue(object:Callback<Boolean>{
                                     override fun onResponse(
                                         call: Call<Boolean>,
                                         response: Response<Boolean>
@@ -124,7 +121,7 @@ class DogSliderAdapter(var imgList: MutableList<ImgDto>): RecyclerView.Adapter<D
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.path = imgList[position].path
-        holder.id = imgList[position].id
+        holder.dogImgId = imgList[position].id
 
         var bitmap: Bitmap
         if (imgList[position].path == "emptyImg") {//이미지가 없는 경우
