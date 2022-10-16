@@ -1,10 +1,14 @@
 package com.example.aroundog.Model
 
+import android.app.Activity
 import android.app.AlertDialog
+import android.app.LauncherActivity.ListItem
+import android.content.ClipData.Item
 import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.net.Uri
 import android.util.Base64
 import android.util.Log
 import android.view.LayoutInflater
@@ -29,8 +33,11 @@ import retrofit2.converter.gson.GsonConverterFactory
 class DogSliderAdapter(var imgList: MutableList<ImgDto>): RecyclerView.Adapter<DogSliderAdapter.ViewHolder>() {
 
     val TAG = "DOGSLIDERADAPTER"
+    lateinit var adapterListener:ItemClickListener
 
-
+    interface ItemClickListener{
+        fun onItemClicked(view: View, position: Int)
+    }
     class ViewHolder(view: View): RecyclerView.ViewHolder(view){
         var dogSlider:ImageView
         var view = view
@@ -46,7 +53,7 @@ class DogSliderAdapter(var imgList: MutableList<ImgDto>): RecyclerView.Adapter<D
 
         //ViewHolder에 어댑터 등록(아이템 삭제하기 위해)
         lateinit var adapter:DogSliderAdapter
-
+        private val DEFAULT_GALLERY_REQUEST_CODE = 0
         fun linkAdapter(adapter: DogSliderAdapter):ViewHolder{
             this.adapter = adapter
             return this
@@ -54,20 +61,10 @@ class DogSliderAdapter(var imgList: MutableList<ImgDto>): RecyclerView.Adapter<D
 
         init {
             dogSlider = view.findViewById(R.id.dogSlider)
-            dogSlider.setOnClickListener {
-                //path에 따라 리스너 달라지게
-                //emptyImg시 이미지 추가 화면
-                //emptyDog시 강아지 추가 화면
-                if (dogImgId==-200L) {
-                    val intent = Intent(view.context, AddDogActivity::class.java)
-                    view.context.startActivity(intent)
-                }
 
-                Toast.makeText(view.context, "path : ${path}, id : $dogImgId", Toast.LENGTH_SHORT).show()
-            }
             dogSlider.setOnLongClickListener {
                 //삭제 예 아니오 다이얼로그
-                if(path!="emptyImg" && path!="emptyDog"){
+                if (dogImgId != -100L && dogImgId != -200L) {
                     //강아지 사진 길게 누를 시 삭제
                     val builder = AlertDialog.Builder(view.context)
                     builder.setTitle("사진 삭제")
@@ -137,6 +134,26 @@ class DogSliderAdapter(var imgList: MutableList<ImgDto>): RecyclerView.Adapter<D
             Log.d(TAG, "${imgList}")
             holder.dogSlider.setImageBitmap(bitmap)
         }
+
+        //원클릭 이벤트 리스너
+        holder.dogSlider.setOnClickListener {
+                //path에 따라 리스너 달라지게
+                //이미지 추가 이미지
+                if (imgList[position].id == -100L) {
+                    if(adapterListener != null) {
+                        //adapterListener사용
+                        adapterListener!!.onItemClicked(it, position)
+                    }
+                }
+
+                //강아지 추가 이미지
+                if (imgList[position].id==-200L) {
+                    val intent = Intent(it.context, AddDogActivity::class.java)
+                    it.context.startActivity(intent)
+                }
+
+                Toast.makeText(it.context, "path : ${imgList[position].path}, id : ${imgList[position].id}", Toast.LENGTH_SHORT).show()
+            }
 
     }
 
