@@ -5,7 +5,11 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.*
+import androidx.lifecycle.MutableLiveData
+import com.example.aroundog.Model.Gender
 import com.example.aroundog.Service.DogService
+import com.example.aroundog.dto.DogDto
+import com.example.aroundog.dto.ImgDto
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import retrofit2.Call
@@ -26,6 +30,9 @@ class AddDogActivity : AppCompatActivity() {
     lateinit var retrofit: DogService
     var userId = ""
     var TAG = "ADDDOGACTIVITY"
+    companion object{
+        val newDogData = MutableLiveData<DogDto>()
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_dog)
@@ -75,10 +82,13 @@ class AddDogActivity : AppCompatActivity() {
                     dogHeight.toDouble(),
                     strGender
                 ).enqueue(object :
-                    Callback<Boolean> {
-                    override fun onResponse(call: Call<Boolean>, response: Response<Boolean>) {
+                    Callback<Long> {
+                    override fun onResponse(call: Call<Long>, response: Response<Long>) {
                         if (response.isSuccessful) {
-                            if (response.body() == true) {
+                            if (response.body() != -100L) { //실패시 -100
+                                var dogId:Long = response.body()!!
+                                val newDog = DogDto(dogId,dogName, dogAge.toInt(), dogWeight.toDouble(), dogHeight.toDouble(), Gender.valueOf(strGender), intBreed, mutableListOf<ImgDto>())
+                                newDogData.postValue(newDog)//newDogData 업데이트 알림
                                 Log.d(TAG, "성공")
                                 Toast.makeText(applicationContext, "추가 성공", Toast.LENGTH_SHORT)
                                     .show()
@@ -93,7 +103,7 @@ class AddDogActivity : AppCompatActivity() {
                         }
                     }
 
-                    override fun onFailure(call: Call<Boolean>, t: Throwable) {
+                    override fun onFailure(call: Call<Long>, t: Throwable) {
                         Log.d(TAG, "추가 실패 $t")
                         Toast.makeText(applicationContext, "서버와의 연결에 실패했습니다.", Toast.LENGTH_SHORT)
                             .show()

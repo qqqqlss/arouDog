@@ -20,7 +20,7 @@ interface DogService {
         @Field("weight") weight: Double,
         @Field("height") height:Double,
         @Field("gender") gender:String
-    ): Call<Boolean>
+    ): Call<Long>
 
     @DELETE("/dogImg/{dogImgId}")
     fun deleteDogImg(

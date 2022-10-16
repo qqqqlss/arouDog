@@ -15,7 +15,9 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import com.example.aroundog.AddDogActivity
 import com.example.aroundog.BuildConfig
+import com.example.aroundog.MainActivity2
 import com.example.aroundog.R
 import com.example.aroundog.Service.DogService
 import com.example.aroundog.Service.WalkService
@@ -32,11 +34,11 @@ import retrofit2.converter.gson.GsonConverterFactory
 class ProfileFragment : Fragment() {
     val TAG = "PROFILEFRAGMENT"
     lateinit var userName:String
-    lateinit var dogList:List<DogDto>
+    lateinit var dogList:MutableList<DogDto>
     lateinit var profileUserNameTV:TextView
     lateinit var profileUserConfig:Button
     lateinit var profileButtonLayout: LinearLayout
-    var idList = arrayListOf<Int>()
+    var idList = mutableListOf<Int>()
 
     lateinit var retrofit:Retrofit
     lateinit var walkService:WalkService
@@ -47,14 +49,52 @@ class ProfileFragment : Fragment() {
     lateinit var profileTotalDistanceTV:TextView
     lateinit var profileTotalCountTV:TextView
     var hasDog:Boolean = false
-    var buttonList = arrayListOf<Button>()
+    var buttonList = mutableListOf<Button>()
     lateinit var style:ContextThemeWrapper
 
 //    https://greensky0026.tistory.com/224
+    init{
+
+        //AddDogActivity의 newDogData값이 변경될 때 실행
+        AddDogActivity.newDogData.observe(this){
+            dogList.add(it)
+            addNewDog(it)
+
+            //리스트 마지막, 마지막-1 변경(+버튼과 추가한 강아지 인덱스 변경)
+            changeIndex(buttonList as MutableList<Any>)
+            changeIndex(idList as MutableList<Any>)
+
+            //버튼 전체 삭제
+            profileButtonLayout.removeAllViews()
+
+            //버튼 리스트의 순서대로 버튼 추가
+            for (button in buttonList) {
+                profileButtonLayout.addView(button)
+            }
+        }
+    }
+
+    /**
+     * @param MutableList 인덱스를 변경할 리스트
+     */
+    private fun changeIndex(list:MutableList<Any>){
+        var lastIndex = list.lastIndex
+        var lastObject = list.last()
+        var secondFromLast = list[lastIndex-1]
+        list[lastIndex] = secondFromLast
+        list[lastIndex-1] = lastObject
+    }
+
+    private fun addNewDog(newDogData:DogDto) {
+        var dogFragment = DogFragment.newInstanceWithDog(newDogData)//프래그먼트 생성
+        addButton(newDogData.dogName, newDogData.dogId.toInt(), dogFragment)
+    }
+
+    //    https://greensky0026.tistory.com/224
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         var makeGson = GsonBuilder().create()
-        var type: TypeToken<List<DogDto>> = object: TypeToken<List<DogDto>>(){}
+        var type: TypeToken<MutableList<DogDto>> = object: TypeToken<MutableList<DogDto>>(){}
 
         //저장된 id 정보 가져오기
         var user_info_pref =
@@ -68,7 +108,7 @@ class ProfileFragment : Fragment() {
         var listStr = dog_info_pref.getString("dogList", "")
         hasDog = dog_info_pref.getBoolean("hasDog", false)
 
-        dogList = makeGson.fromJson<List<DogDto>>(listStr, type.type)
+        dogList = makeGson.fromJson<MutableList<DogDto>>(listStr, type.type)
 
         var gsonInstance: Gson = GsonBuilder().setLenient().create()
         retrofit = Retrofit.Builder()
@@ -197,7 +237,12 @@ class ProfileFragment : Fragment() {
                                                     firstButton.setTypeface(firstButton.typeface, Typeface.BOLD)
                                                     firstButton.textSize = 20F
                                                 }
-                                                buttonList.remove(it)
+                                                
+                                                //buttonList, idList를 추가할때 dogList에서 추가했으므로 셋이 인덱스가 같음
+                                                idList.removeAt(index) //idList에서 인덱스를 사용해 id 삭제
+                                                buttonList.remove(it) //button에서 버튼 삭제
+                                                dogList.removeAt(index)//강아지 삭제
+
                                                 Toast.makeText(context, "삭제 완료", Toast.LENGTH_SHORT).show()
                                             } else{
                                                 Toast.makeText(context, "삭제 실패", Toast.LENGTH_SHORT).show()
