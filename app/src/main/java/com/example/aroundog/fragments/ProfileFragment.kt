@@ -58,7 +58,7 @@ class ProfileFragment : Fragment() {
         //AddDogActivity의 newDogData값이 변경될 때 실행
         AddDogActivity.newDogData.observe(this){
             dogList.add(it)
-            addNewDog(it)
+            val dogFragment = addNewDog(it)
 
             //리스트 마지막, 마지막-1 변경(+버튼과 추가한 강아지 인덱스 변경)
             changeIndex(buttonList as MutableList<Any>)
@@ -71,6 +71,22 @@ class ProfileFragment : Fragment() {
             for (button in buttonList) {
                 profileButtonLayout.addView(button)
             }
+
+            //추가된 강아지 프래그먼트 추가
+            childFragmentManager.beginTransaction()
+                .add(R.id.dogInfoFragment, dogFragment, buttonList[buttonList.lastIndex-1].id.toString())
+                .commit()
+            //강아지 추가 프래그먼트 숨기기
+            childFragmentManager.beginTransaction().hide(childFragmentManager.findFragmentByTag("-1")!!).commit()
+            
+            //추가한 강아지 버튼 텍스트 스타일 변경
+            clickButton(buttonList.lastIndex - 1)
+
+            //강아지 추가 버튼 스타일 변경
+            var button = buttonList.last()
+            button.textColor = resources.getColor(R.color.lightGray)
+            button.setTypeface(Typeface.create(button.typeface, Typeface.NORMAL))//BOLD할때처럼 하면 적용 안딤
+            button.textSize = 14F
         }
     }
 
@@ -85,9 +101,10 @@ class ProfileFragment : Fragment() {
         list[lastIndex-1] = lastObject
     }
 
-    private fun addNewDog(newDogData:DogDto) {
+    private fun addNewDog(newDogData:DogDto):DogFragment {
         var dogFragment = DogFragment.newInstanceWithDog(newDogData)//프래그먼트 생성
         addButton(newDogData.dogName, newDogData.dogId.toInt(), dogFragment)
+        return dogFragment
     }
 
     //    https://greensky0026.tistory.com/224
@@ -187,11 +204,14 @@ class ProfileFragment : Fragment() {
         }
 
         //첫 버튼에 클릭된 효과
-        var firstButton = buttonList[0]
+        clickButton(0)
+    }
+    
+    private fun clickButton(index:Int){
+        var firstButton = buttonList[index]
         firstButton.textColor = resources.getColor(R.color.brown)
         firstButton.setTypeface(firstButton.typeface, Typeface.BOLD)
         firstButton.textSize = 20F
-
     }
     
     private fun addButton(
@@ -232,10 +252,8 @@ class ProfileFragment : Fragment() {
                                                 var index = buttonList.indexOf(it)
                                                 if (index == 0) {//삭제할게 첫 인덱스면
                                                     //첫 버튼에 클릭된 효과
-                                                    var firstButton = buttonList[1]//두번째꺼 글자 형식 변경
-                                                    firstButton.textColor = resources.getColor(R.color.brown)
-                                                    firstButton.setTypeface(firstButton.typeface, Typeface.BOLD)
-                                                    firstButton.textSize = 20F
+                                                    clickButton(1)
+                                                }
                                                 }
                                                 
                                                 //buttonList, idList를 추가할때 dogList에서 추가했으므로 셋이 인덱스가 같음
