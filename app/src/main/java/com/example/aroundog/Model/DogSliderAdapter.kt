@@ -39,6 +39,7 @@ class DogSliderAdapter(var imgList: MutableList<ImgDto>): RecyclerView.Adapter<D
         fun onItemClicked(view: View, position: Int)
     }
     class ViewHolder(view: View): RecyclerView.ViewHolder(view){
+        val TAG = "DOGSLIDERADAPTER"
         var dogSlider:ImageView
         var view = view
         var path: String = ""
@@ -85,6 +86,12 @@ class DogSliderAdapter(var imgList: MutableList<ImgDto>): RecyclerView.Adapter<D
                                                 adapter.notifyItemRemoved(adapterPosition)
 
                                                 Toast.makeText(view.context, "삭제 완료", Toast.LENGTH_SHORT).show()
+
+                                                Log.d(TAG, "imgList size : ${adapter.imgList.size}")
+                                                if (adapter.imgList.size == 0) {
+                                                    adapter.imgList.add(ImgDto(-100, "emptyImg", "emptyImg"))
+                                                    adapter.notifyItemInserted(0)
+                                                }
                                             } else {
                                                 Toast.makeText(view.context, "삭제 실패", Toast.LENGTH_SHORT).show()
                                             }
