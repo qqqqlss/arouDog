@@ -2,15 +2,12 @@
 
 package com.example.aroundog
 
-import android.Manifest
 import android.app.AlertDialog
-import android.content.DialogInterface
 import android.content.Intent
 import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
-import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.CheckBox
@@ -23,7 +20,6 @@ import androidx.core.app.ActivityCompat
 import com.example.aroundog.Service.IntroService
 import com.example.aroundog.dto.DogDto
 import com.example.aroundog.dto.UserAndDogDto
-import com.example.aroundog.dto.UserDto
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import okhttp3.OkHttpClient
@@ -167,7 +163,7 @@ class MainActivity2 : AppCompatActivity(){
                                     dog_info_pref = getSharedPreferences("dogInfo", MODE_PRIVATE) // 세션 영역에 저장할 유저 정보
                                     dog_info_editor = dog_info_pref.edit()
                                     if(userAndDogList!![0].dogId != 0L) {//등록된 강아지가 있는지 확인
-                                        var dogList = arrayListOf<DogDto>()
+                                        var dogList = mutableListOf<DogDto>()
                                         //강아지 정보 리스트로 저장
                                         userAndDogList!!.forEach { userAndDogDto ->
                                             var dog = DogDto(userAndDogDto.dogId, userAndDogDto.dogName, userAndDogDto.dogAge, userAndDogDto.dogWeight, userAndDogDto.dogHeight, userAndDogDto.dogGender, userAndDogDto.breed, userAndDogDto.dogImgList)
@@ -175,7 +171,7 @@ class MainActivity2 : AppCompatActivity(){
                                         }
                                         //Json 으로 만들기 위한 Gson
                                         var makeGson = GsonBuilder().create()
-                                        var type:TypeToken<List<DogDto>> = object:TypeToken<List<DogDto>>(){}
+                                        var type:TypeToken<MutableList<DogDto>> = object:TypeToken<MutableList<DogDto>>(){}
                                         var dogStr = makeGson.toJson(dogList, type.type)
 
                                         dog_info_editor.putBoolean("hasDog", true)
