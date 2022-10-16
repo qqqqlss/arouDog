@@ -125,7 +125,7 @@ class DogSliderAdapter(var imgList: MutableList<ImgDto>): RecyclerView.Adapter<D
 
         var bitmap: Bitmap
         if (imgList[position].path == "emptyImg") {//이미지가 없는 경우
-            holder.dogSlider.setImageResource(R.drawable.error2)
+            holder.dogSlider.setImageResource(R.drawable.dog_camera)
         }
         else if(imgList[position].path == "emptyDog"){//강아지가 없는 경우
             holder.dogSlider.setImageResource(R.drawable.add_dog)
