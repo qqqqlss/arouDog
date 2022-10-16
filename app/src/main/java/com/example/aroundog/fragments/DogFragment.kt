@@ -88,6 +88,7 @@ class DogFragment : Fragment() {
                 adapter = DogSliderAdapter(dogImgList)
 
             }else{//강아지와 사진 다 있음
+                dogImgList.add(ImgDto(-100, "emptyImg", "emptyImg"))//마지막에 사진 추가 이미지
                 adapter  = DogSliderAdapter(dogImgList)
             }
 
@@ -165,11 +166,21 @@ class DogFragment : Fragment() {
                     //리턴받은 id, path 설정
 
 
+                    //클릭한 이미지 삭제(강아지 사진 추가 이미지)
+                    dogImgList.removeAt(clickPosition!!)
+                    adapter.notifyItemRemoved(clickPosition!!)
 
+                    //이미지 추가
                     var imgDto = ImgDto(1000L, "test", encodingStr)
-                    dogImgList[clickPosition!!] = imgDto
-                    //이미지 변경 알림
-                    adapter.notifyItemChanged(clickPosition!!)
+
+                    dogImgList.add(clickPosition!!, imgDto)
+
+                    //마지막 위치에 강아지 사진 추가 이미지 추가
+                    if (dogImgList.last().id != -100L) {
+                        dogImgList.add(ImgDto(-100, "emptyImg", "emptyImg"))
+                        adapter.notifyItemInserted(dogImgList.lastIndex)
+                    }
+                    adapter.notifyItemInserted(clickPosition!!)
                 } catch (e:Exception) {
                     e.printStackTrace()
                 }
