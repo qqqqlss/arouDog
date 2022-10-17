@@ -254,7 +254,6 @@ class ProfileFragment : Fragment() {
                                                     //첫 버튼에 클릭된 효과
                                                     clickButton(1)
                                                 }
-                                                }
                                                 
                                                 //buttonList, idList를 추가할때 dogList에서 추가했으므로 셋이 인덱스가 같음
                                                 idList.removeAt(index) //idList에서 인덱스를 사용해 id 삭제
@@ -266,7 +265,7 @@ class ProfileFragment : Fragment() {
                                                 Toast.makeText(context, "삭제 실패", Toast.LENGTH_SHORT).show()
                                             }
                                         }
-
+                                    }
                                     override fun onFailure(call: Call<Boolean>, t: Throwable) {
                                         Toast.makeText(context, "삭제 실패", Toast.LENGTH_SHORT).show()
                                     }
