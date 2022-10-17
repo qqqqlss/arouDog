@@ -266,7 +266,6 @@ class ProfileFragment : Fragment() {
                                                 Toast.makeText(context, "삭제 실패", Toast.LENGTH_SHORT).show()
                                             }
                                         }
-                                    }
 
                                     override fun onFailure(call: Call<Boolean>, t: Throwable) {
                                         Toast.makeText(context, "삭제 실패", Toast.LENGTH_SHORT).show()
