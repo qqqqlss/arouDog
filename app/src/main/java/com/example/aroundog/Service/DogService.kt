@@ -1,12 +1,10 @@
 package com.example.aroundog.Service
 
 import androidx.compose.ui.text.font.FontWeight
+import com.example.aroundog.dto.UpdateDogImageDto
+import okhttp3.MultipartBody
 import retrofit2.Call
-import retrofit2.http.DELETE
-import retrofit2.http.Field
-import retrofit2.http.FormUrlEncoded
-import retrofit2.http.POST
-import retrofit2.http.Path
+import retrofit2.http.*
 
 interface DogService {
 
@@ -31,5 +29,12 @@ interface DogService {
     fun deleteDog(
         @Path("dogId") dogId:Long
     ):Call<Boolean>
+
+    @Multipart
+    @POST("/dogImg/{dogId}")
+    fun updateDogImg(
+        @Path("dogId") dogId: Long,
+        @Part image:MultipartBody.Part
+    ):Call<UpdateDogImageDto>
     
 }

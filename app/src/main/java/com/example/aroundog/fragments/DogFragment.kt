@@ -10,17 +10,32 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.MimeTypeMap
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.widget.ViewPager2
+import com.example.aroundog.BuildConfig
 import com.example.aroundog.Model.DogSliderAdapter
 import com.example.aroundog.R
+import com.example.aroundog.Service.DogService
+import com.example.aroundog.Service.WalkService
 import com.example.aroundog.dto.DogDto
 import com.example.aroundog.dto.ImgDto
 import com.example.aroundog.dto.ImgDtoUri
+import com.example.aroundog.dto.UpdateDogImageDto
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
+import okhttp3.MediaType
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 import java.io.File
 import java.io.FileOutputStream
 import java.util.*
@@ -47,12 +62,17 @@ class DogFragment : Fragment() {
     var clickPosition: Int? = null
     var dogImgListUri:MutableList<ImgDtoUri> = mutableListOf()
 
+    lateinit var retrofit:Retrofit
+    lateinit var dogService: DogService
+    var dogId:Long = -100L
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
             hasDog = it.getBoolean("hasDog")
             if(hasDog){//등록된 강아지가 있는 경우
                 dogDto = it.getSerializable("dog") as DogDto
+                dogId = dogDto!!.dogId
                 dogImgList = dogDto!!.dogImgList
 
                 //이미지를 캐시디렉터리에 저장 후 Uri 리스트에 추가
@@ -85,6 +105,15 @@ class DogFragment : Fragment() {
                 startActivityForResult(intent, DEFAULT_GALLERY_REQUEST_CODE)
             }
         }
+
+        var gsonInstance: Gson = GsonBuilder().setLenient().create()
+        retrofit = Retrofit.Builder()
+            .baseUrl(BuildConfig.SERVER)
+            .addConverterFactory(GsonConverterFactory.create(gsonInstance))
+            .build()
+
+        dogService = retrofit.create(DogService::class.java)
+
     }
 
     private fun saveBitmap(imgDto: ImgDto): ImgDtoUri {
@@ -193,40 +222,91 @@ class DogFragment : Fragment() {
                 //갤러리에서 고른 사진의 uri
                 var photo = data.data as Uri
 
-                //클릭한 이미지 삭제(강아지 사진 추가 이미지)
-                dogImgListUri.removeAt(clickPosition!!)
-                adapter.notifyItemRemoved(clickPosition!!)
+                //확장자
+                var cr = context!!.contentResolver
+                var type = MimeTypeMap.getSingleton().getExtensionFromMimeType(cr.getType(photo))
 
-                //이미지 추가
-                var imgDto = ImgDtoUri(1000L, "test", photo)
-                dogImgListUri.add(clickPosition!!, imgDto)
+                var imgType = listOf<String>("png", "jpg", "jpeg")
 
-                //마지막 위치에 강아지 사진 추가 이미지 추가
-                if (dogImgListUri.last().id != -100L) {
-                    dogImgListUri.add(ImgDtoUri(-100, "emptyImg", Uri.parse("emptyImg")))
-                    adapter.notifyItemInserted(dogImgListUri.lastIndex)
+                //png, jpg, jpeg일때만 실행
+                if (imgType.contains(type)) {
+                    try {
+                        //byte[] 로 변경
+                        var photoArr = context!!.contentResolver.openInputStream(photo)?.buffered()
+                            ?.use { it.readBytes() }
+
+                        //multipart 설정
+                        var requestFile =
+                            RequestBody.create(MediaType.parse("multipart/form-data"), photoArr)
+                        var multipartImg: MultipartBody.Part =
+                            MultipartBody.Part.createFormData(
+                                "image",
+                                photo.toString() + ".${type}",
+                                requestFile
+                            )
+
+                        //retrofit
+                        dogService.updateDogImg(dogId, multipartImg)
+                            .enqueue(object : Callback<UpdateDogImageDto> {
+                                override fun onResponse(
+                                    call: Call<UpdateDogImageDto>,
+                                    response: Response<UpdateDogImageDto>
+                                ) {
+                                    if (response.isSuccessful) {
+                                        var updateDogImageDto = response.body()
+                                        if (updateDogImageDto!!.dogImgId != -100L) {//-100L이면 서버에서 오류난거
+                                            //클릭한 이미지 삭제(강아지 사진 추가 이미지)
+                                            dogImgListUri.removeAt(clickPosition!!)
+                                            adapter.notifyItemRemoved(clickPosition!!)
+
+                                            //이미지 추가
+                                            var imgDto = ImgDtoUri(
+                                                updateDogImageDto!!.dogImgId,
+                                                updateDogImageDto.path,
+                                                photo
+                                            )
+                                            dogImgListUri.add(clickPosition!!, imgDto)
+
+                                            //마지막 위치에 강아지 사진 추가 이미지 추가
+                                            if (dogImgListUri.last().id != -100L) {
+                                                dogImgListUri.add(
+                                                    ImgDtoUri(
+                                                        -100,
+                                                        "emptyImg",
+                                                        Uri.parse("emptyImg")
+                                                    )
+                                                )
+                                                adapter.notifyItemInserted(dogImgListUri.lastIndex)
+                                            }
+                                            adapter.notifyItemInserted(clickPosition!!)
+                                        }else {
+                                            Toast.makeText(context, "사진추가에 실패했습니다.", Toast.LENGTH_SHORT).show()
+                                        }
+                                    }
+                                    else {
+                                        Toast.makeText(context, "사진추가에 실패했습니다.", Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+
+                                override fun onFailure(
+                                    call: Call<UpdateDogImageDto>,
+                                    t: Throwable
+                                ) {
+                                    Toast.makeText(context, "사진추가에 실패했습니다.", Toast.LENGTH_SHORT)
+                                        .show()
+                                }
+
+                            })
+
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+
+                }else{
+                    Toast.makeText(context, "지원하지 않는 파일 형식입니다.", Toast.LENGTH_SHORT)
+                        .show()
                 }
-                adapter.notifyItemInserted(clickPosition!!)
 
-                //retrofit
-                //byte[] 로 변경
-                try {
-                    var photoArr = context!!.contentResolver.openInputStream(photo)?.buffered()
-                        ?.use { it.readBytes() }
-
-                    //인코딩
-                    var encodingStr = Base64.getEncoder().encodeToString(photoArr)
-
-                    //retrofit 추가 - id 리턴
-                    //리턴받은 id, path 설정
-
-                } catch (e:Exception) {
-                    e.printStackTrace()
-                }
-
-            }
-            else -> {
-                Toast.makeText(context, "사진을 가져오지 못했습니다", Toast.LENGTH_SHORT).show()
             }
         }
     }
