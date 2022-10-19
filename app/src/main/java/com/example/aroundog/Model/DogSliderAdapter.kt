@@ -37,6 +37,12 @@ class DogSliderAdapter(var imgList: MutableList<ImgDtoUri>): RecyclerView.Adapte
     val TAG = "DOGSLIDERADAPTER"
     lateinit var adapterListener:ItemClickListener
 
+    var gsonInstance: Gson = GsonBuilder().setLenient().create()
+    var retrofit = Retrofit.Builder()
+        .baseUrl(BuildConfig.SERVER)
+        .addConverterFactory(GsonConverterFactory.create(gsonInstance))
+        .build()
+        .create(DogService::class.java)
     interface ItemClickListener{
         fun onItemClicked(view: View, position: Int)
     }
@@ -47,12 +53,6 @@ class DogSliderAdapter(var imgList: MutableList<ImgDtoUri>): RecyclerView.Adapte
         var path: String = ""
         var dogImgId:Long = 0
 
-        var gsonInstance: Gson = GsonBuilder().setLenient().create()
-        var retrofit = Retrofit.Builder()
-            .baseUrl(BuildConfig.SERVER)
-            .addConverterFactory(GsonConverterFactory.create(gsonInstance))
-            .build()
-            .create(DogService::class.java)
 
         //ViewHolder에 어댑터 등록(아이템 삭제하기 위해)
         lateinit var adapter:DogSliderAdapter
@@ -64,65 +64,6 @@ class DogSliderAdapter(var imgList: MutableList<ImgDtoUri>): RecyclerView.Adapte
 
         init {
             dogSlider = view.findViewById(R.id.dogSlider)
-
-            dogSlider.setOnLongClickListener {
-                //삭제 예 아니오 다이얼로그
-                if (dogImgId != -100L && dogImgId != -200L) {
-                    //강아지 사진 길게 누를 시 삭제
-                    val builder = AlertDialog.Builder(view.context)
-                    builder.setTitle("사진 삭제")
-                        .setMessage(
-                            "사진을 삭제하시겠어요?"
-                        )
-                        .setPositiveButton("삭제", object:DialogInterface.OnClickListener{
-                            override fun onClick(dialog: DialogInterface?, which: Int) {
-
-                                retrofit.deleteDogImg(dogImgId).enqueue(object:Callback<Boolean>{
-                                    override fun onResponse(
-                                        call: Call<Boolean>,
-                                        response: Response<Boolean>
-                                    ) {
-                                        if (response.isSuccessful) {
-                                            if (response.body() == true) {
-                                                adapter.imgList.removeAt(adapterPosition)
-                                                adapter.notifyItemRemoved(adapterPosition)
-
-                                                Toast.makeText(view.context, "삭제 완료", Toast.LENGTH_SHORT).show()
-
-                                                Log.d(TAG, "imgList size : ${adapter.imgList.size}")
-                                                if (adapter.imgList.size == 0) {
-                                                    adapter.imgList.add(
-                                                        ImgDtoUri(
-                                                            -100,
-                                                            "emptyImg",
-                                                            Uri.parse("emptyImg")
-                                                        )
-                                                    )
-                                                    adapter.notifyItemInserted(0)
-                                                }
-                                            } else {
-                                                Toast.makeText(view.context, "삭제 실패", Toast.LENGTH_SHORT).show()
-                                            }
-                                        }
-                                    }
-
-                                    override fun onFailure(call: Call<Boolean>, t: Throwable) {
-                                        Toast.makeText(view.context, "삭제 실패", Toast.LENGTH_SHORT).show()
-                                    }
-                                })
-                            }
-                        })
-                    builder.setNegativeButton("취소") { dialog, i ->
-                        dialog.dismiss()
-                    }
-                    val dialog = builder.create()
-                    dialog.show()
-                }
-                
-                //false일 경우 길게 누르고있을때 onlongclicklistiner, 손 뗄때 onclick발생
-                //true일 경우 longclick만 발생
-                return@setOnLongClickListener (true)
-            }
         }
     }
 
@@ -132,38 +73,110 @@ class DogSliderAdapter(var imgList: MutableList<ImgDtoUri>): RecyclerView.Adapte
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.path = imgList[position].path
-        holder.dogImgId = imgList[position].id
+        holder.path = imgList[holder.adapterPosition].path
+        holder.dogImgId = imgList[holder.adapterPosition].id
 
-        if (imgList[position].path == "emptyImg") {//이미지가 없는 경우
+        if (imgList[holder.adapterPosition].path == "emptyImg") {//이미지가 없는 경우
             holder.dogSlider.setImageResource(R.drawable.dog_camera)
         }
-        else if(imgList[position].path == "emptyDog"){//강아지가 없는 경우
+        else if(imgList[holder.adapterPosition].path == "emptyDog"){//강아지가 없는 경우
             holder.dogSlider.setImageResource(R.drawable.add_dog)
         }
         else {//강아지 사진 추가
-            holder.dogSlider.setImageURI(imgList[position].imgUri)
+            holder.dogSlider.setImageURI(imgList[holder.adapterPosition].imgUri)
         }
 
         //원클릭 이벤트 리스너
         holder.dogSlider.setOnClickListener {
                 //path에 따라 리스너 달라지게
                 //강아지 사진 추가 이미지
-                if (imgList[position].id == -100L) {
+                if (imgList[holder.adapterPosition].id == -100L) {
                     if(adapterListener != null) {
                         //adapterListener사용
-                        adapterListener!!.onItemClicked(it, position)
+                        adapterListener!!.onItemClicked(it, holder.adapterPosition)
                     }
                 }
 
                 //강아지 추가 이미지
-                if (imgList[position].id==-200L) {
+                if (imgList[holder.adapterPosition].id==-200L) {
                     val intent = Intent(it.context, AddDogActivity::class.java)
                     it.context.startActivity(intent)
                 }
 
-                Toast.makeText(it.context, "path : ${imgList[position].path}, id : ${imgList[position].id}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(it.context, "path : ${imgList[holder.adapterPosition].path}, id : ${imgList[holder.adapterPosition].id}", Toast.LENGTH_SHORT).show()
             }
+
+        holder.dogSlider.setOnLongClickListener {
+            //리스트뷰에서 지우면 포지션인 -1이 되므로 미리 저장
+            var selectPosition = holder.adapterPosition
+            //삭제 예 아니오 다이얼로그
+            if (imgList[selectPosition].id != -100L && imgList[selectPosition].id != -200L) {
+                //강아지 사진 길게 누를 시 삭제
+                val builder = AlertDialog.Builder(it.context)
+                builder.setTitle("사진 삭제")
+                    .setMessage(
+                        "사진을 삭제하시겠어요?"
+                    )
+                    .setPositiveButton("삭제", object : DialogInterface.OnClickListener {
+                        override fun onClick(dialog: DialogInterface?, which: Int) {
+
+                            retrofit.deleteDogImg(imgList[selectPosition].id)
+                                .enqueue(object : Callback<Boolean> {
+                                    override fun onResponse(
+                                        call: Call<Boolean>,
+                                        response: Response<Boolean>
+                                    ) {
+                                        if (response.isSuccessful) {
+                                            if (response.body() == true) {
+                                                notifyItemRemoved(selectPosition)
+                                                notifyItemRangeChanged(selectPosition, imgList.size)
+                                                imgList.removeAt(selectPosition)
+
+                                                Toast.makeText(
+                                                    it.context,
+                                                    "삭제 완료",
+                                                    Toast.LENGTH_SHORT
+                                                ).show()
+
+                                                Log.d(TAG, "imgList size : ${imgList.size}")
+                                                if (imgList.size == 0) {
+                                                    imgList.add(
+                                                        ImgDtoUri(
+                                                            -100,
+                                                            "emptyImg",
+                                                            Uri.parse("emptyImg")
+                                                        )
+                                                    )
+                                                    notifyItemInserted(0)
+                                                }
+                                            } else {
+                                                Toast.makeText(
+                                                    it.context,
+                                                    "삭제 실패",
+                                                    Toast.LENGTH_SHORT
+                                                ).show()
+                                            }
+                                        }
+                                    }
+
+                                    override fun onFailure(call: Call<Boolean>, t: Throwable) {
+                                        Toast.makeText(it.context, "삭제 실패", Toast.LENGTH_SHORT)
+                                            .show()
+                                    }
+                                })
+                        }
+                    })
+                builder.setNegativeButton("취소") { dialog, i ->
+                    dialog.dismiss()
+                }
+                val dialog = builder.create()
+                dialog.show()
+            }
+
+            //false일 경우 길게 누르고있을때 onlongclicklistiner, 손 뗄때 onclick발생
+            //true일 경우 longclick만 발생
+            return@setOnLongClickListener (true)
+        }
 
     }
 

@@ -256,8 +256,9 @@ class DogFragment : Fragment() {
                                         var updateDogImageDto = response.body()
                                         if (updateDogImageDto!!.dogImgId != -100L) {//-100L이면 서버에서 오류난거
                                             //클릭한 이미지 삭제(강아지 사진 추가 이미지)
-                                            dogImgListUri.removeAt(clickPosition!!)
                                             adapter.notifyItemRemoved(clickPosition!!)
+                                            adapter.notifyItemRangeChanged(clickPosition!!, dogImgListUri.size)
+                                            dogImgListUri.removeAt(clickPosition!!)
 
                                             //이미지 추가
                                             var imgDto = ImgDtoUri(
