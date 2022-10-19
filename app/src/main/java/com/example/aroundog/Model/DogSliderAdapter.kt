@@ -22,6 +22,8 @@ import com.example.aroundog.BuildConfig
 import com.example.aroundog.R
 import com.example.aroundog.Service.DogService
 import com.example.aroundog.dto.ImgDto
+import com.example.aroundog.dto.ImgDtoUri
+import com.example.aroundog.fragments.DogFragment
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import retrofit2.Call
@@ -30,7 +32,7 @@ import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-class DogSliderAdapter(var imgList: MutableList<ImgDto>): RecyclerView.Adapter<DogSliderAdapter.ViewHolder>() {
+class DogSliderAdapter(var imgList: MutableList<ImgDtoUri>): RecyclerView.Adapter<DogSliderAdapter.ViewHolder>() {
 
     val TAG = "DOGSLIDERADAPTER"
     lateinit var adapterListener:ItemClickListener
@@ -89,7 +91,13 @@ class DogSliderAdapter(var imgList: MutableList<ImgDto>): RecyclerView.Adapter<D
 
                                                 Log.d(TAG, "imgList size : ${adapter.imgList.size}")
                                                 if (adapter.imgList.size == 0) {
-                                                    adapter.imgList.add(ImgDto(-100, "emptyImg", "emptyImg"))
+                                                    adapter.imgList.add(
+                                                        ImgDtoUri(
+                                                            -100,
+                                                            "emptyImg",
+                                                            Uri.parse("emptyImg")
+                                                        )
+                                                    )
                                                     adapter.notifyItemInserted(0)
                                                 }
                                             } else {
@@ -127,25 +135,20 @@ class DogSliderAdapter(var imgList: MutableList<ImgDto>): RecyclerView.Adapter<D
         holder.path = imgList[position].path
         holder.dogImgId = imgList[position].id
 
-        var bitmap: Bitmap
         if (imgList[position].path == "emptyImg") {//이미지가 없는 경우
             holder.dogSlider.setImageResource(R.drawable.dog_camera)
         }
         else if(imgList[position].path == "emptyDog"){//강아지가 없는 경우
             holder.dogSlider.setImageResource(R.drawable.add_dog)
         }
-        else {
-            var byteArray: ByteArray = Base64.decode(imgList[position].img, Base64.DEFAULT)
-            bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
-            Log.d(TAG, "itemList is not null")
-            Log.d(TAG, "${imgList}")
-            holder.dogSlider.setImageBitmap(bitmap)
+        else {//강아지 사진 추가
+            holder.dogSlider.setImageURI(imgList[position].imgUri)
         }
 
         //원클릭 이벤트 리스너
         holder.dogSlider.setOnClickListener {
                 //path에 따라 리스너 달라지게
-                //이미지 추가 이미지
+                //강아지 사진 추가 이미지
                 if (imgList[position].id == -100L) {
                     if(adapterListener != null) {
                         //adapterListener사용

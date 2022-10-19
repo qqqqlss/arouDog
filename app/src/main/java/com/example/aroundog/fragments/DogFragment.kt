@@ -1,8 +1,9 @@
 package com.example.aroundog.fragments
 
-import android.R.attr
 import android.app.Activity
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
@@ -12,13 +13,16 @@ import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.widget.ViewPager2
 import com.example.aroundog.Model.DogSliderAdapter
 import com.example.aroundog.R
 import com.example.aroundog.dto.DogDto
 import com.example.aroundog.dto.ImgDto
-import java.io.InputStream
+import com.example.aroundog.dto.ImgDtoUri
+import java.io.File
+import java.io.FileOutputStream
 import java.util.*
 
 
@@ -41,6 +45,8 @@ class DogFragment : Fragment() {
     lateinit var dogImgList:MutableList<ImgDto>
     lateinit var adapter: DogSliderAdapter
     var clickPosition: Int? = null
+    var dogImgListUri:MutableList<ImgDtoUri> = mutableListOf()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
@@ -48,10 +54,23 @@ class DogFragment : Fragment() {
             if(hasDog){//등록된 강아지가 있는 경우
                 dogDto = it.getSerializable("dog") as DogDto
                 dogImgList = dogDto!!.dogImgList
-                Log.d("DOGFRAGMENT", "$dogDto")
+
+                //이미지를 캐시디렉터리에 저장 후 Uri 리스트에 추가
+                for (imgDto in dogImgList) {
+                    try {
+                        //dogImgUri저장
+                        var dogUri = saveBitmap(imgDto)
+                        //이미지 uri 리스트에 추가
+                        dogImgListUri.add(dogUri)
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                }
+
+                dogImgList.clear()//얘가 값이 커서 오류났기때문에 클리어해줌
             }
             else{//강아지가 없는 경우 초기화
-                dogImgList = mutableListOf()
+//                dogImgList = mutableListOf()
             }
         }
         
@@ -66,6 +85,28 @@ class DogFragment : Fragment() {
                 startActivityForResult(intent, DEFAULT_GALLERY_REQUEST_CODE)
             }
         }
+    }
+
+    private fun saveBitmap(imgDto: ImgDto): ImgDtoUri {
+        var byteArray: ByteArray =
+            android.util.Base64.decode(imgDto.img, android.util.Base64.DEFAULT)
+        var bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
+
+        val path = File(context!!.cacheDir, "images") //캐시폴더의 images/
+        path.mkdirs()//없으면 생성
+        val tempFile = File(path, imgDto.path)
+        tempFile.createNewFile()//파일 저장
+        val out = FileOutputStream(tempFile)
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out)//파일에 쓰기
+        out.close()
+
+        val contentUri = FileProvider.getUriForFile(
+            context!!,
+            "com.example.android.provider",
+            tempFile
+        )
+        var dogUri = ImgDtoUri(imgDto.id, imgDto.path, contentUri)
+        return dogUri
     }
 
     override fun onCreateView(
@@ -83,20 +124,18 @@ class DogFragment : Fragment() {
             profileDogBreedTV.text = dogDto?.breed.toString()
 
             //dogDto.dogId != null && dogDto.dogImgList == null : 개는 있는데 사진이 없음
-            if (dogDto!!.dogImgList.isNullOrEmpty()) {
-                dogImgList.add(ImgDto(-100, "emptyImg", "emptyImg"))
-                adapter = DogSliderAdapter(dogImgList)
+            if (dogImgListUri.isNullOrEmpty()) {
+                dogImgListUri.add(ImgDtoUri(-100, "emptyImg", Uri.parse("emptyImg")))
 
             }else{//강아지와 사진 다 있음
-                dogImgList.add(ImgDto(-100, "emptyImg", "emptyImg"))//마지막에 사진 추가 이미지
-                adapter  = DogSliderAdapter(dogImgList)
+                dogImgListUri.add(ImgDtoUri(-100, "emptyImg", Uri.parse("emptyImg")))//마지막에 사진 추가 이미지
             }
 
         }else{//강아지가 없는 경우
-            dogImgList.add(ImgDto(-200,"emptyDog", "emptyDog"))
-            adapter = DogSliderAdapter(dogImgList)
+            dogImgListUri.add(ImgDtoUri(-200,"emptyDog", Uri.parse("emptyDog")))
             profileDogInfoLayout.visibility = View.INVISIBLE
         }
+        adapter = DogSliderAdapter(dogImgListUri)
         adapter.adapterListener = listener
         imgViewPager.adapter = adapter
 
@@ -154,6 +193,22 @@ class DogFragment : Fragment() {
                 //갤러리에서 고른 사진의 uri
                 var photo = data.data as Uri
 
+                //클릭한 이미지 삭제(강아지 사진 추가 이미지)
+                dogImgListUri.removeAt(clickPosition!!)
+                adapter.notifyItemRemoved(clickPosition!!)
+
+                //이미지 추가
+                var imgDto = ImgDtoUri(1000L, "test", photo)
+                dogImgListUri.add(clickPosition!!, imgDto)
+
+                //마지막 위치에 강아지 사진 추가 이미지 추가
+                if (dogImgListUri.last().id != -100L) {
+                    dogImgListUri.add(ImgDtoUri(-100, "emptyImg", Uri.parse("emptyImg")))
+                    adapter.notifyItemInserted(dogImgListUri.lastIndex)
+                }
+                adapter.notifyItemInserted(clickPosition!!)
+
+                //retrofit
                 //byte[] 로 변경
                 try {
                     var photoArr = context!!.contentResolver.openInputStream(photo)?.buffered()
@@ -165,22 +220,6 @@ class DogFragment : Fragment() {
                     //retrofit 추가 - id 리턴
                     //리턴받은 id, path 설정
 
-
-                    //클릭한 이미지 삭제(강아지 사진 추가 이미지)
-                    dogImgList.removeAt(clickPosition!!)
-                    adapter.notifyItemRemoved(clickPosition!!)
-
-                    //이미지 추가
-                    var imgDto = ImgDto(1000L, "test", encodingStr)
-
-                    dogImgList.add(clickPosition!!, imgDto)
-
-                    //마지막 위치에 강아지 사진 추가 이미지 추가
-                    if (dogImgList.last().id != -100L) {
-                        dogImgList.add(ImgDto(-100, "emptyImg", "emptyImg"))
-                        adapter.notifyItemInserted(dogImgList.lastIndex)
-                    }
-                    adapter.notifyItemInserted(clickPosition!!)
                 } catch (e:Exception) {
                     e.printStackTrace()
                 }
