@@ -1,18 +1,45 @@
 package com.example.aroundog.fragments
 
+import android.app.Activity
+import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.MimeTypeMap
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
+import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.widget.ViewPager2
+import com.example.aroundog.BuildConfig
 import com.example.aroundog.Model.DogSliderAdapter
 import com.example.aroundog.R
+import com.example.aroundog.Service.DogService
+import com.example.aroundog.Service.WalkService
 import com.example.aroundog.dto.DogDto
 import com.example.aroundog.dto.ImgDto
+import com.example.aroundog.dto.ImgDtoUri
+import com.example.aroundog.dto.UpdateDogImageDto
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
+import okhttp3.MediaType
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import java.io.File
+import java.io.FileOutputStream
+import java.util.*
+
 
 class DogFragment : Fragment() {
     private var dogDto:DogDto? = null
@@ -27,6 +54,17 @@ class DogFragment : Fragment() {
     lateinit var profileDogBreedTV:TextView
     lateinit var profileDogInfoLayout:LinearLayout
     var hasDog = false
+    private val DEFAULT_GALLERY_REQUEST_CODE =200
+    lateinit var listener: DogSliderAdapter.ItemClickListener
+    lateinit var clickView:View
+    lateinit var dogImgList:MutableList<ImgDto>
+    lateinit var adapter: DogSliderAdapter
+    var clickPosition: Int? = null
+    var dogImgListUri:MutableList<ImgDtoUri> = mutableListOf()
+
+    lateinit var retrofit:Retrofit
+    lateinit var dogService: DogService
+    var dogId:Long = -100L
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,9 +72,70 @@ class DogFragment : Fragment() {
             hasDog = it.getBoolean("hasDog")
             if(hasDog){//등록된 강아지가 있는 경우
                 dogDto = it.getSerializable("dog") as DogDto
-                Log.d("DOGFRAGMENT", "$dogDto")
+                dogId = dogDto!!.dogId
+                dogImgList = dogDto!!.dogImgList
+
+                //이미지를 캐시디렉터리에 저장 후 Uri 리스트에 추가
+                for (imgDto in dogImgList) {
+                    try {
+                        //dogImgUri저장
+                        var dogUri = saveBitmap(imgDto)
+                        //이미지 uri 리스트에 추가
+                        dogImgListUri.add(dogUri)
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                }
+
+                dogImgList.clear()//얘가 값이 커서 오류났기때문에 클리어해줌
+            }
+            else{//강아지가 없는 경우 초기화
+//                dogImgList = mutableListOf()
             }
         }
+        
+        //강아지 추가 이미지에 사용할 원클릭 리스너
+        listener = object:DogSliderAdapter.ItemClickListener{
+            override fun onItemClicked(view: View, position:Int) {
+                clickView = view
+                clickPosition = position
+                val intent = Intent()
+                intent.action = Intent.ACTION_GET_CONTENT
+                intent.setType("image/")
+                startActivityForResult(intent, DEFAULT_GALLERY_REQUEST_CODE)
+            }
+        }
+
+        var gsonInstance: Gson = GsonBuilder().setLenient().create()
+        retrofit = Retrofit.Builder()
+            .baseUrl(BuildConfig.SERVER)
+            .addConverterFactory(GsonConverterFactory.create(gsonInstance))
+            .build()
+
+        dogService = retrofit.create(DogService::class.java)
+
+    }
+
+    private fun saveBitmap(imgDto: ImgDto): ImgDtoUri {
+        var byteArray: ByteArray =
+            android.util.Base64.decode(imgDto.img, android.util.Base64.DEFAULT)
+        var bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
+
+        val path = File(context!!.cacheDir, "images") //캐시폴더의 images/
+        path.mkdirs()//없으면 생성
+        val tempFile = File(path, imgDto.path)
+        tempFile.createNewFile()//파일 저장
+        val out = FileOutputStream(tempFile)
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out)//파일에 쓰기
+        out.close()
+
+        val contentUri = FileProvider.getUriForFile(
+            context!!,
+            "com.example.android.provider",
+            tempFile
+        )
+        var dogUri = ImgDtoUri(imgDto.id, imgDto.path, contentUri)
+        return dogUri
     }
 
     override fun onCreateView(
@@ -53,24 +152,21 @@ class DogFragment : Fragment() {
             profileDogWeightTV.text = dogDto?.dogWeight.toString()
             profileDogBreedTV.text = dogDto?.breed.toString()
 
-            //dogDto.dogId == null 등록된 개가 없는 경우
             //dogDto.dogId != null && dogDto.dogImgList == null : 개는 있는데 사진이 없음
-            if (dogDto!!.dogImgList.isNullOrEmpty()) {
-                var emptyImg = arrayListOf<ImgDto>()
-                emptyImg.add(ImgDto(-100, "emptyImg", "emptyImg"))
-                imgViewPager.adapter = DogSliderAdapter(emptyImg)
+            if (dogImgListUri.isNullOrEmpty()) {
+                dogImgListUri.add(ImgDtoUri(-100, "emptyImg", Uri.parse("emptyImg")))
 
-            }else{
-                imgViewPager.adapter = DogSliderAdapter(dogDto!!.dogImgList)
+            }else{//강아지와 사진 다 있음
+                dogImgListUri.add(ImgDtoUri(-100, "emptyImg", Uri.parse("emptyImg")))//마지막에 사진 추가 이미지
             }
 
         }else{//강아지가 없는 경우
-            var emptyDog = arrayListOf<ImgDto>()
-            emptyDog.add(ImgDto(-200,"emptyDog", "emptyDog"))
-            imgViewPager.adapter = DogSliderAdapter(emptyDog)
+            dogImgListUri.add(ImgDtoUri(-200,"emptyDog", Uri.parse("emptyDog")))
             profileDogInfoLayout.visibility = View.INVISIBLE
         }
-
+        adapter = DogSliderAdapter(dogImgListUri)
+        adapter.adapterListener = listener
+        imgViewPager.adapter = adapter
 
         return view
     }
@@ -111,5 +207,108 @@ class DogFragment : Fragment() {
         profileDogInfoLayout = view.findViewById(R.id.profileDogInfoLayout)
 
         return view
+    }
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (resultCode != Activity.RESULT_OK) {
+            return
+        }
+
+        when (requestCode) {
+            DEFAULT_GALLERY_REQUEST_CODE -> {
+                data ?: return
+
+                //갤러리에서 고른 사진의 uri
+                var photo = data.data as Uri
+
+                //확장자
+                var cr = context!!.contentResolver
+                var type = MimeTypeMap.getSingleton().getExtensionFromMimeType(cr.getType(photo))
+
+                var imgType = listOf<String>("png", "jpg", "jpeg")
+
+                //png, jpg, jpeg일때만 실행
+                if (imgType.contains(type)) {
+                    try {
+                        //byte[] 로 변경
+                        var photoArr = context!!.contentResolver.openInputStream(photo)?.buffered()
+                            ?.use { it.readBytes() }
+
+                        //multipart 설정
+                        var requestFile =
+                            RequestBody.create(MediaType.parse("multipart/form-data"), photoArr)
+                        var multipartImg: MultipartBody.Part =
+                            MultipartBody.Part.createFormData(
+                                "image",
+                                photo.toString() + ".${type}",
+                                requestFile
+                            )
+
+                        //retrofit
+                        dogService.updateDogImg(dogId, multipartImg)
+                            .enqueue(object : Callback<UpdateDogImageDto> {
+                                override fun onResponse(
+                                    call: Call<UpdateDogImageDto>,
+                                    response: Response<UpdateDogImageDto>
+                                ) {
+                                    if (response.isSuccessful) {
+                                        var updateDogImageDto = response.body()
+                                        if (updateDogImageDto!!.dogImgId != -100L) {//-100L이면 서버에서 오류난거
+                                            //클릭한 이미지 삭제(강아지 사진 추가 이미지)
+                                            adapter.notifyItemRemoved(clickPosition!!)
+                                            adapter.notifyItemRangeChanged(clickPosition!!, dogImgListUri.size)
+                                            dogImgListUri.removeAt(clickPosition!!)
+
+                                            //이미지 추가
+                                            var imgDto = ImgDtoUri(
+                                                updateDogImageDto!!.dogImgId,
+                                                updateDogImageDto.path,
+                                                photo
+                                            )
+                                            dogImgListUri.add(clickPosition!!, imgDto)
+
+                                            //마지막 위치에 강아지 사진 추가 이미지 추가
+                                            if (dogImgListUri.last().id != -100L) {
+                                                dogImgListUri.add(
+                                                    ImgDtoUri(
+                                                        -100,
+                                                        "emptyImg",
+                                                        Uri.parse("emptyImg")
+                                                    )
+                                                )
+                                                adapter.notifyItemInserted(dogImgListUri.lastIndex)
+                                            }
+                                            adapter.notifyItemInserted(clickPosition!!)
+                                        }else {
+                                            Toast.makeText(context, "사진추가에 실패했습니다.", Toast.LENGTH_SHORT).show()
+                                        }
+                                    }
+                                    else {
+                                        Toast.makeText(context, "사진추가에 실패했습니다.", Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+
+                                override fun onFailure(
+                                    call: Call<UpdateDogImageDto>,
+                                    t: Throwable
+                                ) {
+                                    Toast.makeText(context, "사진추가에 실패했습니다.", Toast.LENGTH_SHORT)
+                                        .show()
+                                }
+
+                            })
+
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+
+                }else{
+                    Toast.makeText(context, "지원하지 않는 파일 형식입니다.", Toast.LENGTH_SHORT)
+                        .show()
+                }
+
+            }
+        }
     }
 }
