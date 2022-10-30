@@ -11,7 +11,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="5dp"
-        android:layout_weight="5"
         android:background="@drawable/style_rounded_layout"
         android:orientation="vertical"
         android:padding="10dp">
@@ -55,7 +54,7 @@
             android:layout_marginLeft="10dp"
             android:layout_marginTop="3dp"
             android:layout_marginRight="10dp"
-            android:layout_marginBottom="10dp"
+            android:layout_marginBottom="3dp"
             android:background="@color/brown" />
 
         <HorizontalScrollView
@@ -79,50 +78,64 @@
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/walkInfo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="5dp"
-        android:layout_marginTop="30dp"
-        android:layout_weight="1"
         android:background="@drawable/style_rounded_layout"
-        android:gravity="center"
-        android:orientation="horizontal"
-        android:padding="10dp">
+        android:orientation="vertical">
 
         <TextView
-            android:id="@+id/profileTotalMinuteTV"
-            android:layout_width="wrap_content"
+            android:id="@+id/textView"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_marginTop="10dp"
             android:gravity="center"
-            android:text="총시간" />
+            android:text="최근 산책 정보"
+            android:textColor="#000000"
+            android:textSize="14sp" />
 
-        <TextView
-            android:id="@+id/profileTotalDistanceTV"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:id="@+id/walkInfo"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_margin="5dp"
             android:gravity="center"
-            android:text="총거리" />
+            android:orientation="horizontal"
+            android:padding="10dp">
 
-        <TextView
-            android:id="@+id/profileTotalCountTV"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:text="횟수" />
+            <TextView
+                android:id="@+id/profileTotalMinuteTV"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="총시간" />
+
+            <TextView
+                android:id="@+id/profileTotalDistanceTV"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="총거리" />
+
+            <TextView
+                android:id="@+id/profileTotalCountTV"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="횟수" />
+        </LinearLayout>
     </LinearLayout>
 
     <LinearLayout
         android:id="@+id/config"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:layout_weight="3"
+        android:layout_marginTop="5dp"
         android:orientation="vertical"
-        android:padding="10dp">
+        android:paddingBottom="10dp">
 
         <TextView
             android:id="@+id/textView3"
