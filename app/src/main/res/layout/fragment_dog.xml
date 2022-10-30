@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:orientation="vertical"
     tools:context=".DogFragment">
 
@@ -17,6 +17,7 @@
         android:id="@+id/profileDogInfoLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_margin="10dp"
         android:orientation="vertical">
 
         <LinearLayout
@@ -30,16 +31,18 @@
                 android:layout_width="100dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
+                android:layout_margin="2dp"
                 android:layout_weight="1"
                 android:gravity="center"
                 android:text="이름"
-                android:textColor="@color/black" />
+                android:textColor="@color/black"
+                android:textSize="16sp" />
 
             <TextView
                 android:id="@+id/profileDogNameTV"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="5dp"
+                android:layout_margin="2dp"
                 android:layout_marginTop="10dp"
                 android:layout_weight="5"
                 android:gravity="center"
@@ -59,16 +62,18 @@
                 android:layout_width="100dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
+                android:layout_margin="2dp"
                 android:layout_weight="1"
                 android:gravity="center"
                 android:text="성별"
-                android:textColor="@color/black" />
+                android:textColor="@color/black"
+                android:textSize="16sp" />
 
             <TextView
                 android:id="@+id/profileDogGenderTV"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="5dp"
+                android:layout_margin="2dp"
                 android:layout_marginTop="10dp"
                 android:layout_weight="5"
                 android:gravity="center"
@@ -89,16 +94,18 @@
                 android:layout_width="100dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
+                android:layout_margin="2dp"
                 android:layout_weight="1"
                 android:gravity="center"
                 android:text="나이"
-                android:textColor="@color/black" />
+                android:textColor="@color/black"
+                android:textSize="16sp" />
 
             <TextView
                 android:id="@+id/profileDogAgeTV"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="5dp"
+                android:layout_margin="2dp"
                 android:layout_marginTop="10dp"
                 android:layout_weight="5"
                 android:gravity="center"
@@ -119,16 +126,18 @@
                 android:layout_width="100dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
+                android:layout_margin="2dp"
                 android:layout_weight="1"
                 android:gravity="center"
                 android:text="키"
-                android:textColor="@color/black" />
+                android:textColor="@color/black"
+                android:textSize="16sp" />
 
             <TextView
                 android:id="@+id/profileDogHeightTV"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="5dp"
+                android:layout_margin="2dp"
                 android:layout_weight="5"
                 android:gravity="center"
                 android:text="TextView"
@@ -148,16 +157,18 @@
                 android:layout_width="100dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
+                android:layout_margin="2dp"
                 android:layout_weight="1"
                 android:gravity="center"
                 android:text="몸무게"
-                android:textColor="@color/black" />
+                android:textColor="@color/black"
+                android:textSize="16sp" />
 
             <TextView
                 android:id="@+id/profileDogWeightTV"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="5dp"
+                android:layout_margin="2dp"
                 android:layout_weight="5"
                 android:gravity="center"
                 android:text="TextView"
@@ -177,16 +188,18 @@
                 android:layout_width="100dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
+                android:layout_margin="2dp"
                 android:layout_weight="1"
                 android:gravity="center"
                 android:text="종"
-                android:textColor="@color/black" />
+                android:textColor="@color/black"
+                android:textSize="16sp" />
 
             <TextView
                 android:id="@+id/profileDogBreedTV"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="5dp"
+                android:layout_margin="2dp"
                 android:layout_weight="5"
                 android:gravity="center"
                 android:text="TextView"
