@@ -9,6 +9,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
@@ -36,7 +37,7 @@ class ProfileFragment : Fragment() {
     lateinit var userName:String
     lateinit var dogList:MutableList<DogDto>
     lateinit var profileUserNameTV:TextView
-    lateinit var profileUserConfig:Button
+    lateinit var profileUserConfig:ImageButton
     lateinit var profileButtonLayout: LinearLayout
     var idList = mutableListOf<Int>()
 

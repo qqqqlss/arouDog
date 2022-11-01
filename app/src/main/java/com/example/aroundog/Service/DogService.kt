@@ -1,6 +1,7 @@
 package com.example.aroundog.Service
 
 import androidx.compose.ui.text.font.FontWeight
+import com.example.aroundog.Model.Gender
 import com.example.aroundog.dto.UpdateDogImageDto
 import okhttp3.MultipartBody
 import retrofit2.Call
@@ -37,4 +38,15 @@ interface DogService {
         @Part image:MultipartBody.Part
     ):Call<UpdateDogImageDto>
     
+    @FormUrlEncoded
+    @PATCH("/dog/{dogId}")
+    fun updateDog(
+        @Path("dogId")dogId:Long,
+        @Field("name") dogName:String,
+        @Field("age") dogAge:Int,
+        @Field("weight") dogWeight:Double,
+        @Field("height") dogHeight:Double,
+        @Field("gender") dogGender:Gender,
+        @Field("breed") breed:Long
+    ):Call<Boolean>
 }

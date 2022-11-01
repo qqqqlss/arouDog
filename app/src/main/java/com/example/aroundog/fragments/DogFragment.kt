@@ -9,15 +9,19 @@ import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.OnClickListener
 import android.view.ViewGroup
 import android.webkit.MimeTypeMap
+import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.MutableLiveData
 import androidx.viewpager2.widget.ViewPager2
 import com.example.aroundog.BuildConfig
+import com.example.aroundog.DogEditActivity
 import com.example.aroundog.Model.DogSliderAdapter
 import com.example.aroundog.R
 import com.example.aroundog.Service.DogService
@@ -53,6 +57,7 @@ class DogFragment : Fragment() {
     lateinit var profileDogWeightTV:TextView
     lateinit var profileDogBreedTV:TextView
     lateinit var profileDogInfoLayout:LinearLayout
+    lateinit var profileDogConfig:ImageButton
     var hasDog = false
     private val DEFAULT_GALLERY_REQUEST_CODE =200
     lateinit var listener: DogSliderAdapter.ItemClickListener
@@ -65,6 +70,12 @@ class DogFragment : Fragment() {
     lateinit var retrofit:Retrofit
     lateinit var dogService: DogService
     var dogId:Long = -100L
+
+    init {
+        DogEditActivity.editDogInfo.observe(this){
+            updateDogInfo(it)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -145,12 +156,7 @@ class DogFragment : Fragment() {
         val view: ViewGroup = setView(inflater, container)
 
         if(hasDog){//강아지가 있는 경우
-            profileDogNameTV.text = dogDto?.dogName
-            profileDogGenderTV.text = dogDto?.dogGender.toString()
-            profileDogAgeTV.text = dogDto?.dogAge.toString()
-            profileDogHeightTV.text = dogDto?.dogHeight.toString()
-            profileDogWeightTV.text = dogDto?.dogWeight.toString()
-            profileDogBreedTV.text = dogDto?.breed.toString()
+            updateDogInfo(dogDto!!)
 
             //dogDto.dogId != null && dogDto.dogImgList == null : 개는 있는데 사진이 없음
             if (dogImgListUri.isNullOrEmpty()) {
@@ -168,6 +174,11 @@ class DogFragment : Fragment() {
         adapter.adapterListener = listener
         imgViewPager.adapter = adapter
 
+        profileDogConfig.setOnClickListener{
+            var intent = Intent(context, DogEditActivity::class.java)
+            intent.putExtra("info", dogDto)
+            it.context.startActivity(intent)
+        }
         return view
     }
 
@@ -190,6 +201,15 @@ class DogFragment : Fragment() {
             }
     }
 
+    private fun updateDogInfo(dogDto: DogDto) {
+        profileDogNameTV.text = dogDto?.dogName
+        profileDogGenderTV.text = dogDto?.dogGender.toString()
+        profileDogAgeTV.text = dogDto?.dogAge.toString()
+        profileDogHeightTV.text = dogDto?.dogHeight.toString()
+        profileDogWeightTV.text = dogDto?.dogWeight.toString()
+        profileDogBreedTV.text = dogDto?.breed.toString()
+    }
+
     private fun setView(
         inflater: LayoutInflater,
         container: ViewGroup?
@@ -205,6 +225,7 @@ class DogFragment : Fragment() {
         profileDogWeightTV = view.findViewById(R.id.profileDogWeightTV)
         profileDogBreedTV = view.findViewById(R.id.profileDogBreedTV)
         profileDogInfoLayout = view.findViewById(R.id.profileDogInfoLayout)
+        profileDogConfig = view.findViewById(R.id.profileDogConfig)
 
         return view
     }
