@@ -28,6 +28,13 @@
         tools:ignore="ExtraText"
         tools:targetApi="n">
         <activity
+            android:name=".DogEditActivity"
+            android:exported="false">
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value="" />
+        </activity>
+        <activity
             android:name=".AddDogActivity"
             android:exported="false">
             <meta-data
