@@ -1,11 +1,9 @@
 package com.example.aroundog.Service
 
+import com.example.aroundog.Model.Gender
 import com.example.aroundog.dto.UserDto
 import retrofit2.Call
-import retrofit2.http.Body
-import retrofit2.http.GET
-import retrofit2.http.POST
-import retrofit2.http.Query
+import retrofit2.http.*
 
 interface UserService {
 
@@ -26,4 +24,15 @@ interface UserService {
     ): Call<Boolean>
 
 
+    @FormUrlEncoded
+    @PATCH("/user/{userId}")
+    fun updateUser(
+        @Path("userId") userId:String,
+        @Field("userName") name:String,
+        @Field("age") age:Int,
+        @Field("email") email:String,
+        @Field("phone") phone:String,
+        @Field("gender") gender:Gender,
+        @Field("image") image:Int
+    ):Call<Boolean>
 }
