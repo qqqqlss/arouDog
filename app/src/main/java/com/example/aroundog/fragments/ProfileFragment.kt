@@ -1,6 +1,7 @@
 package com.example.aroundog.fragments
 
 import android.content.DialogInterface
+import android.content.Intent
 import android.graphics.Typeface
 import android.os.Bundle
 import android.util.Log
@@ -16,14 +17,13 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import com.example.aroundog.AddDogActivity
-import com.example.aroundog.BuildConfig
-import com.example.aroundog.MainActivity2
-import com.example.aroundog.R
+import com.example.aroundog.*
+import com.example.aroundog.Model.Gender
 import com.example.aroundog.Service.DogService
 import com.example.aroundog.Service.WalkService
 import com.example.aroundog.dto.DogDto
 import com.example.aroundog.dto.WalkWeekSummaryDto
+import com.example.aroundog.utils.UserData
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
@@ -52,6 +52,8 @@ class ProfileFragment : Fragment() {
     var hasDog:Boolean = false
     var buttonList = mutableListOf<Button>()
     lateinit var style:ContextThemeWrapper
+
+    lateinit var userData:UserData
 
 //    https://greensky0026.tistory.com/224
     init{
@@ -123,12 +125,8 @@ class ProfileFragment : Fragment() {
         var makeGson = GsonBuilder().create()
         var type: TypeToken<MutableList<DogDto>> = object: TypeToken<MutableList<DogDto>>(){}
 
-        //저장된 id 정보 가져오기
-        var user_info_pref =
-            requireActivity().getSharedPreferences("userInfo", AppCompatActivity.MODE_PRIVATE)
-        userName = user_info_pref.getString("userName", "").toString()
-        userId = user_info_pref.getString("id", "").toString()
-
+        //유저 정보 업데이트
+        getSharedUserData()
 
         var dog_info_pref =
             requireActivity().getSharedPreferences("dogInfo", AppCompatActivity.MODE_PRIVATE)
@@ -170,6 +168,33 @@ class ProfileFragment : Fragment() {
             }
 
         })
+
+        //유저 정보 업데이트
+        getSharedUserData()
+        profileUserNameTV.text = userName
+    }
+
+    private fun getSharedUserData() {
+        var user_info_pref =
+            requireActivity().getSharedPreferences("userInfo", AppCompatActivity.MODE_PRIVATE)
+        userName = user_info_pref.getString("userName", "").toString()
+        userId = user_info_pref.getString("id", "").toString()
+
+
+        var id = user_info_pref.getString("id", "").toString()
+        var password = user_info_pref.getString("password", "").toString()
+        var userAge = user_info_pref.getInt("userAge", 0)
+        var image = user_info_pref.getInt("image", 0)
+        var userName = user_info_pref.getString("userName", "").toString()
+        var phone = user_info_pref.getString("phone", "").toString()
+        var email = user_info_pref.getString("email", "").toString()
+        var userGender =
+            if (user_info_pref.getString("userGender", "").toString().equals(Gender.MAN)) {
+                Gender.MAN
+            } else {
+                Gender.WOMAN
+            }
+        userData = UserData(id, password, userAge, image, userName, phone, email, userGender)
     }
 
     override fun onCreateView(
@@ -179,6 +204,12 @@ class ProfileFragment : Fragment() {
         val view: ViewGroup = setView(inflater, container)
 
         profileUserNameTV.text = userName
+
+        profileUserConfig.setOnClickListener {
+            val intent = Intent(context, ProfileEditActivity::class.java)
+            intent.putExtra("user", userData)
+            it.context.startActivity(intent)
+        }
 
         addDogFragments()
 
