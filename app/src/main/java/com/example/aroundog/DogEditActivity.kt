@@ -63,6 +63,7 @@ class DogEditActivity : AppCompatActivity() {
 
         dogBreed!!.setOnClickListener {
             var intent = Intent(this, SelectDogActivity::class.java)
+            intent.putExtra("breed", dogInfo.breed)
             it.context.startActivity(intent)
         }
 

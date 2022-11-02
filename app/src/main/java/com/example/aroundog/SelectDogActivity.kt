@@ -10,6 +10,7 @@ import android.widget.Button
 import android.widget.LinearLayout
 import androidx.lifecycle.MutableLiveData
 import com.example.aroundog.utils.DogBreedData
+import com.example.aroundog.utils.UserData
 import kotlin.collections.HashMap
 
 class SelectDogActivity : AppCompatActivity() {
@@ -27,6 +28,16 @@ class SelectDogActivity : AppCompatActivity() {
 
 
         var map = getMap()//<뷰, (해당 강아지 아이디, 선택여부)>
+
+        //변경 전의 강아지 종을 선택상태로 만들기
+        val breed = intent.getSerializableExtra("breed") as Long
+        for (entry in map) {
+            if (entry.value.dogId == breed) {
+                entry.value.boolean = true
+                entry.key.background = resources.getDrawable(R.drawable.dog_select_style, null)
+            }
+        }
+
         var listener = OnClickListener {
             if (map[it]!!.boolean == true) {//선택된 상태면 테두리 없앰
                 map[it]!!.boolean = false
