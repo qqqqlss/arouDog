@@ -30,6 +30,7 @@ import com.example.aroundog.dto.DogDto
 import com.example.aroundog.dto.ImgDto
 import com.example.aroundog.dto.ImgDtoUri
 import com.example.aroundog.dto.UpdateDogImageDto
+import com.example.aroundog.utils.DogBreedData
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import okhttp3.MediaType
@@ -207,7 +208,8 @@ class DogFragment : Fragment() {
         profileDogAgeTV.text = dogDto?.dogAge.toString()
         profileDogHeightTV.text = dogDto?.dogHeight.toString()
         profileDogWeightTV.text = dogDto?.dogWeight.toString()
-        profileDogBreedTV.text = dogDto?.breed.toString()
+        var dogBreed = dogDto?.breed
+        profileDogBreedTV.text = DogBreedData.getBreed(dogBreed)
     }
 
     private fun setView(
