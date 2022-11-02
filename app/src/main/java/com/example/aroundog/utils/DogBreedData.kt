@@ -56,5 +56,15 @@ class DogBreedData {
             }
             return "오류"
         }
+
+        @JvmStatic
+        fun getId(name:String):Long{
+            for (entry in dogList) {
+                if (entry.value == name) {
+                    return entry.key
+                }
+            }
+            return -1L
+        }
     }
 }

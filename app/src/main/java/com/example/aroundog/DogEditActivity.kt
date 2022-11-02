@@ -87,7 +87,7 @@ class DogEditActivity : AppCompatActivity() {
                     strDogWeight.toDouble(),
                     strDogHeight.toDouble(),
                     gender,
-                    dogBreed!!.text.toString().toLong(),
+                    DogBreedData.getId(dogBreed!!.text.toString()),//종을 해당 종 id로 변경
                     dogInfo.dogImgList
                 )
 
@@ -132,7 +132,7 @@ class DogEditActivity : AppCompatActivity() {
         } else {
             dogGender!!.check(R.id.editDogWoman)
         }
-        dogBreed!!.text = dogInfo.breed.toString()
+        dogBreed!!.text = DogBreedData.getBreed(dogInfo.breed)
     }
 
     private fun setView() {
