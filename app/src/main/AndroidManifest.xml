@@ -28,6 +28,14 @@
         tools:ignore="ExtraText"
         tools:targetApi="n">
         <activity
+            android:name=".SelectDogActivity"
+            android:exported="false"
+            android:theme="@style/Theme.AppCompat.DayNight.Dialog">
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value="" />
+        </activity>
+        <activity
             android:name=".DogEditActivity"
             android:exported="false">
             <meta-data

@@ -1,5 +1,6 @@
 package com.example.aroundog
 
+import android.content.Intent
 import android.nfc.Tag
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -7,9 +8,11 @@ import android.util.Log
 import android.view.View
 import android.widget.*
 import androidx.lifecycle.MutableLiveData
+import com.example.aroundog.Model.DogBreed
 import com.example.aroundog.Model.Gender
 import com.example.aroundog.Service.DogService
 import com.example.aroundog.dto.DogDto
+import com.example.aroundog.utils.DogBreedData
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import retrofit2.Call
@@ -32,6 +35,13 @@ class DogEditActivity : AppCompatActivity() {
     companion object{
         val editDogInfo = MutableLiveData<DogDto>()
     }
+
+    init {
+        SelectDogActivity.selectDog.observe(this){
+            dogBreed!!.text = DogBreedData.getBreed(it)
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_dog_edit)
@@ -50,6 +60,11 @@ class DogEditActivity : AppCompatActivity() {
             .addConverterFactory(GsonConverterFactory.create(gsonInstance))
             .build()
             .create(DogService::class.java)
+
+        dogBreed!!.setOnClickListener {
+            var intent = Intent(this, SelectDogActivity::class.java)
+            it.context.startActivity(intent)
+        }
 
         editButton!!.setOnClickListener {
             val strDogName = dogName!!.text.toString()
