@@ -75,6 +75,7 @@ class DogFragment : Fragment() {
     init {
         DogEditActivity.editDogInfo.observe(this){
             updateDogInfo(it)
+            dogDto = it
         }
     }
 

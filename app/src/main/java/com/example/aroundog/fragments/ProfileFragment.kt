@@ -89,6 +89,15 @@ class ProfileFragment : Fragment() {
             button.setTypeface(Typeface.create(button.typeface, Typeface.NORMAL))//BOLD할때처럼 하면 적용 안딤
             button.textSize = 14F
         }
+
+        //강아지 정보가 수정되면 강아지 이름 버튼 텍스트 변경
+        DogEditActivity.editDogInfo.observe(this){
+            var id = it.dogId
+            for (button in buttonList) {
+                if (button.id == id.toInt())
+                    button.text = it.dogName
+            }
+        }
     }
 
     /**
