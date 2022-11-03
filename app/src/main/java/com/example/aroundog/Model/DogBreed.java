@@ -1,5 +1,22 @@
 package com.example.aroundog.Model;
 
 public enum DogBreed {
-    BIG, MEDIUM, SMALL
+    HUSKY,
+    SAMOYED,
+    RETRIEVER,
+    SHEPHERD,
+    MALAMUTE,
+    BEAGLE,
+    BORDERCOLLIE,
+    BULLDOG,
+    SHIBA,
+    WELSHCORGI,
+    CHIHUAHUA,
+    MALTESE,
+    POODLE,
+    SHIHTZU,
+    YORKSHIRETERRIER,
+    DOGBITECT,
+    DOGMEDIUMECT,
+    DOGSMALLECT,
 }
