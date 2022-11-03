@@ -4,8 +4,6 @@ import android.animation.ObjectAnimator
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
-import android.graphics.drawable.AnimationDrawable
-import android.graphics.drawable.ColorDrawable
 import android.location.Location
 import android.net.Uri
 import android.os.*
@@ -19,8 +17,6 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.app.AppCompatDialog
-import androidx.appcompat.app.AppCompatDialogFragment
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResult
@@ -32,6 +28,7 @@ import com.example.aroundog.R
 import com.example.aroundog.Service.CoordinateService
 import com.example.aroundog.Service.NaverMapService
 import com.example.aroundog.Service.Polyline
+import com.example.aroundog.Service.UserService
 import com.example.aroundog.Util
 import com.example.aroundog.dto.UserCoordinateDogDto
 import com.example.aroundog.utils.*
@@ -57,6 +54,7 @@ import java.text.SimpleDateFormat
 import java.time.LocalDateTime
 import java.util.*
 import java.util.concurrent.TimeUnit
+import kotlin.collections.ArrayList
 
 
 class MainFragment : Fragment(){
@@ -88,12 +86,14 @@ class MainFragment : Fragment(){
     lateinit var strTime: String
     var tile = ""
     lateinit var userId: String
-    lateinit var retrofit: CoordinateService
+    lateinit var coordinateService: CoordinateService
     lateinit var databaseCoroutine: Job
 
     lateinit var userCoordinateDogDtoList:List<UserCoordinateDogDto>
-    var updateCoordinateMap = HashMap<Long, Marker>()//<개id, 마커>
-    var visibleOnMapMap = HashMap<Long, Marker>()
+
+    //서버에서 불러온 updateCoordinateMap에 visibleOnMapMap의 값이 없을때 -> 산책 종료
+    var updateCoordinateMap = HashMap<Long, Marker>()//<개id, 마커> 서버에서 불러온 강아지 정보
+    var visibleOnMapMap = HashMap<Long, Marker>()//<개id, 마커> 현재 화면에 표시된 강아지 정보
 
     lateinit var dog1:OverlayImage
     lateinit var dog2:OverlayImage
@@ -116,6 +116,13 @@ class MainFragment : Fragment(){
     val REQUEST_TAKE_PHOTO = 1
 
 
+    lateinit var userService: UserService
+    var hateDogList = ArrayList<DogBreed>()//서버에서 받아오는 싫어하는 강아지 문자열을 저장할 리스트
+    
+    var big = mutableListOf<DogBreed>() //대형견
+    var medium = mutableListOf<DogBreed>() //중형견
+    var small = mutableListOf<DogBreed>() //소형견
+    
     companion object {
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1000
         val firstTile = MutableLiveData<String>()
@@ -139,16 +146,39 @@ class MainFragment : Fragment(){
 
         initDogImage()//강아지 이미지 초기화
 
-
+        initDogBreed()//강아지 종 리스트 생성
 
         //환경설정에서 알람을 표시할 영역을 설정하는 변수, 저장 필요, 일단 임의값으로 대체
         //소수점 다섯째 자리가 약 1m정도씩 차이남
-        width = 0.001 //100m
+        width = 0.0005 //50m
 
         //저장된 id 정보 가져오기
         var user_info_pref =
             requireActivity().getSharedPreferences("userInfo", AppCompatActivity.MODE_PRIVATE)
         userId = user_info_pref.getString("id", "error").toString()
+    }
+
+    private fun initDogBreed() {
+        big.add(DogBreed.HUSKY)
+        big.add(DogBreed.SAMOYED)
+        big.add(DogBreed.RETRIEVER)
+        big.add(DogBreed.SHEPHERD)
+        big.add(DogBreed.MALAMUTE)
+        big.add(DogBreed.DOGBITECT)
+
+        medium.add(DogBreed.BEAGLE)
+        medium.add(DogBreed.BORDERCOLLIE)
+        medium.add(DogBreed.BULLDOG)
+        medium.add(DogBreed.SHIBA)
+        medium.add(DogBreed.WELSHCORGI)
+        medium.add(DogBreed.DOGMEDIUMECT)
+
+        small.add(DogBreed.CHIHUAHUA)
+        small.add(DogBreed.MALTESE)
+        small.add(DogBreed.POODLE)
+        small.add(DogBreed.SHIHTZU)
+        small.add(DogBreed.YORKSHIRETERRIER)
+        small.add(DogBreed.DOGSMALLECT)
     }
 
     init {
@@ -254,11 +284,13 @@ class MainFragment : Fragment(){
      */
     private fun initRetrofit() {
         var gsonInstance: Gson = GsonBuilder().setLenient().create()
-        retrofit = Retrofit.Builder()
+        var retrofit = Retrofit.Builder()
             .baseUrl(BuildConfig.SERVER)
             .addConverterFactory(GsonConverterFactory.create(gsonInstance))
             .build()
-            .create(CoordinateService::class.java)
+        coordinateService = retrofit.create(CoordinateService::class.java)
+        userService = retrofit.create(UserService::class.java)
+
     }
 
     /**
@@ -401,6 +433,10 @@ class MainFragment : Fragment(){
                 sendCommandToService(ACTION_SHOW_RUNNING_ACTIVITY)
                 sendCommandToService(ACTION_START_OR_RESUME_SERVICE)
 
+                //기피 강아지 목록 불러오기
+                getHateDogList()
+
+                //기피 강아지 경고
                 boundCoroutine = CoroutineScope(Dispatchers.Main).launch {
                     var isWarning = false
                     //안드로이드 버전에 따라 다르게 저장
@@ -485,7 +521,7 @@ class MainFragment : Fragment(){
             }
 
             //서버에 false 전송
-            retrofit.endWalking(userId).enqueue(object:Callback<Boolean>{
+            coordinateService.endWalking(userId).enqueue(object:Callback<Boolean>{
                 override fun onResponse(call: Call<Boolean>, response: Response<Boolean>) {
                     if (response.isSuccessful) {
                         Log.d(TAG, "endWalking is success");
@@ -505,15 +541,44 @@ class MainFragment : Fragment(){
         return view
     }
 
+    private fun getHateDogList(){
+        userService.getHateDog(userId).enqueue(object:Callback<String>{
+            override fun onResponse(call: Call<String>, response: Response<String>) {
+                if (response.isSuccessful) {
+                    try {
+                        var strHateDog = response.body()
+                        var strHateDogList = strHateDog!!.split("%")
+                        for (breed in strHateDogList) {
+                            hateDogList.add(DogBreed.valueOf(breed))
+                        }
+                        Log.d(TAG, "hate list : $hateDogList")
+                    } catch (e:Exception) {
+                        Log.d(TAG, "$e")
+                    }
+                }
+            }
+
+            override fun onFailure(call: Call<String>, t: Throwable) {
+                Log.d(TAG, "기피 강아지 불러오기 실패", t)
+            }
+        })
+    }
+
     private fun checkBound():Boolean{
         //bound가 초기화 되었다면
         if(this::bounds.isInitialized) {
  //        지도에 표시된 개의 마커의 위치를 기준으로 bounds안에 들어와있는지 확인
             if (isTracking && bounds != null) {
-                visibleOnMapMap.forEach { markerId ->
-                    val markerPosition = markerId.value.position
-                    if (bounds.contains(markerPosition)) {//좌표가 영역 안에 포함될경우
-                        return true
+                if(userCoordinateDogDtoList.isNotEmpty()) {
+                    for (userCoordinateDogDto in userCoordinateDogDtoList) { //서버에서 가져온 주변 산책강아지 정보
+                        if (hateDogList.contains(userCoordinateDogDto.dogBreed)) {//기피하는 종과 같은 종의 강아지인 경우
+                            //updateCoordinateMap에서 찾을 경우 일정 시간마다 clear하기 때문에 비어있을 수 있음
+                            //그래서 visibleOnMapMap 사용
+                            val markerPosition = visibleOnMapMap[userCoordinateDogDto.dogId]!!.position
+                            if (bounds.contains(markerPosition)) {//좌표가 영역 안에 포함될경우
+                                return true
+                            }
+                        }
                     }
                 }
             }
@@ -567,7 +632,7 @@ class MainFragment : Fragment(){
 
                 if (naverMap != null) {
                     if (!coorUpdate) {//첫 실행일때는 모든 정보 넣어서 테이블에 추가
-                        retrofit.insert(
+                        coordinateService.insert(
                             userId,
                             lastLocation.latitude,
                             lastLocation.longitude,
@@ -594,7 +659,7 @@ class MainFragment : Fragment(){
                     } //if
 
                     else {//첫실행 아닐때
-                        retrofit.update(
+                        coordinateService.update(
                             userId,
                             lastLocation.latitude,
                             lastLocation.longitude,
@@ -620,7 +685,7 @@ class MainFragment : Fragment(){
 
                     //다른 사용자들의 위치정보 불러오기
                     //tile 올려서 해당 사용자들만 받아오게
-                    retrofit.getWalkingList(tile)
+                    coordinateService.getWalkingList(tile)
                         .enqueue(object : Callback<List<UserCoordinateDogDto>> {
                             override fun onResponse(
                                 call: Call<List<UserCoordinateDogDto>>,
@@ -681,8 +746,8 @@ class MainFragment : Fragment(){
                                                     )
                                                 } else {//주인이 중복되는 경우
                                                     latLng = LatLng(
-                                                        dto.latitude - 0.0001,
-                                                        dto.longitude - 0.0001
+                                                        dto.latitude - 0.00005,
+                                                        dto.longitude - 0.00005
                                                     )
                                                 }
                                                 val marker = visibleOnMapMap.get(dto.dogId)
@@ -724,12 +789,12 @@ class MainFragment : Fragment(){
     }
 
     private fun setDogImage(dogBreed: DogBreed): OverlayImage {
-        if (dogBreed.equals(DogBreed.BIG)) {
-            return dog1
-        } else if (dogBreed.equals(DogBreed.MEDIUM)) {
-            return dog2
+        return if (big.contains(dogBreed)) {
+            dog1
+        } else if (small.contains(dogBreed)) {
+            dog2
         } else{
-            return dog3
+            dog3
         }
     }
 
@@ -877,4 +942,25 @@ class MainFragment : Fragment(){
         var northEast = LatLng(latLng.latitude + width, latLng.longitude + width)
         return LatLngBounds(southWest, northEast)
     }
+
+    override fun onPause() {
+        super.onPause()
+        Log.d(TAG, "onPause")
+    }
+
+    override fun onStart() {
+        super.onStart()
+        Log.d(TAG, "onStart")
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Log.d(TAG, "onResume")
+    }
+
+    override fun onStop() {
+        super.onStop()
+        Log.d(TAG, "onStop")
+    }
+
 }

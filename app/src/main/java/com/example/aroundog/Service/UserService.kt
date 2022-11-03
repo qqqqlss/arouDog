@@ -35,4 +35,9 @@ interface UserService {
         @Field("gender") gender:Gender,
         @Field("image") image:Int
     ):Call<Boolean>
+
+    @GET("/hate/{userId}")
+    fun getHateDog(
+        @Path("userId") userId: String
+    ):Call<String>
 }
