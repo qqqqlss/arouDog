@@ -58,19 +58,27 @@ import kotlin.collections.ArrayList
 
 
 class MainFragment : Fragment(){
+    val TAG = "MainFragmentTAG"
 
+    //지도
     private lateinit var locationSource: FusedLocationSource
     private lateinit var naverMap: NaverMap
+    lateinit var overlayImage: OverlayImage
+    lateinit var lastLocation: Location
+    lateinit var locationOverlay:LocationOverlay
+    lateinit var bounds:LatLngBounds
     private var pathList: ArrayList<LatLng> = ArrayList<LatLng>()
     private var pathOverlay: PathOverlay = PathOverlay()
     private var isFirst: Boolean = true
-    lateinit var overlayImage: OverlayImage
-    lateinit var compassImage: OverlayImage
-    lateinit var lastLocation: Location
-    lateinit var startTime: LocalDateTime
-    var walkDistance: Double = 0.0
-    val TAG = "MainFragmentTAG"
+    var isTracking = false
+    var pathPoints = mutableListOf<Polyline>()
 
+    //마커에 사용할 이미지
+    lateinit var dog1:OverlayImage
+    lateinit var dog2:OverlayImage
+    lateinit var dog3:OverlayImage
+
+    //화면 관련
     lateinit var frame: FrameLayout
     lateinit var startWalkButton: Button
     lateinit var walkDistanceTV: TextView
@@ -78,54 +86,74 @@ class MainFragment : Fragment(){
     lateinit var pauseButton: ImageButton
     lateinit var cameraButton: ImageButton
     lateinit var statusLayout: LinearLayout
+
+    //타일
+    var tile = ""
     lateinit var webView: WebView
+
+    //타이머
     lateinit var timer: Timer
+    lateinit var startTime: LocalDateTime
+    lateinit var strTime: String
+    var walkDistance: Double = 0.0
     var time: Long = 0
+
     lateinit var currentPhotoPath: String
 
-    lateinit var strTime: String
-    var tile = ""
     lateinit var userId: String
-    lateinit var coordinateService: CoordinateService
-    lateinit var databaseCoroutine: Job
 
-    lateinit var userCoordinateDogDtoList:List<UserCoordinateDogDto>
+    //코루틴
+    lateinit var databaseCoroutine: Job
+    lateinit var boundCoroutine:Job
+
+    lateinit var userCoordinateDogDtoList:List<UserCoordinateDogDto>//서버에서 불러온 주변 강아지 정보
 
     //서버에서 불러온 updateCoordinateMap에 visibleOnMapMap의 값이 없을때 -> 산책 종료
-    var updateCoordinateMap = HashMap<Long, Marker>()//<개id, 마커> 서버에서 불러온 강아지 정보
+    var updateCoordinateMap = HashMap<Long, Marker>()//<개id, 마커> 서버에서 불러온 강아지 정보를 맵으로 저장
     var visibleOnMapMap = HashMap<Long, Marker>()//<개id, 마커> 현재 화면에 표시된 강아지 정보
-
-    lateinit var dog1:OverlayImage
-    lateinit var dog2:OverlayImage
-    lateinit var dog3:OverlayImage
-    
     var aroundUserMap = HashMap<Long, String>() //개id, 유저id
     var duplicateUserDog = HashSet<Long>()//주인이 중복되는 개 id 저장
 
-    lateinit var bounds:LatLngBounds
-    var width:Double = 0.0
-
     lateinit var mainActivty: MainActivty
-    var isTracking = false
-    var pathPoints = mutableListOf<Polyline>()
-    lateinit var locationOverlay:LocationOverlay
+
+    //경고 이미지(엣지라이팅)
     lateinit var imageView:ImageView
-    lateinit var boundCoroutine:Job
+
+    //retrofit
+    lateinit var coordinateService: CoordinateService
+    lateinit var userService: UserService
+
     //카메라
     val REQUEST_IMAGE_CAPTURE = 1
     val REQUEST_TAKE_PHOTO = 1
 
-
-    lateinit var userService: UserService
     var hateDogList = ArrayList<DogBreed>()//서버에서 받아오는 싫어하는 강아지 문자열을 저장할 리스트
-    
+
+    //강아지 종류
     var big = mutableListOf<DogBreed>() //대형견
     var medium = mutableListOf<DogBreed>() //중형견
     var small = mutableListOf<DogBreed>() //소형견
+
+    //알림 거리 설정
+    var width:Double = 0.0
     
     companion object {
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1000
         val firstTile = MutableLiveData<String>()
+    }
+
+    init {
+        // 위치 추적 여부 관찰하여 updateTracking 호출
+        //레이아웃 변경
+        NaverMapService.isTracking.observe(this){
+            isTracking = it
+            //updateTracking(it)
+        }
+        // 경로 변경 관찰
+        NaverMapService.pathPoints.observe(this) {
+            pathPoints = it
+            addLatestPolyline()
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -158,41 +186,138 @@ class MainFragment : Fragment(){
         userId = user_info_pref.getString("id", "error").toString()
     }
 
-    private fun initDogBreed() {
-        big.add(DogBreed.HUSKY)
-        big.add(DogBreed.SAMOYED)
-        big.add(DogBreed.RETRIEVER)
-        big.add(DogBreed.SHEPHERD)
-        big.add(DogBreed.MALAMUTE)
-        big.add(DogBreed.DOGBITECT)
+    override fun onCreateView(//인터페이스를 그리기위해 호출
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
 
-        medium.add(DogBreed.BEAGLE)
-        medium.add(DogBreed.BORDERCOLLIE)
-        medium.add(DogBreed.BULLDOG)
-        medium.add(DogBreed.SHIBA)
-        medium.add(DogBreed.WELSHCORGI)
-        medium.add(DogBreed.DOGMEDIUMECT)
+        val view: ViewGroup = setView(inflater, container)
 
-        small.add(DogBreed.CHIHUAHUA)
-        small.add(DogBreed.MALTESE)
-        small.add(DogBreed.POODLE)
-        small.add(DogBreed.SHIHTZU)
-        small.add(DogBreed.YORKSHIRETERRIER)
-        small.add(DogBreed.DOGSMALLECT)
-    }
+        inflater.inflate(R.layout.warning, view, true)
+        imageView = view.findViewById<ImageView>(R.id.warning)
+        imageView.visibility = View.INVISIBLE
 
-    init {
-        // 위치 추적 여부 관찰하여 updateTracking 호출
-        //레이아웃 변경
-        NaverMapService.isTracking.observe(this){
-            isTracking = it
-            //updateTracking(it)
+        val fadeIn = ObjectAnimator.ofFloat(imageView, "alpha", 0f, 1f)
+        fadeIn.repeatCount = -1
+        fadeIn.duration = 1500
+        fadeIn.repeatMode = ObjectAnimator.REVERSE
+
+        //산책시작 버튼 클릭 리스너
+        startWalkButton.setOnClickListener {
+            //최신 위치가 저장되었는지 확인
+            if (this::lastLocation.isInitialized) {
+                startWalk()
+                dbProcess()
+                createWebView()//웹뷰 생성, tile 값 지정
+                sendCommandToService(ACTION_SHOW_RUNNING_ACTIVITY)
+                sendCommandToService(ACTION_START_OR_RESUME_SERVICE)
+
+                //기피 강아지 목록 불러오기
+                getHateDogList()
+
+                //기피 강아지 경고
+                boundCoroutine = CoroutineScope(Dispatchers.Main).launch {
+                    var isWarning = false
+                    //안드로이드 버전에 따라 다르게 저장
+                    var vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                        val vibratorManager =
+                            context!!.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+                        vibratorManager.defaultVibrator;
+                    } else {
+                        context!!.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+                    }
+//                    val notification: Uri =
+//                        RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+//                    val ringtone = RingtoneManager.getRingtone(context,notification)
+
+                    while(true){
+                        //위험 개 있을때
+                        if(checkBound()){
+                            if(!isWarning){//경고중이 아닐때
+                                //애니메이션 실행
+                                isWarning = true
+                                animationStatus(fadeIn, true)
+                            }
+                            //이미 경고중일때
+                            else{
+                                //할거없음
+                            }
+
+                            //소리, 진동 으로알림(공통)
+                            //안드로이드 버전에 따라 다르게
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                                vibrator.vibrate(VibrationEffect.createOneShot(500,255))
+                            } else {
+                                vibrator.vibrate(500L)
+                            }
+//                            ringtone.play()
+                        }
+                        //위험 개 없을때
+                        else{
+                            isWarning = false
+                            animationStatus(fadeIn, false)
+                        }
+                        delay(2000)
+                    }
+                }
+
+            } else {
+                Toast.makeText(context, "로딩중입니다. 잠시만 기다려주세요", Toast.LENGTH_SHORT).show()
+            }
         }
-        // 경로 변경 관찰
-        NaverMapService.pathPoints.observe(this) {
-            pathPoints = it
-            addLatestPolyline()
+
+        //카메라 버튼클릭 리스너
+        cameraButton.setOnClickListener{
+            dispatchTakePictureIntent()
         }
+
+        //산책종료 버튼클릭 리스너
+        pauseButton.setOnClickListener {
+            stopRun()
+            setBundle()//Bundle설정
+            endWalk()
+            Log.d(TAG, "end walk : $pathPoints")
+            parentFragmentManager.beginTransaction()
+                .add(R.id.main_container, EndWalkFragment(), "endWalk").addToBackStack(null)
+                .commit()
+
+            //insert/update 코루틴 종료
+            databaseCoroutine.cancel()
+
+            //영역 확인 코루틴 종료
+            boundCoroutine.cancel()
+            animationStatus(fadeIn, false)
+
+            //지도에서 마커 삭제
+            CoroutineScope(Dispatchers.Main).launch {
+                updateCoordinateMap.forEach{ (id, marker)->
+                    marker.map = null
+                }
+                updateCoordinateMap.clear() //서버에서 불러오는 정보 저장하는 맵 초기화
+                visibleOnMapMap.clear() //지도에 표시되는 마커들이 저장된 맵 초기화
+                aroundUserMap.clear() //개id, 유저id 해시맵 초기화
+                duplicateUserDog.clear() //중복되는 유저 초기화
+            }
+
+            //서버에 false 전송
+            coordinateService.endWalking(userId).enqueue(object:Callback<Boolean>{
+                override fun onResponse(call: Call<Boolean>, response: Response<Boolean>) {
+                    if (response.isSuccessful) {
+                        Log.d(TAG, "endWalking is success");
+                    }
+                }
+                override fun onFailure(
+                    call: Call<Boolean>,
+                    t: Throwable
+                ) {
+                    Log.d(TAG, "endWalking fail", t)
+                }
+            })
+
+            //-------------------카메라 중심을 마지막 위치로 바꾸는 코드 추가할 것-------------
+
+        }//listener
+        return view
     }
 
     /**
@@ -302,7 +427,81 @@ class MainFragment : Fragment(){
         dog3 = OverlayImage.fromResource(R.drawable.dog3)
     }
 
-    // 경로 표시 (마지막 전, 마지막 경로 연결)
+    /**
+     * 강아지 종 리스트 초기화
+     */
+    private fun initDogBreed() {
+        big.add(DogBreed.HUSKY)
+        big.add(DogBreed.SAMOYED)
+        big.add(DogBreed.RETRIEVER)
+        big.add(DogBreed.SHEPHERD)
+        big.add(DogBreed.MALAMUTE)
+        big.add(DogBreed.DOGBITECT)
+
+        medium.add(DogBreed.BEAGLE)
+        medium.add(DogBreed.BORDERCOLLIE)
+        medium.add(DogBreed.BULLDOG)
+        medium.add(DogBreed.SHIBA)
+        medium.add(DogBreed.WELSHCORGI)
+        medium.add(DogBreed.DOGMEDIUMECT)
+
+        small.add(DogBreed.CHIHUAHUA)
+        small.add(DogBreed.MALTESE)
+        small.add(DogBreed.POODLE)
+        small.add(DogBreed.SHIHTZU)
+        small.add(DogBreed.YORKSHIRETERRIER)
+        small.add(DogBreed.DOGSMALLECT)
+    }
+
+    /**
+     * 견종에 따른 마커 이미지 설정
+     */
+    private fun setDogImage(dogBreed: DogBreed): OverlayImage {
+        return if (big.contains(dogBreed)) {
+            dog1
+        } else if (small.contains(dogBreed)) {
+            dog2
+        } else{
+            dog3
+        }
+    }
+    
+    /**
+     * 경로선 오버레이 초기화
+     */
+    fun pathOverlaySettings() {
+        pathOverlay.outlineWidth = 5//테두리 없음
+        pathOverlay.width = 30//경로선 폭
+        pathOverlay.passedColor = Color.rgb(235, 218, 179)//지나온 경로선
+        pathOverlay.color = Color.rgb(235, 218, 179)//경로선 색상
+        pathOverlay.patternImage = OverlayImage.fromResource(R.drawable.path_pattern) //경로 패턴이미지
+        pathOverlay.patternInterval = 40 //경로 패턴 간격
+    }
+
+    /**
+     * 위치 오버레이 초기화
+     */
+    fun setlocationOverlay(): LocationOverlay {
+        var locationOverlay: LocationOverlay = naverMap.locationOverlay
+        locationOverlay.icon = overlayImage
+        locationOverlay.iconHeight = 100
+        locationOverlay.iconWidth = 100
+
+        return locationOverlay
+    }
+
+    /**
+     * 지도 현재위치, 버튼 여부 설정
+     */
+    fun uiSettings() {
+        //naverMap.uiSettings.isCompassEnabled=true
+        naverMap.uiSettings.isLocationButtonEnabled = true//현재위치 버튼 여부
+        naverMap.uiSettings.isZoomControlEnabled = false//줌 버튼 여부
+    }
+
+    /**
+     * 경로 추가
+     */
     private fun addLatestPolyline(){
         if(pathPoints.isNotEmpty() && pathPoints.last().size > 2){
             val preLastLatLng = pathPoints.last()[pathPoints.last().size - 2] // 마지막 전 경로
@@ -330,6 +529,7 @@ class MainFragment : Fragment(){
             }
         }
     }
+
 
     private fun updateTracking(isTracking: Boolean) {
         this.isTracking = isTracking
@@ -407,140 +607,10 @@ class MainFragment : Fragment(){
         }
     }
 
-    override fun onCreateView(//인터페이스를 그리기위해 호출
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
 
-        val view: ViewGroup = setView(inflater, container)
-
-        inflater.inflate(R.layout.warning, view, true)
-        imageView = view.findViewById<ImageView>(R.id.warning)
-        imageView.visibility = View.INVISIBLE
-
-        val fadeIn = ObjectAnimator.ofFloat(imageView, "alpha", 0f, 1f)
-        fadeIn.repeatCount = -1
-        fadeIn.duration = 1500
-        fadeIn.repeatMode = ObjectAnimator.REVERSE
-
-        //산책시작 버튼 클릭 리스너
-        startWalkButton.setOnClickListener {
-            //최신 위치가 저장되었는지 확인
-            if (this::lastLocation.isInitialized) {
-                startWalk()
-                dbProcess()
-                createWebView()//웹뷰 생성, tile 값 지정
-                sendCommandToService(ACTION_SHOW_RUNNING_ACTIVITY)
-                sendCommandToService(ACTION_START_OR_RESUME_SERVICE)
-
-                //기피 강아지 목록 불러오기
-                getHateDogList()
-
-                //기피 강아지 경고
-                boundCoroutine = CoroutineScope(Dispatchers.Main).launch {
-                    var isWarning = false
-                    //안드로이드 버전에 따라 다르게 저장
-                    var vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                        val vibratorManager =
-                            context!!.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
-                        vibratorManager.defaultVibrator;
-                    } else {
-                        context!!.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-                    }
-//                    val notification: Uri =
-//                        RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
-//                    val ringtone = RingtoneManager.getRingtone(context,notification)
-
-                    while(true){
-                        //위험 개 있을때
-                        if(checkBound()){
-                            if(!isWarning){//경고중이 아닐때
-                                //애니메이션 실행
-                                isWarning = true
-                                animationStatus(fadeIn, true)
-                            }
-                            //이미 경고중일때
-                            else{
-                                //할거없음
-                            }
-
-                            //소리, 진동 으로알림(공통)
-                            //안드로이드 버전에 따라 다르게
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                                vibrator.vibrate(VibrationEffect.createOneShot(500,255))
-                            } else {
-                                vibrator.vibrate(500L)
-                            }
-//                            ringtone.play()
-                        }
-                        //위험 개 없을때
-                        else{
-                            isWarning = false
-                            animationStatus(fadeIn, false)
-                        }
-                        delay(2000)
-                    }
-                }
-
-            } else {
-                Toast.makeText(context, "로딩중입니다. 잠시만 기다려주세요", Toast.LENGTH_SHORT).show()
-            }
-        }
-    
-        //카메라 버튼클릭 리스너
-        cameraButton.setOnClickListener{
-            dispatchTakePictureIntent()
-        }
-
-        //산책종료 버튼클릭 리스너
-        pauseButton.setOnClickListener {
-            stopRun()
-            setBundle()//Bundle설정
-            endWalk()
-            Log.d(TAG, "end walk : $pathPoints")
-            parentFragmentManager.beginTransaction()
-                .add(R.id.main_container, EndWalkFragment(), "endWalk").addToBackStack(null)
-                .commit()
-
-            //insert/update 코루틴 종료
-            databaseCoroutine.cancel()
-
-            //영역 확인 코루틴 종료
-            boundCoroutine.cancel()
-            animationStatus(fadeIn, false)
-
-            //지도에서 마커 삭제
-            CoroutineScope(Dispatchers.Main).launch {
-                updateCoordinateMap.forEach{ (id, marker)->
-                    marker.map = null
-                }
-                updateCoordinateMap.clear() //서버에서 불러오는 정보 저장하는 맵 초기화
-                visibleOnMapMap.clear() //지도에 표시되는 마커들이 저장된 맵 초기화
-                aroundUserMap.clear() //개id, 유저id 해시맵 초기화
-                duplicateUserDog.clear() //중복되는 유저 초기화
-            }
-
-            //서버에 false 전송
-            coordinateService.endWalking(userId).enqueue(object:Callback<Boolean>{
-                override fun onResponse(call: Call<Boolean>, response: Response<Boolean>) {
-                    if (response.isSuccessful) {
-                        Log.d(TAG, "endWalking is success");
-                    }
-                }
-                override fun onFailure(
-                    call: Call<Boolean>,
-                    t: Throwable
-                ) {
-                    Log.d(TAG, "endWalking fail", t)
-                }
-            })
-
-            //-------------------카메라 중심을 마지막 위치로 바꾸는 코드 추가할 것-------------
-
-        }//listener
-        return view
-    }
-
+    /**
+     * 서버에서 싫어하는 강아지 목록 가져옴
+     */
     private fun getHateDogList(){
         userService.getHateDog(userId).enqueue(object:Callback<String>{
             override fun onResponse(call: Call<String>, response: Response<String>) {
@@ -564,61 +634,9 @@ class MainFragment : Fragment(){
         })
     }
 
-    private fun checkBound():Boolean{
-        //bound가 초기화 되었다면
-        if(this::bounds.isInitialized) {
- //        지도에 표시된 개의 마커의 위치를 기준으로 bounds안에 들어와있는지 확인
-            if (isTracking && bounds != null) {
-                if(userCoordinateDogDtoList.isNotEmpty()) {
-                    for (userCoordinateDogDto in userCoordinateDogDtoList) { //서버에서 가져온 주변 산책강아지 정보
-                        if (hateDogList.contains(userCoordinateDogDto.dogBreed)) {//기피하는 종과 같은 종의 강아지인 경우
-                            //updateCoordinateMap에서 찾을 경우 일정 시간마다 clear하기 때문에 비어있을 수 있음
-                            //그래서 visibleOnMapMap 사용
-                            val markerPosition = visibleOnMapMap[userCoordinateDogDto.dogId]!!.position
-                            if (bounds.contains(markerPosition)) {//좌표가 영역 안에 포함될경우
-                                return true
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        else{
-
-        }
-        return false
-    }
-
-    fun animationStatus(fadeIn:ObjectAnimator, boolean:Boolean){
-        if(boolean){
-            imageView.visibility = View.VISIBLE
-            fadeIn.start()
-        }else{
-            fadeIn.cancel()
-            imageView.visibility = View.INVISIBLE
-        }
-    }
-
-    private fun stopRun() {
-        sendCommandToService(ACTION_STOP_SERVICE)
-    }
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        mainActivty = context as MainActivty
-    }
-
-    private fun sendCommandToService(action : String) {
-        var intent = Intent(context, NaverMapService::class.java)
-        intent.action = action
-        if (Build.VERSION.SDK_INT >= 26) {
-            context!!.startForegroundService(intent);
-        }
-        else {
-            context!!.startService(intent);
-        }
-    }
-
+    /**
+     * db와 통신 처리
+     */
     private fun dbProcess() {
         //첫 실행 여부 확인
         var coorUpdate = false
@@ -788,16 +806,9 @@ class MainFragment : Fragment(){
         }//launch
     }
 
-    private fun setDogImage(dogBreed: DogBreed): OverlayImage {
-        return if (big.contains(dogBreed)) {
-            dog1
-        } else if (small.contains(dogBreed)) {
-            dog2
-        } else{
-            dog3
-        }
-    }
-
+    /**
+     * 뷰 바인딩
+     */
     private fun setView(
         inflater: LayoutInflater,
         container: ViewGroup?
@@ -815,18 +826,9 @@ class MainFragment : Fragment(){
         return view
     }
 
-    private fun setBundle() {
-        var bundle: Bundle = Bundle()
-        bundle.putSerializable("pathPoints", pathPoints as java.io.Serializable)
-        bundle.putSerializable("walkDistance", walkDistance)
-        bundle.putSerializable("time", strTime)
-        bundle.putSerializable("startTime", startTime)
-        bundle.putSerializable("tile", tile)
-        bundle.putSerializable("second", time)
-        setFragmentResult("walkEnd", bundle)
-    }
-
-
+    /**
+     * 타일 값 생성
+     */
     private fun createWebView() {
         var url =
             BuildConfig.SERVER + "map?latitude=${lastLocation.latitude}&longitude=${lastLocation.longitude}"
@@ -849,15 +851,23 @@ class MainFragment : Fragment(){
         webView.loadUrl(url)
     }
 
-
-    fun startWalk() {
-        startTime = LocalDateTime.now()//시작시간 지정
-        statusLayout.visibility = View.VISIBLE
-        startWalkButton.visibility = View.GONE
-        frame.layoutParams.height = 0
-        startTimer()
+    /**
+     * 타이머 설정
+     */
+    fun setTimer() {
+        var hour = TimeUnit.SECONDS.toHours(time)
+        var minute = TimeUnit.SECONDS.toMinutes(time) - hour * 60
+        var second = TimeUnit.SECONDS.toSeconds(time) - hour * 3600 - minute * 60
+        strTime = String.format("%02d", hour) + " : " + String.format(
+            "%02d",
+            minute
+        ) + " : " + String.format("%02d", second)
+        walkTimeTV.text = strTime
     }
 
+    /**
+     * 타이머 시작
+     */
     fun startTimer() {
         timer = kotlin.concurrent.timer(period = 1000) {
             time++
@@ -871,35 +881,79 @@ class MainFragment : Fragment(){
         timer.cancel()
     }
 
+    /**
+     * 타이머 초기화
+     */
     fun resetTimer() {
         timer.cancel()
         time = 0
         setTimer()
     }
 
-    fun setTimer() {
-        var hour = TimeUnit.SECONDS.toHours(time)
-        var minute = TimeUnit.SECONDS.toMinutes(time) - hour * 60
-        var second = TimeUnit.SECONDS.toSeconds(time) - hour * 3600 - minute * 60
-        strTime = String.format("%02d", hour) + " : " + String.format(
-            "%02d",
-            minute
-        ) + " : " + String.format("%02d", second)
-        walkTimeTV.text = strTime
+    /**
+     * 지도 알림 bound 설정
+     */
+    fun setBounds(latLng: LatLng, width: Double) :LatLngBounds {
+        var southWest = LatLng(latLng.latitude - width, latLng.longitude - width)
+        var northEast = LatLng(latLng.latitude + width, latLng.longitude + width)
+        return LatLngBounds(southWest, northEast)
     }
 
     /**
-     * 경로선 오버레이 초기화
+     * 주변 강아지 확인
      */
-    fun pathOverlaySettings() {
-        pathOverlay.outlineWidth = 5//테두리 없음
-        pathOverlay.width = 30//경로선 폭
-        pathOverlay.passedColor = Color.rgb(235, 218, 179)//지나온 경로선
-        pathOverlay.color = Color.rgb(235, 218, 179)//경로선 색상
-        pathOverlay.patternImage = OverlayImage.fromResource(R.drawable.path_pattern) //경로 패턴이미지
-        pathOverlay.patternInterval = 40 //경로 패턴 간격
+    private fun checkBound():Boolean{
+        //bound가 초기화 되었다면
+        if(this::bounds.isInitialized) {
+            //        지도에 표시된 개의 마커의 위치를 기준으로 bounds안에 들어와있는지 확인
+            if (isTracking && bounds != null) {
+                if(userCoordinateDogDtoList.isNotEmpty()) {
+                    for (userCoordinateDogDto in userCoordinateDogDtoList) { //서버에서 가져온 주변 산책강아지 정보
+                        if (hateDogList.contains(userCoordinateDogDto.dogBreed)) {//기피하는 종과 같은 종의 강아지인 경우
+                            //updateCoordinateMap에서 찾을 경우 일정 시간마다 clear하기 때문에 비어있을 수 있음
+                            //그래서 visibleOnMapMap 사용
+                            val markerPosition = visibleOnMapMap[userCoordinateDogDto.dogId]!!.position
+                            if (bounds.contains(markerPosition)) {//좌표가 영역 안에 포함될경우
+                                return true
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        else{
+
+        }
+        return false
     }
 
+    /**
+     * 알림 여부 설정
+     */
+    fun animationStatus(fadeIn:ObjectAnimator, boolean:Boolean){
+        if(boolean){
+            imageView.visibility = View.VISIBLE
+            fadeIn.start()
+        }else{
+            fadeIn.cancel()
+            imageView.visibility = View.INVISIBLE
+        }
+    }
+
+    /**
+     * 산책 시작
+     */
+    fun startWalk() {
+        startTime = LocalDateTime.now()//시작시간 지정
+        statusLayout.visibility = View.VISIBLE
+        startWalkButton.visibility = View.GONE
+        frame.layoutParams.height = 0
+        startTimer()
+    }
+
+    /**
+     * 산책 종료
+     */
     fun endWalk() {
         pathList.clear()
         pathOverlay.map = null
@@ -917,32 +971,46 @@ class MainFragment : Fragment(){
         walkDistanceTV.text="0M"
     }
 
-
-
-    fun uiSettings() {
-        //naverMap.uiSettings.isCompassEnabled=true
-        naverMap.uiSettings.isLocationButtonEnabled = true//현재위치 버튼 여부
-        naverMap.uiSettings.isZoomControlEnabled = false//줌 버튼 여부
+    /**
+     * 산책 종료 서비스에게 알림
+     */
+    private fun stopRun() {
+        sendCommandToService(ACTION_STOP_SERVICE)
     }
 
     /**
-     * 위치 오버레이 설정
+     * 산책 종료 화면에서 사용할 번들 생성
      */
-    fun setlocationOverlay(): LocationOverlay {
-        var locationOverlay: LocationOverlay = naverMap.locationOverlay
-        locationOverlay.icon = overlayImage
-        locationOverlay.iconHeight = 100
-        locationOverlay.iconWidth = 100
-
-        return locationOverlay
+    private fun setBundle() {
+        var bundle: Bundle = Bundle()
+        bundle.putSerializable("pathPoints", pathPoints as java.io.Serializable)
+        bundle.putSerializable("walkDistance", walkDistance)
+        bundle.putSerializable("time", strTime)
+        bundle.putSerializable("startTime", startTime)
+        bundle.putSerializable("tile", tile)
+        bundle.putSerializable("second", time)
+        setFragmentResult("walkEnd", bundle)
     }
 
-    fun setBounds(latLng: LatLng, width: Double) :LatLngBounds {
-        var southWest = LatLng(latLng.latitude - width, latLng.longitude - width)
-        var northEast = LatLng(latLng.latitude + width, latLng.longitude + width)
-        return LatLngBounds(southWest, northEast)
+    /**
+     * 서비스에게 상태 알림
+     */
+    private fun sendCommandToService(action : String) {
+        var intent = Intent(context, NaverMapService::class.java)
+        intent.action = action
+        if (Build.VERSION.SDK_INT >= 26) {
+            context!!.startForegroundService(intent);
+        }
+        else {
+            context!!.startService(intent);
+        }
     }
 
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        mainActivty = context as MainActivty
+    }
+    
     override fun onPause() {
         super.onPause()
         Log.d(TAG, "onPause")
