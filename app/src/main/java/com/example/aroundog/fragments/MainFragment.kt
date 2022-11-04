@@ -875,9 +875,11 @@ class MainFragment : Fragment(){
                         if (strHateDog.contains(userCoordinateDogDto.dogBreed.eng)) {//기피하는 종과 같은 종의 강아지인 경우
                             //updateCoordinateMap에서 찾을 경우 일정 시간마다 clear하기 때문에 비어있을 수 있음
                             //그래서 visibleOnMapMap 사용
-                            val markerPosition = visibleOnMapMap[userCoordinateDogDto.dogId]!!.position
-                            if (bounds.contains(markerPosition)) {//좌표가 영역 안에 포함될경우
-                                return true
+                            if (visibleOnMapMap[userCoordinateDogDto.dogId] != null) {//userCoordinateDogDto에는 내정보도 들어가지만, visibleOnMapMap에는 내 정보가 없으므로 null값이 됨
+                                val markerPosition = visibleOnMapMap[userCoordinateDogDto.dogId]!!.position
+                                if (bounds.contains(markerPosition)) {//좌표가 영역 안에 포함될경우
+                                    return true
+                                }
                             }
                         }
                     }
