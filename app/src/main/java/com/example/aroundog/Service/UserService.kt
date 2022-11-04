@@ -40,4 +40,11 @@ interface UserService {
     fun getHateDog(
         @Path("userId") userId: String
     ):Call<String>
+
+    @FormUrlEncoded
+    @POST("/hate/{userId}")
+    fun updateHateDog(
+        @Path("userId") userId: String,
+        @Field("hateDog") hateDog:String
+    ):Call<Boolean>
 }

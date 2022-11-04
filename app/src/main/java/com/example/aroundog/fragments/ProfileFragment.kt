@@ -49,6 +49,8 @@ class ProfileFragment : Fragment() {
     lateinit var profileTotalMinuteTV:TextView
     lateinit var profileTotalDistanceTV:TextView
     lateinit var profileTotalCountTV:TextView
+    lateinit var profileSelectWarningDog:TextView
+
     var hasDog:Boolean = false
     var buttonList = mutableListOf<Button>()
     lateinit var style:ContextThemeWrapper
@@ -211,6 +213,12 @@ class ProfileFragment : Fragment() {
             it.context.startActivity(intent)
         }
 
+        profileSelectWarningDog.setOnClickListener{
+            val intent = Intent(context, SelectWarningDog::class.java)
+            intent.putExtra("user", userData)
+            it.context.startActivity(intent)
+        }
+
         addDogFragments()
 
         return view
@@ -342,7 +350,7 @@ class ProfileFragment : Fragment() {
         profileTotalMinuteTV = view.findViewById(R.id.profileTotalMinuteTV)
         profileTotalDistanceTV = view.findViewById(R.id.profileTotalDistanceTV)
         profileTotalCountTV = view.findViewById(R.id.profileTotalCountTV)
-
+        profileSelectWarningDog = view.findViewById(R.id.profileSelectWarningDog)
 
         return view
     }
