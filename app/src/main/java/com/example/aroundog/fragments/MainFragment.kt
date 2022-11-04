@@ -23,7 +23,6 @@ import androidx.fragment.app.setFragmentResult
 import androidx.lifecycle.MutableLiveData
 import com.example.aroundog.BuildConfig
 import com.example.aroundog.MainActivty
-import com.example.aroundog.Model.DogBreed
 import com.example.aroundog.R
 import com.example.aroundog.Service.CoordinateService
 import com.example.aroundog.Service.NaverMapService
@@ -127,12 +126,8 @@ class MainFragment : Fragment(){
     val REQUEST_IMAGE_CAPTURE = 1
     val REQUEST_TAKE_PHOTO = 1
 
-    var hateDogList = ArrayList<DogBreed>()//서버에서 받아오는 싫어하는 강아지 문자열을 저장할 리스트
-
-    //강아지 종류
-    var big = mutableListOf<DogBreed>() //대형견
-    var medium = mutableListOf<DogBreed>() //중형견
-    var small = mutableListOf<DogBreed>() //소형견
+    //기피 강아지
+    var strHateDog =""
 
     //알림 거리 설정
     var width:Double = 0.0
@@ -173,8 +168,6 @@ class MainFragment : Fragment(){
         initRetrofit()//retrofit초기화
 
         initDogImage()//강아지 이미지 초기화
-
-        initDogBreed()//강아지 종 리스트 생성
 
         //환경설정에서 알람을 표시할 영역을 설정하는 변수, 저장 필요, 일단 임의값으로 대체
         //소수점 다섯째 자리가 약 1m정도씩 차이남
@@ -428,44 +421,18 @@ class MainFragment : Fragment(){
     }
 
     /**
-     * 강아지 종 리스트 초기화
-     */
-    private fun initDogBreed() {
-        big.add(DogBreed.HUSKY)
-        big.add(DogBreed.SAMOYED)
-        big.add(DogBreed.RETRIEVER)
-        big.add(DogBreed.SHEPHERD)
-        big.add(DogBreed.MALAMUTE)
-        big.add(DogBreed.DOGBITECT)
-
-        medium.add(DogBreed.BEAGLE)
-        medium.add(DogBreed.BORDERCOLLIE)
-        medium.add(DogBreed.BULLDOG)
-        medium.add(DogBreed.SHIBA)
-        medium.add(DogBreed.WELSHCORGI)
-        medium.add(DogBreed.DOGMEDIUMECT)
-
-        small.add(DogBreed.CHIHUAHUA)
-        small.add(DogBreed.MALTESE)
-        small.add(DogBreed.POODLE)
-        small.add(DogBreed.SHIHTZU)
-        small.add(DogBreed.YORKSHIRETERRIER)
-        small.add(DogBreed.DOGSMALLECT)
-    }
-
-    /**
      * 견종에 따른 마커 이미지 설정
      */
-    private fun setDogImage(dogBreed: DogBreed): OverlayImage {
-        return if (big.contains(dogBreed)) {
+    private fun setDogImage(string: String): OverlayImage {
+        return if ("HUSKY%SAMOYED%RETRIEVER%SHEPHERD%MALAMUTE%DOGBITECT".contains(string)) {//대형견
             dog1
-        } else if (small.contains(dogBreed)) {
+        } else if ("BEAGLE%BORDERCOLLIE%BULLDOG%SHIBA%WELSHCORGI%DOGMEDIUMECT".contains(string)) {//중형견
             dog2
         } else{
             dog3
         }
     }
-    
+
     /**
      * 경로선 오버레이 초기화
      */
@@ -616,12 +583,8 @@ class MainFragment : Fragment(){
             override fun onResponse(call: Call<String>, response: Response<String>) {
                 if (response.isSuccessful) {
                     try {
-                        var strHateDog = response.body()
-                        var strHateDogList = strHateDog!!.split("%")
-                        for (breed in strHateDogList) {
-                            hateDogList.add(DogBreed.valueOf(breed))
-                        }
-                        Log.d(TAG, "hate list : $hateDogList")
+                        strHateDog = response.body()!!
+
                     } catch (e:Exception) {
                         Log.d(TAG, "$e")
                     }
@@ -732,7 +695,7 @@ class MainFragment : Fragment(){
                                                 var marker = Marker().apply {
                                                     position = latLng
                                                     captionText = dto.dogName
-                                                    icon = setDogImage(dto.dogBreed)//이미지 설정
+                                                    icon = setDogImage(dto.dogBreed.eng)//이미지 설정
                                                     setOnClickListener { o ->
                                                         Toast.makeText(
                                                             context,
@@ -909,7 +872,7 @@ class MainFragment : Fragment(){
             if (isTracking && bounds != null) {
                 if(userCoordinateDogDtoList.isNotEmpty()) {
                     for (userCoordinateDogDto in userCoordinateDogDtoList) { //서버에서 가져온 주변 산책강아지 정보
-                        if (hateDogList.contains(userCoordinateDogDto.dogBreed)) {//기피하는 종과 같은 종의 강아지인 경우
+                        if (strHateDog.contains(userCoordinateDogDto.dogBreed.eng)) {//기피하는 종과 같은 종의 강아지인 경우
                             //updateCoordinateMap에서 찾을 경우 일정 시간마다 clear하기 때문에 비어있을 수 있음
                             //그래서 visibleOnMapMap 사용
                             val markerPosition = visibleOnMapMap[userCoordinateDogDto.dogId]!!.position
