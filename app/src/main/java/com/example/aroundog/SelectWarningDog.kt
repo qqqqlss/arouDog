@@ -8,7 +8,6 @@ import android.view.View
 import android.view.View.OnClickListener
 import android.widget.*
 import com.example.aroundog.Model.DogBreed
-import com.example.aroundog.Model.DogBreed2
 import com.example.aroundog.Service.CoordinateService
 import com.example.aroundog.Service.UserService
 import com.google.gson.Gson
@@ -162,30 +161,30 @@ class SelectWarningDog : AppCompatActivity() {
 
     fun initdogData() {
         var bigMap = LinkedHashMap<View, DogNameAndBoolean>()
-        bigMap[husky] = DogNameAndBoolean(DogBreed2.HUSKY, false)
-        bigMap[samoyed] = DogNameAndBoolean(DogBreed2.SAMOYED, false)
-        bigMap[retreiever] = DogNameAndBoolean(DogBreed2.RETRIEVER, false)
-        bigMap[shephered] = DogNameAndBoolean(DogBreed2.SHEPHERD, false)
-        bigMap[malamute] = DogNameAndBoolean(DogBreed2.MALAMUTE, false)
-        bigMap[dogBigEtc] = DogNameAndBoolean(DogBreed2.DOGBITECT, false)
+        bigMap[husky] = DogNameAndBoolean(DogBreed.HUSKY, false)
+        bigMap[samoyed] = DogNameAndBoolean(DogBreed.SAMOYED, false)
+        bigMap[retreiever] = DogNameAndBoolean(DogBreed.RETRIEVER, false)
+        bigMap[shephered] = DogNameAndBoolean(DogBreed.SHEPHERD, false)
+        bigMap[malamute] = DogNameAndBoolean(DogBreed.MALAMUTE, false)
+        bigMap[dogBigEtc] = DogNameAndBoolean(DogBreed.DOGBITECT, false)
         dogData["big"] = bigMap
 
         var mediumMap = LinkedHashMap<View, DogNameAndBoolean>()
-        mediumMap[beagle] = DogNameAndBoolean(DogBreed2.BEAGLE, false)
-        mediumMap[bordercollie] = DogNameAndBoolean(DogBreed2.BORDERCOLLIE, false)
-        mediumMap[bulldog] = DogNameAndBoolean(DogBreed2.BULLDOG, false)
-        mediumMap[shiba] = DogNameAndBoolean(DogBreed2.SHIBA, false)
-        mediumMap[welshcorgi] = DogNameAndBoolean(DogBreed2.WELSHCORGI, false)
-        mediumMap[dogMediumEct] = DogNameAndBoolean(DogBreed2.DOGMEDIUMECT, false)
+        mediumMap[beagle] = DogNameAndBoolean(DogBreed.BEAGLE, false)
+        mediumMap[bordercollie] = DogNameAndBoolean(DogBreed.BORDERCOLLIE, false)
+        mediumMap[bulldog] = DogNameAndBoolean(DogBreed.BULLDOG, false)
+        mediumMap[shiba] = DogNameAndBoolean(DogBreed.SHIBA, false)
+        mediumMap[welshcorgi] = DogNameAndBoolean(DogBreed.WELSHCORGI, false)
+        mediumMap[dogMediumEct] = DogNameAndBoolean(DogBreed.DOGMEDIUMECT, false)
         dogData["medium"] = mediumMap
 
         var smallMap = LinkedHashMap<View, DogNameAndBoolean>()
-        smallMap[chihuahua] = DogNameAndBoolean(DogBreed2.CHIHUAHUA, false)
-        smallMap[maltese] = DogNameAndBoolean(DogBreed2.MALTESE, false)
-        smallMap[poodle] = DogNameAndBoolean(DogBreed2.POODLE, false)
-        smallMap[shihtzu] = DogNameAndBoolean(DogBreed2.SHIHTZU, false)
-        smallMap[yorkshireterrier] = DogNameAndBoolean(DogBreed2.YORKSHIRETERRIER, false)
-        smallMap[dogSmallEct] = DogNameAndBoolean(DogBreed2.DOGSMALLECT, false)
+        smallMap[chihuahua] = DogNameAndBoolean(DogBreed.CHIHUAHUA, false)
+        smallMap[maltese] = DogNameAndBoolean(DogBreed.MALTESE, false)
+        smallMap[poodle] = DogNameAndBoolean(DogBreed.POODLE, false)
+        smallMap[shihtzu] = DogNameAndBoolean(DogBreed.SHIHTZU, false)
+        smallMap[yorkshireterrier] = DogNameAndBoolean(DogBreed.YORKSHIRETERRIER, false)
+        smallMap[dogSmallEct] = DogNameAndBoolean(DogBreed.DOGSMALLECT, false)
         dogData["small"] = smallMap
     }
 
@@ -388,7 +387,7 @@ class SelectWarningDog : AppCompatActivity() {
     }
 
 
-    inner class DogNameAndBoolean(var dogBreed: DogBreed2, var boolean: Boolean) {
+    inner class DogNameAndBoolean(var dogBreed: DogBreed, var boolean: Boolean) {
         override fun toString(): String {
             return "DogNameAndBoolean(dogBreed='$dogBreed', boolean=$boolean)"
         }

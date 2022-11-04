@@ -8,7 +8,6 @@ import android.util.Log
 import android.view.View
 import android.widget.*
 import androidx.lifecycle.MutableLiveData
-import com.example.aroundog.Model.DogBreed
 import com.example.aroundog.Model.Gender
 import com.example.aroundog.Service.DogService
 import com.example.aroundog.dto.DogDto

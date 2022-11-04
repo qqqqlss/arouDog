@@ -1,6 +1,6 @@
 package com.example.aroundog.Model
 
-enum class DogBreed2(val kor:String, val eng: String) {
+enum class DogBreed(val kor:String, val eng: String) {
     HUSKY("허스키","HUSKY"),
     SAMOYED("사모예드","SAMOYED"),
     RETRIEVER("리트리버","RETRIEVER"),
