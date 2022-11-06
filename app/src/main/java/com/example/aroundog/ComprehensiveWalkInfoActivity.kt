@@ -123,22 +123,18 @@ class ComprehensiveWalkInfoActivity : AppCompatActivity() {
             }
         }
 
-//        calendar.setOnDateChangedListener { widget, date, selected ->
-//            if (this::allWalkInfoData.isInitialized) {
-//                if (selected) {
-//                    var day = CalendarDay.from(date.year, date.month, date.day)
-//                    if (dates.contains(day)) {
-//                        //선택 효과 o
-//                        widget.selectionMode = MaterialCalendarView.SELECTION_MODE_SINGLE
-//                        //리사이클러뷰에 보이는 첫번째 목록으로 해당 일 선택
-//
-//                    } else {
-//                        //선택효과 x
-//                        widget.disa
-//                    }
-//                }
-//            }
-//       }
+        calendar.setOnDateChangedListener { widget, date, selected ->
+            if (this::allWalkInfoData.isInitialized) {
+                var day = CalendarDay.from(date.year, date.month, date.day)
+                if (hasWalkDates.contains(day)) {
+                    //선택 효과 o
+                    widget.addDecorators(HasWalkDecorator(hasWalkDates), SelectDecorator(date))
+
+                    //리사이클러뷰에 보이는 첫번째 목록으로 해당 일 선택
+                    
+                }
+            }
+       }
 
         //retrofit 정보 받아와야함
         //전체 산책 요약정보, 전체 월 요약 정보
@@ -209,7 +205,7 @@ class ComprehensiveWalkInfoActivity : AppCompatActivity() {
                                 hasWalkDates.add(calendarDay)
                             }
                         }
-                        calendar.addDecorator(EventDecorator(hasWalkDates))//산책 있는날 원 추가
+                        calendar.addDecorator(HasWalkDecorator(hasWalkDates))//산책 있는날 원 추가
                         calendar.addDecorators(DayDisableDecorator(hasWalkDates))//산책 없는날 선택 안되게
                     } else {
 
@@ -271,7 +267,7 @@ class ComprehensiveWalkInfoActivity : AppCompatActivity() {
 
 
     }
-    class EventDecorator(dates: Collection<CalendarDay>): DayViewDecorator {
+    class HasWalkDecorator(dates: Collection<CalendarDay>): DayViewDecorator {
 
         var dates: HashSet<CalendarDay> = HashSet(dates)
 
@@ -280,7 +276,7 @@ class ComprehensiveWalkInfoActivity : AppCompatActivity() {
         }
 
         override fun decorate(view: DayViewFacade?) {
-            view?.addSpan(DotSpan(10F, Color.parseColor("#ebdab3")))
+            view?.addSpan(DotSpan(12F, Color.parseColor("#ebdab3")))
         }
     }
 
@@ -295,6 +291,16 @@ class ComprehensiveWalkInfoActivity : AppCompatActivity() {
         override fun decorate(view: DayViewFacade?) {
             view?.setDaysDisabled(true)
             view?.addSpan(ForegroundColorSpan(Color.BLACK))
+        }
+    }
+    class SelectDecorator(selectDay: CalendarDay): DayViewDecorator {
+        var selectDay = selectDay
+        override fun shouldDecorate(day: CalendarDay?): Boolean {
+            return selectDay == day
+        }
+
+        override fun decorate(view: DayViewFacade?) {
+            view?.addSpan(DotSpan(12F, Color.parseColor("#675E4D")))
         }
     }
 }
