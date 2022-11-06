@@ -11,6 +11,7 @@ import com.example.aroundog.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.time.format.DateTimeFormatter
 
 class WalkRecyclerViewAdapter(private var items:ArrayList<WalkRecyclerViewItem>): RecyclerView.Adapter<WalkRecyclerViewAdapter.ItemViewHolder>() {
 
@@ -20,11 +21,13 @@ class WalkRecyclerViewAdapter(private var items:ArrayList<WalkRecyclerViewItem>)
             var viewDate = view.findViewById<TextView>(R.id.walkItemDate)
             var viewSecond = view.findViewById<TextView>(R.id.walkItemSecond)
             var viewDistance = view.findViewById<TextView>(R.id.walkItemDistance)
+            var viewHour = view.findViewById<TextView>(R.id.walkItemHour)
 
             viewDate.text = item.date.toString()
             viewSecond.text = String.format("%.2f", item.second / 60.0) + " 분"
             viewDistance.text = item.distance.toString() + " M"
-
+            viewHour.text = item.hourStr
+            
             var listener = View.OnClickListener {
                 //레트로핏
                 Toast.makeText(it.context, "${item.walkId}", Toast.LENGTH_SHORT).show()
