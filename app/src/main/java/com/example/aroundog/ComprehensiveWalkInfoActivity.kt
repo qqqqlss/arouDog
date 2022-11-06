@@ -105,12 +105,14 @@ class ComprehensiveWalkInfoActivity : AppCompatActivity() {
                 val monthDataList = allWalkInfoData.monthData[dateStr]
                 if (!monthDataList.isNullOrEmpty()) {
                     for (monthData in monthDataList!!) {
+                        var hourStr = monthData.startTime.format(DateTimeFormatter.ofPattern("a HH:mm"))
                         temp.add(
                             WalkRecyclerViewItem(
                                 monthData.walkId,
                                 monthData.startTime.dayOfMonth,
                                 monthData.second,
-                                monthData.distance
+                                monthData.distance,
+                                hourStr
                             )
                         )
                     }
@@ -184,7 +186,8 @@ class ComprehensiveWalkInfoActivity : AppCompatActivity() {
                         var temp = ArrayList<WalkRecyclerViewItem>()
                         val monthDataList = allWalkInfoData.monthData[nowYearMonthStr]
                         for (monthData in monthDataList!!) {
-                            temp.add(WalkRecyclerViewItem(monthData.walkId, monthData.startTime.dayOfMonth, monthData.second, monthData.distance))
+                            var hourStr = monthData.startTime.format(DateTimeFormatter.ofPattern("a HH:mm"))
+                            temp.add(WalkRecyclerViewItem(monthData.walkId, monthData.startTime.dayOfMonth, monthData.second, monthData.distance, hourStr))
                         }
 
                         //리스트뷰 업데이트
