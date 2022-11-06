@@ -6,8 +6,10 @@ import android.os.Bundle
 import android.text.style.ForegroundColorSpan
 import android.util.Log
 import android.widget.TextView
-import com.example.aroundog.Service.DogService
-import com.example.aroundog.Service.UserService
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.example.aroundog.Model.WalkRecyclerViewAdapter
+import com.example.aroundog.Model.WalkRecyclerViewItem
 import com.example.aroundog.Service.WalkService
 import com.example.aroundog.dto.AllWalkInformationDto
 import com.example.aroundog.dto.MonthInformationDto
@@ -23,19 +25,17 @@ import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.lang.reflect.Type
-import java.time.DayOfWeek
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
-import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.collections.HashSet
 
 class ComprehensiveWalkInfoActivity : AppCompatActivity() {
     val TAG = "COMPREHENSIVEWALKINFOACTIVITY"
-    lateinit var calendar: MaterialCalendarView
 
+    //뷰 바인딩
+    lateinit var calendar: MaterialCalendarView
     lateinit var totalSecond: TextView
     lateinit var totalCount: TextView
     lateinit var totalDistance: TextView
@@ -43,15 +43,45 @@ class ComprehensiveWalkInfoActivity : AppCompatActivity() {
     lateinit var monthCount: TextView
     lateinit var monthDistance: TextView
     lateinit var monthSummaryData:TextView
+    lateinit var walkRecyclerView:RecyclerView
 
+    //전체 산책 정보
     lateinit var allWalkInfoData:AllWalkInformationDto
+
+    //산책 정보가 있는 날 저장
+    var hasWalkDates = HashSet<CalendarDay>()
+
+    var mLayoutManager = LinearLayoutManager(this);
+    var defaultList = ArrayList<WalkRecyclerViewItem>()//어댑터 초기화를 위한 리스트
+    var adapter = WalkRecyclerViewAdapter(defaultList)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_comprehensive_walk_info)
 
+//        //https://sinwho.tistory.com/entry/%EC%95%88%EB%93%9C%EB%A1%9C%EC%9D%B4%EB%93%9C-recyclerview-%EC%A0%9C%EC%9D%BC-%EC%9C%84%EB%A1%9C-%EC%9D%B4%EB%8F%99%EC%8B%9C%ED%82%A4%EA%B8%B0
+//        https://bumjae.tistory.com/6
+//        https://hanyeop.tistory.com/255
+//
+//
+//        https://youngest-programming.tistory.com/374
+//
+//        https://onlyfor-me-blog.tistory.com/437
+//
+//        https://github.com/prolificinteractive/material-calendarview/wiki/Decorators
+//        https://dpdpwl.tistory.com/3
+//        https://gdbagooni.tistory.com/19
+//
+//        https://velog.io/@nezhitsya/%ED%95%9C%EC%9D%B4%EC%9D%8C-%ED%94%84%EB%A1%9C%EC%A0%9D%ED%8A%B8-Custom-Calendar
+
+        //뷰 바인딩
         setView()
 
+        //리사이클러뷰 설정
+        walkRecyclerView.layoutManager = mLayoutManager;
+        walkRecyclerView.adapter = adapter
+
+        //월 변경될때
         calendar.setOnMonthChangedListener { widget, date ->
             monthSummaryData.text = "" + date.month +" 월 산책 정보"
             if (this::allWalkInfoData.isInitialized) {
@@ -68,10 +98,46 @@ class ComprehensiveWalkInfoActivity : AppCompatActivity() {
                     monthCount.text = "0 회"
                 }
 
-                //리스트 뷰애 들어갈 데이터 바꿔치기
+                //월 전체 산책 정보 리사이클러뷰에 추가
+                //리사이클러 뷰에 들어갈 데이터 바꿔치기
+                var temp = ArrayList<WalkRecyclerViewItem>()
+                val dateStr = ""+ date.year + "-" + date.month
+                val monthDataList = allWalkInfoData.monthData[dateStr]
+                if (!monthDataList.isNullOrEmpty()) {
+                    for (monthData in monthDataList!!) {
+                        temp.add(
+                            WalkRecyclerViewItem(
+                                monthData.walkId,
+                                monthData.startTime.dayOfMonth,
+                                monthData.second,
+                                monthData.distance
+                            )
+                        )
+                    }
+                }
+                //리스트뷰 업데이트
+                //비어있으면 비어있는채로 업데이트
+                adapter.swap(temp)
             }
         }
-        
+
+//        calendar.setOnDateChangedListener { widget, date, selected ->
+//            if (this::allWalkInfoData.isInitialized) {
+//                if (selected) {
+//                    var day = CalendarDay.from(date.year, date.month, date.day)
+//                    if (dates.contains(day)) {
+//                        //선택 효과 o
+//                        widget.selectionMode = MaterialCalendarView.SELECTION_MODE_SINGLE
+//                        //리사이클러뷰에 보이는 첫번째 목록으로 해당 일 선택
+//
+//                    } else {
+//                        //선택효과 x
+//                        widget.disa
+//                    }
+//                }
+//            }
+//       }
+
         //retrofit 정보 받아와야함
         //전체 산책 요약정보, 전체 월 요약 정보
         //유저 산책 정보리스트
@@ -80,26 +146,9 @@ class ComprehensiveWalkInfoActivity : AppCompatActivity() {
         var user_info_pref =
             this.getSharedPreferences("userInfo", AppCompatActivity.MODE_PRIVATE)
         var userId = user_info_pref.getString("id", "error").toString()
-        var jsonLocalDateTimeDeserializer = object:JsonDeserializer<LocalDateTime>{
-            override fun deserialize(
-                json: JsonElement?,
-                typeOfT: Type?,
-                context: JsonDeserializationContext?
-            ): LocalDateTime {
-                return LocalDateTime.parse(json!!.asString, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"))
-            }
 
-        }
-        var gson = GsonBuilder().registerTypeAdapter(LocalDateTime::class.java, jsonLocalDateTimeDeserializer).create()
-
-
-        var retrofit = Retrofit.Builder()
-            .baseUrl(BuildConfig.SERVER)
-            .addConverterFactory(GsonConverterFactory.create(gson))
-            .build()
-            .create(WalkService::class.java)
-
-        var dates = HashSet<CalendarDay>()
+        //레트로핏 설정
+        var retrofit = setRetrofit()
 
         retrofit.getAllWalkInfo(userId).enqueue(object : Callback<AllWalkInformationDto> {
             override fun onResponse(
@@ -115,10 +164,12 @@ class ComprehensiveWalkInfoActivity : AppCompatActivity() {
                         totalDistance.text = String.format("%.2f", (allWalkInfoData.summaryTotalData[1] / 1000.0)) + " KM"
                         totalCount.text = allWalkInfoData.summaryTotalData[2].toString() + " 회"
 
-                        var nowYearMonth = YearMonth.now()
-                        var nowYearMonthStr = "" + nowYearMonth.year + "-" + nowYearMonth.monthValue
+                        var todayYearMonth = YearMonth.now()
+                        var nowYearMonthStr = "" + todayYearMonth.year + "-" + todayYearMonth.monthValue
+
+                        //월 정보 가져옴
                         val monthData = allWalkInfoData.summaryMonthData[nowYearMonthStr]
-                        
+
                         //오늘을 기준으로 월 산책 요약 정보 설정
                         if (!monthData.isNullOrEmpty()) {
                             monthSecond.text = String.format("%.1f", monthData[0] / 60.0 / 60.0) + " 시간"
@@ -126,8 +177,20 @@ class ComprehensiveWalkInfoActivity : AppCompatActivity() {
                             monthCount.text = monthData[2].toString() + " 회"
                         }
 
-                        monthSummaryData.text = "" + nowYearMonth.monthValue +" 월 산책 정보"
+                        //월에 따라 변하게
+                        monthSummaryData.text = "" + todayYearMonth.monthValue +" 월 산책 정보"
 
+                        //월 전체 산책 정보 리사이클러뷰에 추가
+                        var temp = ArrayList<WalkRecyclerViewItem>()
+                        val monthDataList = allWalkInfoData.monthData[nowYearMonthStr]
+                        for (monthData in monthDataList!!) {
+                            temp.add(WalkRecyclerViewItem(monthData.walkId, monthData.startTime.dayOfMonth, monthData.second, monthData.distance))
+                        }
+
+                        //리스트뷰 업데이트
+                        adapter.swap(temp)
+
+                        //산책 있는 날 목록 저장
                         for (data in allWalkInfoData.monthData) {
                             var yearMonth = data.key //"like 2022-10"
 
@@ -140,10 +203,11 @@ class ComprehensiveWalkInfoActivity : AppCompatActivity() {
                                     startTime.dayOfMonth
                                 )
                                 //달력의 데코레이터 추가에 사용하는 dates에 날짜 추가
-                                dates.add(calendarDay)
+                                hasWalkDates.add(calendarDay)
                             }
                         }
-                        calendar.addDecorator(EventDecorator(dates))
+                        calendar.addDecorator(EventDecorator(hasWalkDates))//산책 있는날 원 추가
+                        calendar.addDecorators(DayDisableDecorator(hasWalkDates))//산책 없는날 선택 안되게
                     } else {
 
                     }
@@ -155,6 +219,37 @@ class ComprehensiveWalkInfoActivity : AppCompatActivity() {
             }
 
         })
+//        var dates = HashSet<CalendarDay>()
+//        dates.add(CalendarDay.from(2022, 11,5))
+//        calendar.addDecorator(EventDecorator(dates))
+    }
+
+    private fun setRetrofit(): WalkService {
+        var jsonLocalDateTimeDeserializer = object : JsonDeserializer<LocalDateTime> {
+            override fun deserialize(
+                json: JsonElement?,
+                typeOfT: Type?,
+                context: JsonDeserializationContext?
+            ): LocalDateTime {
+                return LocalDateTime.parse(
+                    json!!.asString,
+                    DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
+                )
+            }
+
+        }
+        var gson = GsonBuilder().registerTypeAdapter(
+            LocalDateTime::class.java,
+            jsonLocalDateTimeDeserializer
+        ).create()
+
+
+        var retrofit = Retrofit.Builder()
+            .baseUrl(BuildConfig.SERVER)
+            .addConverterFactory(GsonConverterFactory.create(gson))
+            .build()
+            .create(WalkService::class.java)
+        return retrofit
     }
 
     fun setView(){
@@ -169,10 +264,7 @@ class ComprehensiveWalkInfoActivity : AppCompatActivity() {
         monthCount = findViewById(R.id.monthCount)
         monthDistance = findViewById(R.id.monthDistance)
 
-
-
-
-
+        walkRecyclerView = findViewById(R.id.walkRecyclerView)
 
 
     }
@@ -186,6 +278,20 @@ class ComprehensiveWalkInfoActivity : AppCompatActivity() {
 
         override fun decorate(view: DayViewFacade?) {
             view?.addSpan(DotSpan(10F, Color.parseColor("#ebdab3")))
+        }
+    }
+
+    class DayDisableDecorator(dates: Collection<CalendarDay>): DayViewDecorator {
+
+        var dates: HashSet<CalendarDay> = HashSet(dates)
+
+        override fun shouldDecorate(day: CalendarDay?): Boolean {
+            return !dates.contains(day)
+        }
+
+        override fun decorate(view: DayViewFacade?) {
+            view?.setDaysDisabled(true)
+            view?.addSpan(ForegroundColorSpan(Color.BLACK))
         }
     }
 }
