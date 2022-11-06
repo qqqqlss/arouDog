@@ -279,12 +279,13 @@ class SelectWarningDog : AppCompatActivity() {
 
         //선택완료 버튼
         warningDogSelectButton.setOnClickListener {
+            //str이 빈문자열인채로 올라갈 경우 받아올때 문제 발생
             //글자 생성
-            var str = ""
+            var str = "$"
             for (size in dogData) {
                 for (entry in size.value) {
                     if (entry.value.boolean) {
-                        if (str.equals(""))
+                        if (str.equals("$"))
                             str += entry.value.dogBreed.eng
                         else
                             str += "%" + entry.value.dogBreed.eng
