@@ -6,7 +6,7 @@ class WalkRecyclerViewItem(
     var walkId:Long,
     var date:Int,
     var second:Long,
-    var distance:Long
+    var distance:Long,
     var hourStr: String
 ) {
 }
