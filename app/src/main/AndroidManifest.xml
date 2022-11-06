@@ -28,6 +28,13 @@
         tools:ignore="ExtraText"
         tools:targetApi="n">
         <activity
+            android:name=".ComprehensiveWalkInfoActivity"
+            android:exported="false">
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value="" />
+        </activity>
+        <activity
             android:name=".SelectWarningDog"
             android:exported="false">
             <meta-data

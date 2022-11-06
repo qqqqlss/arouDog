@@ -50,6 +50,7 @@ class ProfileFragment : Fragment() {
     lateinit var profileTotalDistanceTV:TextView
     lateinit var profileTotalCountTV:TextView
     lateinit var profileSelectWarningDog:TextView
+    lateinit var walkInfo:LinearLayout
 
     var hasDog:Boolean = false
     var buttonList = mutableListOf<Button>()
@@ -219,6 +220,12 @@ class ProfileFragment : Fragment() {
             it.context.startActivity(intent)
         }
 
+        walkInfo.setOnClickListener {
+            val intent = Intent(context, ComprehensiveWalkInfoActivity::class.java)
+            intent.putExtra("user", userData)
+            it.context.startActivity(intent)
+        }
+
         addDogFragments()
 
         return view
@@ -351,7 +358,7 @@ class ProfileFragment : Fragment() {
         profileTotalDistanceTV = view.findViewById(R.id.profileTotalDistanceTV)
         profileTotalCountTV = view.findViewById(R.id.profileTotalCountTV)
         profileSelectWarningDog = view.findViewById(R.id.profileSelectWarningDog)
-
+        walkInfo =  view.findViewById(R.id.walkInfo)
         return view
     }
     inner class ButtonClickListener(var fragment:Fragment):View.OnClickListener{
