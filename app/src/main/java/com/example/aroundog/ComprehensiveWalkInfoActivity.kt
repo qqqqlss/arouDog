@@ -7,6 +7,7 @@ import android.text.style.ForegroundColorSpan
 import android.util.Log
 import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.LinearSmoothScroller
 import androidx.recyclerview.widget.RecyclerView
 import com.example.aroundog.Model.WalkRecyclerViewAdapter
 import com.example.aroundog.Model.WalkRecyclerViewItem
@@ -131,10 +132,38 @@ class ComprehensiveWalkInfoActivity : AppCompatActivity() {
                     widget.addDecorators(HasWalkDecorator(hasWalkDates), SelectDecorator(date))
 
                     //리사이클러뷰에 보이는 첫번째 목록으로 해당 일 선택
-                    
+                    val dateStr = "" + date.year + "-" + date.month
+                    val monthDataList = allWalkInfoData.monthData[dateStr]
+                    var index = 0
+                    if (!monthDataList.isNullOrEmpty()) {
+                        for (monthInformationDto in monthDataList) {
+                            val startTime = monthInformationDto.startTime
+                            if (date == CalendarDay.from(
+                                    startTime.year,
+                                    startTime.monthValue,
+                                    startTime.dayOfMonth
+                                )
+                            ) {
+                                index = monthDataList.indexOf(monthInformationDto)
+                                break
+                            }
+                        }
+                        //원하는 아이템을 리사이클러뷰 맨 위로 올리기
+//                        (walkRecyclerView.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(index,0)
+
+                        //스크롤 부드럽게
+                        val snapMode: Int = LinearSmoothScroller.SNAP_TO_START
+                        val smoothScroller = object : LinearSmoothScroller(applicationContext) {
+                            override fun getVerticalSnapPreference(): Int = snapMode
+                            override fun getHorizontalSnapPreference(): Int = snapMode
+                        }
+                        smoothScroller.targetPosition = index
+                        mLayoutManager?.startSmoothScroll(smoothScroller)
+                    }
                 }
             }
-       }
+        }
+
 
         //retrofit 정보 받아와야함
         //전체 산책 요약정보, 전체 월 요약 정보
