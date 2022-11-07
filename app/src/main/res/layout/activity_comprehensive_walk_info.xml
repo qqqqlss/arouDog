@@ -5,7 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".ComprehensiveWalkInfoActivity">
+    tools:context=".ComprehensiveWalkInfoActivity"
+    android:background="@color/background">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -27,7 +28,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:text="전체 산책 정보"
-                android:textColor="#000000" />
+                android:textColor="@color/black" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -41,7 +42,7 @@
                     android:layout_weight="1"
                     android:gravity="center"
                     android:text="0 시간"
-                    android:textColor="#000000" />
+                    android:textColor="@color/black" />
 
                 <TextView
                     android:id="@+id/totalDistance"
@@ -50,7 +51,7 @@
                     android:layout_weight="1"
                     android:gravity="center"
                     android:text="0 KM"
-                    android:textColor="#000000" />
+                    android:textColor="@color/black" />
 
                 <TextView
                     android:id="@+id/totalCount"
@@ -59,7 +60,7 @@
                     android:layout_weight="1"
                     android:gravity="center"
                     android:text="0 회"
-                    android:textColor="#000000" />
+                    android:textColor="@color/black" />
             </LinearLayout>
 
         </LinearLayout>
@@ -76,7 +77,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:text="TextView"
-                android:textColor="#000000" />
+                android:textColor="@color/black" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -90,7 +91,7 @@
                     android:layout_weight="1"
                     android:gravity="center"
                     android:text="0 시간"
-                    android:textColor="#000000" />
+                    android:textColor="@color/black" />
 
                 <TextView
                     android:id="@+id/monthDistance"
@@ -99,7 +100,7 @@
                     android:layout_weight="1"
                     android:gravity="center"
                     android:text="0 KM"
-                    android:textColor="#000000" />
+                    android:textColor="@color/black" />
 
                 <TextView
                     android:id="@+id/monthCount"
@@ -108,7 +109,7 @@
                     android:layout_weight="1"
                     android:gravity="center"
                     android:text="0 회"
-                    android:textColor="#000000" />
+                    android:textColor="@color/black" />
             </LinearLayout>
 
         </LinearLayout>
@@ -130,6 +131,8 @@
             android:layout_height="wrap_content"
             android:paddingLeft="40dp"
             android:paddingRight="40dp"
+            app:mcv_dateTextAppearance="@color/black"
+            app:mcv_headerTextAppearance="@color/black"
             app:mcv_selectionColor="@color/brown"/>
 
     </LinearLayout>
@@ -138,8 +141,8 @@
         android:id="@+id/walkRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="5dp"
-        android:layout_marginRight="5dp"
-        android:padding="10dp"/>
+        android:paddingLeft="30dp"
+        android:paddingTop="0dp"
+        android:paddingRight="30dp" />
 
 </LinearLayout>

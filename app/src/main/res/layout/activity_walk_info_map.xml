@@ -15,9 +15,9 @@
         android:layout_marginTop="20dp"
         android:layout_marginRight="20dp"
         android:layout_marginBottom="20dp"
-        android:background="@color/white"
+        android:background="@color/transparent"
         android:src="@android:drawable/ic_menu_close_clear_cancel"
-        app:tint="@color/black" />
+        app:tint="@color/textColor"  />
 
     <fragment
         android:id="@+id/infoMap"

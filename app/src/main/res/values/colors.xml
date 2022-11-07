@@ -26,4 +26,20 @@
     <color name="yellow">#F7CA4E</color>
     <color name="lightGray">#aaabac</color>
 
+
+    <!-- 새로 추가    -->
+    <color name="textColor">#FF000000</color>
+    <color name="background">#FFFFFFFF</color>
+    <color name="dp1">#FFFFFFFF</color>
+    <color name="dp2">#FFFFFFFF</color>
+    <color name="dp3">#FFFFFFFF</color>
+    <color name="dp4">#FFFFFFFF</color>
+    <color name="dp6">#FFFFFFFF</color>
+    <color name="dp8">#FFFFFFFF</color>
+    <color name="dp12">#FFFFFFFF</color>
+    <color name="dp16">#FFFFFFFF</color>
+    <color name="dp24">#FFFFFFFF</color>
+    <color name="editText">#1A253648</color>
+    <color name="imgButton">#5a6a72</color>
+    
 </resources>

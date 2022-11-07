@@ -2,4 +2,21 @@
 <resources>
     <color name="black">#FFFFFFFF</color>
     <color name="white">#FF000000</color>
+    <color name="brown">#ebdab3</color>
+
+    <!--  새로 추가  -->
+    <color name="background">#121212</color>
+    <color name="textColor">#FFFFFFFF</color>
+
+    <color name="dp1">#1E1E1E</color>
+    <color name="dp2">#232323</color>
+    <color name="dp3">#242424</color>
+    <color name="dp4">#272727</color>
+    <color name="dp6">#2C2C2C</color>
+    <color name="dp8">#2D2D2D</color>
+    <color name="dp12">#333333</color>
+    <color name="dp16">#353535</color>
+    <color name="dp24">#383838</color>
+    <color name="editText">#242424</color>
+    <color name="imgButton"></color>
 </resources>

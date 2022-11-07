@@ -5,7 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".SelectWarningDog">
+    tools:context=".SelectWarningDog"
+    android:background="@color/background">
 
     <ScrollView
         android:layout_width="match_parent"
@@ -21,7 +22,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_margin="10dp"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:background="@color/dp2">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -34,7 +36,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:text="기피 강아지"
-                        android:textColor="#000000"
+                        android:textColor="@color/black"
                         android:textSize="20sp" />
 
                     <TextView
@@ -43,7 +45,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="20dp"
                         android:text=""
-                        android:textColor="#000000" />
+                        android:textColor="@color/black" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -57,7 +59,7 @@
                         android:layout_width="130dp"
                         android:layout_height="wrap_content"
                         android:text="알림 거리 설정"
-                        android:textColor="#000000"
+                        android:textColor="@color/black"
                         android:textSize="20sp" />
 
                     <Spinner
@@ -106,7 +108,7 @@
                             android:layout_height="wrap_content"
                             android:layout_span="2"
                             android:text="대형견"
-                            android:textColor="#000000"
+                            android:textColor="@color/black"
                             android:textSize="20sp" />
 
                         <CheckBox
@@ -128,7 +130,8 @@
                         android:layout_height="match_parent"
                         android:layout_margin="2dp"
                         android:orientation="vertical"
-                        android:padding="5dp">
+                        android:padding="5dp"
+                        android:background="@color/dp2">
 
 
                         <ImageView
@@ -145,7 +148,7 @@
                             android:layout_margin="5dp"
                             android:gravity="center"
                             android:text="허스키"
-                            android:textColor="#000000"
+                            android:textColor="@color/black"
                             android:textSize="16sp" />
                     </LinearLayout>
 
@@ -155,7 +158,8 @@
                         android:layout_height="match_parent"
                         android:layout_margin="2dp"
                         android:orientation="vertical"
-                        android:padding="5dp">
+                        android:padding="5dp"
+                        android:background="@color/dp2">
 
 
                         <ImageView
@@ -172,7 +176,7 @@
                             android:layout_margin="5dp"
                             android:gravity="center"
                             android:text="사모예드"
-                            android:textColor="#000000"
+                            android:textColor="@color/black"
                             android:textSize="16sp" />
 
                     </LinearLayout>
@@ -189,7 +193,8 @@
                         android:layout_height="match_parent"
                         android:layout_margin="2dp"
                         android:orientation="vertical"
-                        android:padding="5dp">
+                        android:padding="5dp"
+                        android:background="@color/dp2">
 
 
                         <ImageView
@@ -206,7 +211,7 @@
                             android:layout_margin="5dp"
                             android:gravity="center"
                             android:text="리트리버"
-                            android:textColor="#000000"
+                            android:textColor="@color/black"
                             android:textSize="16sp" />
                     </LinearLayout>
 
@@ -216,7 +221,8 @@
                         android:layout_height="match_parent"
                         android:layout_margin="2dp"
                         android:orientation="vertical"
-                        android:padding="5dp">
+                        android:padding="5dp"
+                        android:background="@color/dp2">
 
 
                         <ImageView
@@ -233,7 +239,7 @@
                             android:layout_margin="5dp"
                             android:gravity="center"
                             android:text="셰퍼드"
-                            android:textColor="#000000"
+                            android:textColor="@color/black"
                             android:textSize="16sp" />
 
                     </LinearLayout>
@@ -251,7 +257,8 @@
                         android:layout_height="match_parent"
                         android:layout_margin="2dp"
                         android:orientation="vertical"
-                        android:padding="5dp">
+                        android:padding="5dp"
+                        android:background="@color/dp2">
 
 
                         <ImageView
@@ -268,7 +275,7 @@
                             android:layout_margin="5dp"
                             android:gravity="center"
                             android:text="말라뮤트"
-                            android:textColor="#000000"
+                            android:textColor="@color/black"
                             android:textSize="16sp" />
                     </LinearLayout>
 
@@ -278,7 +285,8 @@
                         android:layout_height="match_parent"
                         android:layout_margin="2dp"
                         android:orientation="vertical"
-                        android:padding="5dp">
+                        android:padding="5dp"
+                        android:background="@color/dp2">
 
 
                         <!--                    <ImageView-->
@@ -295,7 +303,7 @@
                             android:layout_marginTop="5dp"
                             android:gravity="center"
                             android:text="기타"
-                            android:textColor="#000000"
+                            android:textColor="@color/black"
                             android:textSize="16sp" />
 
                     </LinearLayout>
@@ -332,7 +340,7 @@
                             android:layout_height="wrap_content"
                             android:layout_span="2"
                             android:text="중형견"
-                            android:textColor="#000000"
+                            android:textColor="@color/black"
                             android:textSize="20sp" />
 
                         <CheckBox
@@ -354,7 +362,8 @@
                         android:layout_height="match_parent"
                         android:layout_margin="2dp"
                         android:orientation="vertical"
-                        android:padding="5dp">
+                        android:padding="5dp"
+                        android:background="@color/dp2">
 
 
                         <ImageView
@@ -371,7 +380,7 @@
                             android:layout_margin="5dp"
                             android:gravity="center"
                             android:text="비글"
-                            android:textColor="#000000"
+                            android:textColor="@color/black"
                             android:textSize="16sp" />
                     </LinearLayout>
 
@@ -381,7 +390,8 @@
                         android:layout_height="match_parent"
                         android:layout_margin="2dp"
                         android:orientation="vertical"
-                        android:padding="5dp">
+                        android:padding="5dp"
+                        android:background="@color/dp2">
 
 
                         <ImageView
@@ -398,7 +408,7 @@
                             android:layout_margin="5dp"
                             android:gravity="center"
                             android:text="보더콜리"
-                            android:textColor="#000000"
+                            android:textColor="@color/black"
                             android:textSize="16sp" />
 
                     </LinearLayout>
@@ -415,7 +425,8 @@
                         android:layout_height="match_parent"
                         android:layout_margin="2dp"
                         android:orientation="vertical"
-                        android:padding="5dp">
+                        android:padding="5dp"
+                        android:background="@color/dp2">
 
 
                         <ImageView
@@ -432,7 +443,7 @@
                             android:layout_margin="5dp"
                             android:gravity="center"
                             android:text="불독"
-                            android:textColor="#000000"
+                            android:textColor="@color/black"
                             android:textSize="16sp" />
                     </LinearLayout>
 
@@ -442,7 +453,8 @@
                         android:layout_height="match_parent"
                         android:layout_margin="2dp"
                         android:orientation="vertical"
-                        android:padding="5dp">
+                        android:padding="5dp"
+                        android:background="@color/dp2">
 
 
                         <ImageView
@@ -459,7 +471,7 @@
                             android:layout_margin="5dp"
                             android:gravity="center"
                             android:text="시바"
-                            android:textColor="#000000"
+                            android:textColor="@color/black"
                             android:textSize="16sp" />
 
                     </LinearLayout>
@@ -477,7 +489,8 @@
                         android:layout_height="match_parent"
                         android:layout_margin="2dp"
                         android:orientation="vertical"
-                        android:padding="5dp">
+                        android:padding="5dp"
+                        android:background="@color/dp2">
 
 
                         <ImageView
@@ -494,7 +507,7 @@
                             android:layout_margin="5dp"
                             android:gravity="center"
                             android:text="웰시코기"
-                            android:textColor="#000000"
+                            android:textColor="@color/black"
                             android:textSize="16sp" />
                     </LinearLayout>
 
@@ -504,7 +517,8 @@
                         android:layout_height="match_parent"
                         android:layout_margin="2dp"
                         android:orientation="vertical"
-                        android:padding="5dp">
+                        android:padding="5dp"
+                        android:background="@color/dp2">
 
 
                         <!--                    <ImageView-->
@@ -521,7 +535,7 @@
                             android:layout_marginTop="5dp"
                             android:gravity="center"
                             android:text="기타"
-                            android:textColor="#000000"
+                            android:textColor="@color/black"
                             android:textSize="16sp" />
 
                     </LinearLayout>
@@ -558,7 +572,7 @@
                             android:layout_height="wrap_content"
                             android:layout_span="2"
                             android:text="소형견"
-                            android:textColor="#000000"
+                            android:textColor="@color/black"
                             android:textSize="20sp" />
 
                         <CheckBox
@@ -580,7 +594,8 @@
                         android:layout_height="match_parent"
                         android:layout_margin="2dp"
                         android:orientation="vertical"
-                        android:padding="5dp">
+                        android:padding="5dp"
+                        android:background="@color/dp2">
 
 
                         <ImageView
@@ -597,7 +612,7 @@
                             android:layout_margin="5dp"
                             android:gravity="center"
                             android:text="치와와"
-                            android:textColor="#000000"
+                            android:textColor="@color/black"
                             android:textSize="16sp" />
                     </LinearLayout>
 
@@ -607,7 +622,8 @@
                         android:layout_height="match_parent"
                         android:layout_margin="2dp"
                         android:orientation="vertical"
-                        android:padding="5dp">
+                        android:padding="5dp"
+                        android:background="@color/dp2">
 
 
                         <ImageView
@@ -624,7 +640,7 @@
                             android:layout_margin="5dp"
                             android:gravity="center"
                             android:text="말티즈"
-                            android:textColor="#000000"
+                            android:textColor="@color/black"
                             android:textSize="16sp" />
 
                     </LinearLayout>
@@ -641,7 +657,8 @@
                         android:layout_height="match_parent"
                         android:layout_margin="2dp"
                         android:orientation="vertical"
-                        android:padding="5dp">
+                        android:padding="5dp"
+                        android:background="@color/dp2">
 
 
                         <ImageView
@@ -658,7 +675,7 @@
                             android:layout_margin="5dp"
                             android:gravity="center"
                             android:text="푸들"
-                            android:textColor="#000000"
+                            android:textColor="@color/black"
                             android:textSize="16sp" />
                     </LinearLayout>
 
@@ -668,7 +685,8 @@
                         android:layout_height="match_parent"
                         android:layout_margin="2dp"
                         android:orientation="vertical"
-                        android:padding="5dp">
+                        android:padding="5dp"
+                        android:background="@color/dp2">
 
 
                         <ImageView
@@ -685,7 +703,7 @@
                             android:layout_margin="5dp"
                             android:gravity="center"
                             android:text="시츄"
-                            android:textColor="#000000"
+                            android:textColor="@color/black"
                             android:textSize="16sp" />
 
                     </LinearLayout>
@@ -703,7 +721,8 @@
                         android:layout_height="match_parent"
                         android:layout_margin="2dp"
                         android:orientation="vertical"
-                        android:padding="5dp">
+                        android:padding="5dp"
+                        android:background="@color/dp2">
 
 
                         <ImageView
@@ -720,7 +739,7 @@
                             android:layout_margin="5dp"
                             android:gravity="center"
                             android:text="요크셔테리어"
-                            android:textColor="#000000"
+                            android:textColor="@color/black"
                             android:textSize="16sp" />
                     </LinearLayout>
 
@@ -730,7 +749,8 @@
                         android:layout_height="match_parent"
                         android:layout_margin="2dp"
                         android:orientation="vertical"
-                        android:padding="5dp">
+                        android:padding="5dp"
+                        android:background="@color/dp2">
 
 
                         <!--                    <ImageView-->
@@ -747,7 +767,7 @@
                             android:layout_marginTop="5dp"
                             android:gravity="center"
                             android:text="기타"
-                            android:textColor="#000000"
+                            android:textColor="@color/black"
                             android:textSize="16sp" />
 
                     </LinearLayout>

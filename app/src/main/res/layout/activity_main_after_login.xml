@@ -5,7 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    tools:context=".MainActivity2">
+    tools:context=".MainActivity2"
+    android:background="@color/background">
 
     <!--    프래그먼트를 띄울 레이아웃-->
     <FrameLayout

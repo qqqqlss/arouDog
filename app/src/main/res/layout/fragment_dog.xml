@@ -5,7 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    tools:context=".DogFragment">
+    tools:context=".DogFragment"
+    android:background="@color/dp2">
 
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/imgViewPager"
@@ -28,7 +29,8 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:background="@color/dp3">
 
         <LinearLayout
             android:layout_width="match_parent"
