@@ -143,11 +143,19 @@ class MainFragment : Fragment(){
         NaverMapService.isTracking.observe(this){
             isTracking = it
             //updateTracking(it)
-        }
-        // 경로 변경 관찰
-        NaverMapService.pathPoints.observe(this) {
-            pathPoints = it
-            addLatestPolyline()
+
+            // 경로 변경 관찰하는 옵저버
+            var observeForever = androidx.lifecycle.Observer<MutableList<Polyline>>{ data->
+                pathPoints = data
+                addLatestPolyline()
+            }
+
+            if (isTracking) {//산책을 시작했으면
+                NaverMapService.pathPoints.observeForever(observeForever)//관찰시작
+            } else {
+                NaverMapService.pathPoints.removeObserver(observeForever)//관찰끝
+            }
+
         }
     }
 
