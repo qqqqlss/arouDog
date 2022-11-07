@@ -2,6 +2,7 @@ package com.example.aroundog.Service
 
 import com.example.aroundog.Model.UpdateWalkHistory
 import com.example.aroundog.dto.AllWalkInformationDto
+import com.example.aroundog.dto.WalkInfoDto
 import com.example.aroundog.dto.WalkListDto
 import com.example.aroundog.dto.WalkWeekSummaryDto
 import okhttp3.MultipartBody
@@ -51,4 +52,9 @@ interface WalkService {
     fun getAllWalkInfo(
         @Path("userId") userId:String
     ):Call<AllWalkInformationDto>
+
+    @GET("/walk/{walkId}/info")
+    fun getWalkInfo(
+        @Path("walkId") walkId: Long
+    ):Call<WalkInfoDto>
 }

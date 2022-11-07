@@ -1,6 +1,6 @@
 package com.example.aroundog.Model
 
-import RecyclerViewAdapter
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -8,10 +8,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.example.aroundog.R
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import java.time.format.DateTimeFormatter
+import com.example.aroundog.WalkInfoActivity
 
 class WalkRecyclerViewAdapter(private var items:ArrayList<WalkRecyclerViewItem>): RecyclerView.Adapter<WalkRecyclerViewAdapter.ItemViewHolder>() {
 
@@ -31,7 +28,9 @@ class WalkRecyclerViewAdapter(private var items:ArrayList<WalkRecyclerViewItem>)
             var listener = View.OnClickListener {
                 //레트로핏
                 Toast.makeText(it.context, "${item.walkId}", Toast.LENGTH_SHORT).show()
-
+                var intent = Intent(it.context, WalkInfoActivity::class.java)
+                intent.putExtra("walkId", item.walkId)
+                it.context.startActivity(intent)
 
             }
             view.setOnClickListener(listener)
