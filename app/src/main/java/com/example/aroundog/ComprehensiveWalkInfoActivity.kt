@@ -1,11 +1,13 @@
 package com.example.aroundog
 
+import android.content.Context
+import android.content.res.Resources
 import android.graphics.Color
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.style.ForegroundColorSpan
 import android.util.Log
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.LinearSmoothScroller
 import androidx.recyclerview.widget.RecyclerView
@@ -19,6 +21,7 @@ import com.prolificinteractive.materialcalendarview.CalendarDay
 import com.prolificinteractive.materialcalendarview.DayViewDecorator
 import com.prolificinteractive.materialcalendarview.DayViewFacade
 import com.prolificinteractive.materialcalendarview.MaterialCalendarView
+import com.prolificinteractive.materialcalendarview.format.TitleFormatter
 import com.prolificinteractive.materialcalendarview.spans.DotSpan
 import retrofit2.Call
 import retrofit2.Callback
@@ -26,11 +29,11 @@ import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.lang.reflect.Type
+import java.text.SimpleDateFormat
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
-import kotlin.collections.ArrayList
-import kotlin.collections.HashSet
+import java.util.*
 
 class ComprehensiveWalkInfoActivity : AppCompatActivity() {
     val TAG = "COMPREHENSIVEWALKINFOACTIVITY"
@@ -77,6 +80,9 @@ class ComprehensiveWalkInfoActivity : AppCompatActivity() {
 
         //뷰 바인딩
         setView()
+
+        //년 월 표시방법 변경
+        updateCalendarHeader()
 
         //리사이클러뷰 설정
         walkRecyclerView.layoutManager = mLayoutManager;
@@ -252,6 +258,14 @@ class ComprehensiveWalkInfoActivity : AppCompatActivity() {
 //        calendar.addDecorator(EventDecorator(dates))
     }
 
+    private fun updateCalendarHeader() {
+        calendar.setTitleFormatter(object : TitleFormatter {
+            override fun format(day: CalendarDay?): CharSequence {
+                return "${day!!.year}년  ${day.month}월"
+            }
+        })
+    }
+
     private fun setRetrofit(): WalkService {
         var jsonLocalDateTimeDeserializer = object : JsonDeserializer<LocalDateTime> {
             override fun deserialize(
@@ -319,7 +333,6 @@ class ComprehensiveWalkInfoActivity : AppCompatActivity() {
 
         override fun decorate(view: DayViewFacade?) {
             view?.setDaysDisabled(true)
-            view?.addSpan(ForegroundColorSpan(Color.BLACK))
         }
     }
     class SelectDecorator(selectDay: CalendarDay): DayViewDecorator {
