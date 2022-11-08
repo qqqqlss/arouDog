@@ -3,6 +3,7 @@ package com.example.aroundog.fragments
 import android.animation.ObjectAnimator
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.graphics.Color
 import android.location.Location
 import android.net.Uri
@@ -17,6 +18,7 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResult
@@ -84,7 +86,8 @@ class MainFragment : Fragment(){
     lateinit var walkTimeTV: TextView
     lateinit var pauseButton: ImageButton
     lateinit var cameraButton: ImageButton
-    lateinit var statusLayout: LinearLayout
+    lateinit var statusLayout: ConstraintLayout
+    lateinit var warningDistance:TextView
 
     //타일
     var tile = ""
@@ -131,7 +134,9 @@ class MainFragment : Fragment(){
 
     //알림 거리 설정
     var width:Double = 0.0
-    
+
+    lateinit var user_info_pref:SharedPreferences
+
     companion object {
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1000
         val firstTile = MutableLiveData<String>()
@@ -177,14 +182,11 @@ class MainFragment : Fragment(){
 
         initDogImage()//강아지 이미지 초기화
 
-        //환경설정에서 알람을 표시할 영역을 설정하는 변수, 저장 필요, 일단 임의값으로 대체
-        //소수점 다섯째 자리가 약 1m정도씩 차이남
-        width = 0.0005 //50m
-
         //저장된 id 정보 가져오기
-        var user_info_pref =
+        user_info_pref =
             requireActivity().getSharedPreferences("userInfo", AppCompatActivity.MODE_PRIVATE)
         userId = user_info_pref.getString("id", "error").toString()
+
     }
 
     override fun onCreateView(//인터페이스를 그리기위해 호출
@@ -205,6 +207,40 @@ class MainFragment : Fragment(){
 
         //산책시작 버튼 클릭 리스너
         startWalkButton.setOnClickListener {
+
+            //환경설정에서 알람을 표시할 영역
+            //소수점 다섯째 자리가 약 1m정도씩 차이남
+            //10, 30, 50, 100, 200
+            var spinnerSelectDistance = user_info_pref.getInt("distance", 0)
+            Log.d(TAG, "spinnerSelectDistance : $spinnerSelectDistance")
+            when (spinnerSelectDistance) {
+                0 -> {
+                    width = 0.0001
+                    warningDistance.text = "알림 거리 : 10M"
+                }
+                1 -> {
+                    width = 0.0003
+                    warningDistance.text = "알림 거리 : 30M"
+                }
+                2 -> {
+                    width = 0.0005
+                    warningDistance.text = "알림 거리 : 50M"
+                }
+                3 -> {
+                    width = 0.001
+                    warningDistance.text = "알림 거리 : 100M"
+                }
+                4 -> {
+                    width = 0.002
+                    warningDistance.text = "알림 거리 : 200M"
+                }
+                else ->{
+                    width = 0.0005
+                    warningDistance.text = "알림 거리 : 50M"
+                }
+
+            }
+
             //최신 위치가 저장되었는지 확인
             if (this::lastLocation.isInitialized) {
                 startWalk()
@@ -794,6 +830,7 @@ class MainFragment : Fragment(){
         statusLayout = view.findViewById(R.id.statusLayout)
         frame = view.findViewById(R.id.map)
         webView = view.findViewById(R.id.webView)
+        warningDistance = view.findViewById(R.id.warningDistance)
         return view
     }
 

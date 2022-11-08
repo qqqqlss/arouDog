@@ -13,6 +13,7 @@ import com.example.aroundog.Service.UserService
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import org.jetbrains.anko.sdk25.coroutines.onClick
+import org.jetbrains.anko.sdk25.coroutines.onItemSelectedListener
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -79,6 +80,11 @@ class SelectWarningDog : AppCompatActivity() {
             this.getSharedPreferences("userInfo", AppCompatActivity.MODE_PRIVATE)
         user_info_editor = user_info_pref.edit()
         userId = user_info_pref.getString("id", "error").toString()
+
+        //스피너
+        var spinnerSelectDistance = user_info_pref.getInt("distance", 0)
+        spinner.adapter = ArrayAdapter.createFromResource(this, R.array.itemList, android.R.layout.simple_list_item_1)
+        spinner.setSelection(spinnerSelectDistance)
 
 
         //레트로핏 초기화
@@ -290,6 +296,12 @@ class SelectWarningDog : AppCompatActivity() {
 
         //선택완료 버튼
         warningDogSelectButton.setOnClickListener {
+            //거리 저장
+            val pref = getSharedPreferences("userInfo", MODE_PRIVATE)
+            val edit = pref.edit()
+            edit.putInt("distance", spinner.selectedItemPosition)
+            edit.apply()
+
             //str이 빈문자열인채로 올라갈 경우 받아올때 문제 발생
             //글자 생성
             var str = "$"

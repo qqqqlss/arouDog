@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="itemList">
+        <item>10M</item>
+        <item>30M</item>
+        <item>50M</item>
+        <item>100M</item>
+        <item>200M</item>
+    </string-array>
+    
+</resources>

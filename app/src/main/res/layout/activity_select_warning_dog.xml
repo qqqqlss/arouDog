@@ -105,9 +105,10 @@
 
                     <Spinner
                         android:id="@+id/warningSpinner"
-                        android:layout_width="100dp"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="20dp" />
+                        android:layout_marginLeft="20dp"
+                        android:background="@drawable/spinner_background" />
                 </LinearLayout>
             </LinearLayout>
 
