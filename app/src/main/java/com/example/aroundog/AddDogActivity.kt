@@ -1,5 +1,6 @@
 package com.example.aroundog
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -10,6 +11,7 @@ import com.example.aroundog.Model.Gender
 import com.example.aroundog.Service.DogService
 import com.example.aroundog.dto.DogDto
 import com.example.aroundog.dto.ImgDto
+import com.example.aroundog.utils.DogBreedData
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import retrofit2.Call
@@ -24,15 +26,25 @@ class AddDogActivity : AppCompatActivity() {
     var dog_height: EditText? = null
     var dog_weight: EditText? = null
     var dogGender: RadioGroup? = null
-    var dogBreed: RadioGroup? = null
+    var dogBreed: TextView? = null
     var dogCheck: TextView? = null
     var dogButton: Button? = null
+
+    lateinit var addDogBack:ImageButton
     lateinit var retrofit: DogService
     var userId = ""
     var TAG = "ADDDOGACTIVITY"
+
+    init {
+        SelectDogActivity.selectDog.observe(this){
+            dogBreed!!.text = DogBreedData.getBreed(it)
+        }
+    }
+
     companion object{
         val newDogData = MutableLiveData<DogDto>()
     }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_dog)
@@ -49,13 +61,24 @@ class AddDogActivity : AppCompatActivity() {
             getSharedPreferences("userInfo", AppCompatActivity.MODE_PRIVATE)
         userId = user_info_pref.getString("id", "error").toString()
 
+        //뒤로가기 버튼
+        addDogBack.setOnClickListener {
+            finish()
+        }
+
+        dogBreed!!.setOnClickListener {
+            var intent = Intent(this, SelectDogActivity::class.java)
+            intent.putExtra("breed",-1L)
+            it.context.startActivity(intent)
+        }
+
         dogButton!!.setOnClickListener(View.OnClickListener {
             val dogName = dog_name!!.text.toString()
             val dogAge = dog_age!!.text.toString()
             val dogHeight = dog_height!!.text.toString()
             val dogWeight = dog_weight!!.text.toString()
 
-            if (dogName == "" || dogAge == "" || dogHeight == "" || dogWeight == "" || dogGender!!.checkedRadioButtonId == -1 || dogBreed!!.checkedRadioButtonId == -1) {
+            if (dogName == "" || dogAge == "" || dogHeight == "" || dogWeight == "" || dogGender!!.checkedRadioButtonId == -1) {
                 dogCheck!!.visibility = View.VISIBLE
                 return@OnClickListener
             } else {
@@ -65,17 +88,9 @@ class AddDogActivity : AppCompatActivity() {
                     "WOMAN"
                 }
 
-                var intBreed = if (dogBreed!!.checkedRadioButtonId == R.id.dog_big) {
-                    1L
-                } else if (dogBreed!!.checkedRadioButtonId == R.id.dog_medium) {
-                    2L
-                } else {
-                    3L
-                }
-
                 retrofit.addDog(
                     userId,
-                    intBreed,
+                    DogBreedData.getId(dogBreed!!.text.toString()),//종을 해당 종 id로 변경
                     dogName,
                     dogAge.toInt(),
                     dogWeight.toDouble(),
@@ -87,7 +102,16 @@ class AddDogActivity : AppCompatActivity() {
                         if (response.isSuccessful) {
                             if (response.body() != -100L) { //실패시 -100
                                 var dogId:Long = response.body()!!
-                                val newDog = DogDto(dogId,dogName, dogAge.toInt(), dogWeight.toDouble(), dogHeight.toDouble(), Gender.valueOf(strGender), intBreed, mutableListOf<ImgDto>())
+                                val newDog = DogDto(
+                                    dogId,
+                                    dogName,
+                                    dogAge.toInt(),
+                                    dogWeight.toDouble(),
+                                    dogHeight.toDouble(),
+                                    Gender.valueOf(strGender),
+                                    DogBreedData.getId(dogBreed!!.text.toString()),
+                                    mutableListOf<ImgDto>()
+                                )
                                 newDogData.postValue(newDog)//newDogData 업데이트 알림
                                 Log.d(TAG, "성공")
                                 Toast.makeText(applicationContext, "추가 성공", Toast.LENGTH_SHORT)
@@ -129,5 +153,6 @@ class AddDogActivity : AppCompatActivity() {
         dogBreed = findViewById(R.id.dog_breed)
         dogCheck = findViewById(R.id.dog_check)
         dogButton = findViewById(R.id.dog_button)
+        addDogBack = findViewById(R.id.addDogBack)
     }
 }

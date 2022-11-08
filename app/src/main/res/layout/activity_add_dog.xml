@@ -57,7 +57,7 @@
             android:background="@color/brown" />
 
         <EditText
-            android:id="@+id/dog_nam"
+            android:id="@+id/dog_name"
             android:layout_width="match_parent"
             android:layout_height="50dp"
             android:layout_gravity="center"
@@ -235,7 +235,7 @@
             android:background="@drawable/style_rounded_login"
 
             android:gravity="center"
-            android:text="종"
+            android:text="종을 선택해주세요"
             android:textColor="@color/black"
             android:textSize="15dp" />
     </LinearLayout>
