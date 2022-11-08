@@ -17,23 +17,43 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-  <androidx.appcompat.widget.Toolbar
-      android:id="@+id/edit_toolbar"
-      android:layout_width="match_parent"
-      android:layout_height="60dp"
-      android:background="@color/brown">
+      <LinearLayout
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:gravity="center_vertical"
+          android:padding="15dp">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:fontFamily="@font/nanum_square_eb"
-        android:text="내 정보 수정"
-        android:textColor="@color/white"
-        android:textSize="30sp" />
+        <ImageButton
+            android:id="@+id/profileEditBack"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/transparent"
+            android:src="@drawable/back" />
 
-  </androidx.appcompat.widget.Toolbar>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:text="사용자 정보 수정"
+            android:textColor="@color/textColor"
+            android:textSize="20sp"
+            android:textStyle="bold" />
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="right"
+            android:orientation="horizontal">
+
+<!--          <Button-->
+<!--              android:id="@+id/profileEditButton"-->
+<!--              android:layout_width="wrap_content"-->
+<!--              android:layout_height="wrap_content"-->
+<!--              android:layout_gravity="right"-->
+<!--              android:text="수정 완료" />-->
+        </LinearLayout>
+
+      </LinearLayout>
 
   <LinearLayout
       android:layout_width="match_parent"
@@ -347,7 +367,7 @@
 
   <Button
       android:id="@+id/profileEditButton"
-      android:layout_width="350dp"
+      android:layout_width="150dp"
       android:layout_height="50dp"
       android:layout_gravity="center"
       android:layout_marginTop="15dp"

@@ -10,7 +10,7 @@
                 android:width="5dp"
                 android:color="@color/brown" />
 
-            <solid android:color="?attr/background" />
+            <solid android:color="@color/dp2" />
         </shape>
     </item>
 </layer-list>

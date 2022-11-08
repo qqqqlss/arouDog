@@ -42,12 +42,14 @@ class SelectDogActivity : AppCompatActivity() {
             if (map[it]!!.boolean == true) {//선택된 상태면 테두리 없앰
                 map[it]!!.boolean = false
                 it.setBackgroundResource(0)
+                it.background = resources.getDrawable(R.color.dp2, null)
             } else {//선택 안되어있으면 테두리 생성
                 for (entry in map) {
                     //전체 해제
                     if (entry.value.boolean) {
                         entry.value.boolean = false
                         entry.key.setBackgroundResource(0)
+                        it.background = resources.getDrawable(R.color.dp2, null)
                     }
                 }
                 map[it]!!.boolean = true//선택된거 true로 변경

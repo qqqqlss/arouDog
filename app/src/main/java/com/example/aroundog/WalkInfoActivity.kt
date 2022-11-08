@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Base64
 import android.util.Log
+import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
@@ -35,6 +36,7 @@ class WalkInfoActivity : AppCompatActivity() {
     lateinit var walkInfoSecond:TextView
     lateinit var walkInfoDistance:TextView
     lateinit var floatingActionButton:FloatingActionButton
+    lateinit var walkInfoBack:ImageButton
 
     lateinit var walkInfoDto:WalkInfoDto
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -61,6 +63,11 @@ class WalkInfoActivity : AppCompatActivity() {
                 intent.putExtra("pathData", pathData)
                 startActivity(intent)
             }
+        }
+
+        //뒤로가기 버튼 리스너
+        walkInfoBack.setOnClickListener {
+            finish()
         }
     }
 
@@ -116,7 +123,7 @@ class WalkInfoActivity : AppCompatActivity() {
         walkInfoDistance = findViewById(R.id.walkInfoDistance)
         floatingActionButton = findViewById(R.id.floatingActionButton)
         walkDetailsImageView = findViewById(R.id.walkDetailsImageView)
-
+        walkInfoBack = findViewById(R.id.walkInfoBack)
     }
     private fun setRetrofit(): WalkService {
         var jsonLocalDateTimeDeserializer = object : JsonDeserializer<LocalDateTime> {

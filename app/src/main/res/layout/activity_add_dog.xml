@@ -2,160 +2,295 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical">
 
 
-    <TextView
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:padding="15dp">
+
+        <ImageButton
+            android:id="@+id/addDogBack"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/transparent"
+            android:src="@drawable/back" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:text="강아지 등록"
+            android:textColor="@color/textColor"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+    </LinearLayout>
+
+    <LinearLayout
         android:layout_width="330dp"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:layout_margin="30dp"
-        android:fontFamily="@font/nanum_square"
-        android:gravity="center"
-        android:text="강아지 등록"
-        android:textColor="@color/textColor"
-        android:textSize="30sp" />
-
-
-    <EditText
-        android:id="@+id/dog_name"
-        android:layout_width="350dp"
-        android:layout_height="50dp"
-        android:layout_gravity="center"
-        android:layout_marginTop="10dp"
-        android:background="@drawable/style_rounded_login"
-        android:fontFamily="@font/nanum_barun_gothic_light"
-        android:hint="강아지의 이름을 입력해 주세요"
-        android:inputType="textVisiblePassword"
-        android:paddingLeft="17dp"
-        android:textColor="@color/black"
-        android:textColorHint="@color/black"
-        android:maxLength="16"
-        android:textSize="15sp" />
-
-
-    <EditText
-        android:id="@+id/dog_age"
-        android:layout_width="350dp"
-        android:layout_height="50dp"
-        android:layout_gravity="center"
-        android:layout_marginTop="10dp"
-        android:background="@drawable/style_rounded_login"
-        android:fontFamily="@font/nanum_barun_gothic_light"
-        android:hint="강아지의 나이를 입력해주세요."
-        android:digits="0123456789"
-        android:inputType="number"
-        android:paddingLeft="17dp"
-        android:textColor="@color/black"
-        android:textColorHint="@color/black"
-        android:maxLength="15"
-        android:textSize="15sp" />
-
-    <EditText
-        android:id="@+id/dog_height"
-        android:layout_width="350dp"
-        android:layout_height="50dp"
-        android:layout_gravity="center"
-        android:layout_marginTop="10dp"
-        android:background="@drawable/style_rounded_login"
-        android:digits="0123456789."
-        android:fontFamily="@font/nanum_barun_gothic_light"
-        android:hint="강아지의 키를 입력해주세요(cm)"
-        android:inputType="number"
-        android:paddingLeft="17dp"
-        android:textColor="@color/black"
-        android:textColorHint="@color/black"
-        android:textSize="15sp" />
-
-
-
-    <EditText
-        android:id="@+id/dog_weight"
-        android:layout_width="350dp"
-        android:layout_height="50dp"
-        android:layout_gravity="center"
-        android:layout_marginTop="10dp"
-        android:background="@drawable/style_rounded_login"
-        android:digits="0123456789."
-        android:fontFamily="@font/nanum_barun_gothic_light"
-        android:hint="강아지의 몸무게를 입력해주세요(kg)"
-        android:inputType="numberDecimal"
-        android:paddingLeft="17dp"
-        android:textColor="@color/black"
-        android:textColorHint="@color/black"
-        android:textSize="15sp" />
-
-    <TextView
-        android:layout_width="330dp"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginTop="15dp"
-        android:fontFamily="@font/nanum_square"
-        android:text="성별을 선택해주세요"
-        android:textColor="@color/gray"
-        android:textSize="15sp" />
-
-    <RadioGroup
-        android:id="@+id/dog_gender"
-        android:layout_width="350dp"
-        android:layout_height="50dp"
-        android:layout_gravity="center"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="30dp"
+        android:layout_marginBottom="12dp"
         android:orientation="horizontal">
 
-        <RadioButton
-            android:id="@+id/dog_man"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:text="수컷" />
+        <TextView
+            android:layout_width="90dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:fontFamily="@font/nanum_barun_gothic"
+            android:gravity="center"
+            android:text="이름"
+            android:textColor="@color/black"
+            android:textSize="16dp" />
 
-        <RadioButton
-            android:id="@+id/dog_woman"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:text="암컷" />
-    </RadioGroup>
+        <View
+            android:layout_width="3dp"
+            android:layout_height="40dp"
+            android:layout_gravity="center"
+            android:layout_marginRight="20dp"
+            android:background="@color/brown" />
 
-    <TextView
+        <EditText
+            android:id="@+id/dog_nam"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_gravity="center"
+            android:background="@drawable/style_rounded_login"
+            android:fontFamily="@font/nanum_barun_gothic"
+            android:gravity="center"
+            android:hint="이름을 입력해주세요."
+            android:inputType="text"
+            android:maxLength="15"
+            android:textColor="@color/black"
+            android:textSize="15dp" />
+
+    </LinearLayout>
+
+    <LinearLayout
         android:layout_width="330dp"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:layout_marginTop="15dp"
-        android:fontFamily="@font/nanum_square"
-        android:text="견종을 선택해주세요"
-        android:textColor="@color/gray"
-        android:textSize="15sp" />
-    <RadioGroup
-        android:id="@+id/dog_breed"
-        android:layout_width="350dp"
-        android:layout_height="50dp"
-        android:layout_gravity="center"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="12dp"
         android:orientation="horizontal">
 
-        <RadioButton
-            android:id="@+id/dog_big"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:text="대형견" />
+        <TextView
+            android:layout_width="90dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:fontFamily="@font/nanum_barun_gothic"
+            android:gravity="center"
+            android:text="나이"
+            android:textColor="@color/black"
+            android:textSize="16dp" />
 
-        <RadioButton
-            android:id="@+id/dog_medium"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:text="중형견" />
+        <View
+            android:layout_width="3dp"
+            android:layout_height="40dp"
+            android:layout_gravity="center"
+            android:layout_marginRight="20dp"
+            android:background="@color/brown" />
 
-        <RadioButton
-            android:id="@+id/dog_small"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:text="소형견" />
-    </RadioGroup>
+
+        <EditText
+            android:id="@+id/dog_age"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_gravity="center"
+            android:background="@drawable/style_rounded_login"
+            android:digits="0123456789"
+            android:fontFamily="@font/nanum_barun_gothic"
+            android:gravity="center"
+            android:hint="나이를 입력해주세요"
+            android:inputType="number"
+            android:maxLength="35"
+            android:textColor="@color/black"
+            android:textSize="15dp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="330dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="12dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="90dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:fontFamily="@font/nanum_barun_gothic"
+            android:gravity="center"
+            android:text="키(cm)"
+            android:textColor="@color/black"
+            android:textSize="16dp" />
+
+        <View
+            android:layout_width="3dp"
+            android:layout_height="40dp"
+            android:layout_gravity="center"
+            android:layout_marginRight="20dp"
+            android:background="@color/brown" />
+
+
+        <EditText
+            android:id="@+id/dog_height"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_gravity="center"
+            android:background="@drawable/style_rounded_login"
+            android:digits="0123456789"
+            android:fontFamily="@font/nanum_barun_gothic"
+            android:gravity="center"
+            android:hint="키를 입력해주세요."
+            android:inputType="number"
+            android:maxLength="11"
+            android:textColor="@color/black"
+            android:textSize="15dp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="330dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="12dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="90dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:fontFamily="@font/nanum_barun_gothic"
+            android:gravity="center"
+            android:text="몸무게(kg)"
+            android:textColor="@color/black"
+            android:textSize="16dp" />
+
+        <View
+            android:layout_width="3dp"
+            android:layout_height="40dp"
+            android:layout_gravity="center"
+            android:layout_marginRight="20dp"
+            android:background="@color/brown" />
+
+
+        <EditText
+            android:id="@+id/dog_weight"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_gravity="center"
+            android:background="@drawable/style_rounded_login"
+            android:digits="0123456789"
+            android:fontFamily="@font/nanum_barun_gothic"
+            android:gravity="center"
+            android:hint="몸무게를 입력해주세요."
+            android:inputType="number"
+            android:maxLength="11"
+            android:textColor="@color/black"
+            android:textSize="15dp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="330dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="12dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="90dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:fontFamily="@font/nanum_barun_gothic"
+            android:gravity="center"
+            android:text="종"
+            android:textColor="@color/black"
+            android:textSize="16dp" />
+
+        <View
+            android:layout_width="3dp"
+            android:layout_height="40dp"
+            android:layout_gravity="center"
+            android:layout_marginRight="20dp"
+            android:background="@color/brown" />
+
+
+        <TextView
+            android:id="@+id/dog_breed"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_gravity="center"
+            android:background="@drawable/style_rounded_login"
+
+            android:gravity="center"
+            android:text="종"
+            android:textColor="@color/black"
+            android:textSize="15dp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="330dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="12dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="90dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:fontFamily="@font/nanum_barun_gothic"
+            android:gravity="center"
+            android:text="성별"
+            android:textColor="@color/black"
+            android:textSize="16dp" />
+
+        <View
+            android:layout_width="3dp"
+            android:layout_height="40dp"
+            android:layout_gravity="center"
+            android:layout_marginRight="20dp"
+            android:background="@color/brown" />
+
+        <RadioGroup
+            android:id="@+id/dog_gender"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@+id/dog_man"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="수컷"
+                android:textSize="16sp" />
+
+            <RadioButton
+                android:id="@+id/dog_woman"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="암컷"
+                android:textSize="16sp" />
+        </RadioGroup>
+
+    </LinearLayout>
+
 
     <TextView
         android:id="@+id/dog_check"
@@ -171,7 +306,7 @@
 
     <Button
         android:id="@+id/dog_button"
-        android:layout_width="350dp"
+        android:layout_width="150dp"
         android:layout_height="50dp"
         android:layout_gravity="center"
         android:layout_marginTop="15dp"

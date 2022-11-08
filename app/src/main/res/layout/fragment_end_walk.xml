@@ -13,17 +13,29 @@
         android:orientation="vertical"
         android:weightSum="12">
 
-        <ImageButton
-            android:id="@+id/exitButton"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="right"
-            android:layout_marginTop="20dp"
-            android:layout_marginRight="20dp"
-            android:layout_marginBottom="20dp"
-            android:background="@color/transparent"
-            android:src="@android:drawable/ic_menu_close_clear_cancel"
-            app:tint="@color/textColor" />
+            android:gravity="center_vertical"
+            android:padding="15dp">
+
+            <ImageButton
+                android:id="@+id/exitButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@color/transparent"
+                android:src="@drawable/back" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:text="산책 결과"
+                android:textColor="@color/textColor"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+        </LinearLayout>
 
         <FrameLayout
             android:id="@+id/endWalk_container"

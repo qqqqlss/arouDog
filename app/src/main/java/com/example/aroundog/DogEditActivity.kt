@@ -30,6 +30,7 @@ class DogEditActivity : AppCompatActivity() {
     var dogBreed: TextView? = null
     var dogCheck: TextView? = null
     var editButton: Button? = null
+    lateinit var editDogBack:ImageButton
 
     companion object{
         val editDogInfo = MutableLiveData<DogDto>()
@@ -117,7 +118,10 @@ class DogEditActivity : AppCompatActivity() {
             finish()
         }
 
-
+        //뒤로가기 버튼 리스너
+        editDogBack.setOnClickListener {
+            finish()
+        }
 
     }
 
@@ -144,5 +148,6 @@ class DogEditActivity : AppCompatActivity() {
         dogBreed = findViewById(R.id.editDogBreed)
         dogCheck = findViewById(R.id.editDogCheck)
         editButton = findViewById(R.id.editDogUpdate)
+        editDogBack = findViewById(R.id.editDogBack)
     }
 }

@@ -28,6 +28,8 @@ class ProfileEditActivity : AppCompatActivity() {
     lateinit var profileEditPhone: EditText
     lateinit var profileEditCheck: TextView
     lateinit var profileEditButton: Button
+    lateinit var profileEditBack:ImageButton
+    
     var userCardView: CardView? = null
     var userProfileDialog: Dialog? = null
     var profileEditProfile: ImageView? = null
@@ -56,6 +58,11 @@ class ProfileEditActivity : AppCompatActivity() {
 
         } else {
             profileEditProfile!!.setImageResource(R.drawable.profile_3)
+        }
+
+        //뒤로가기 버튼 클릭 시
+        profileEditBack.setOnClickListener { 
+            finish()
         }
 
         //프로필 이미지 선택시
@@ -147,5 +154,6 @@ class ProfileEditActivity : AppCompatActivity() {
 
         userCardView = findViewById(R.id.profileEditCardView)
         profileEditProfile = findViewById(R.id.profileEditProfile)
+        profileEditBack = findViewById(R.id.profileEditBack)
     }
 }

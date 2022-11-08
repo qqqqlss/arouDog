@@ -11,16 +11,25 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="20dp"
-        android:gravity="center"
-        android:orientation="horizontal">
+        android:gravity="center_vertical"
+        android:padding="15dp">
+
+        <ImageButton
+            android:id="@+id/walkInfoBack"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/transparent"
+            android:src="@drawable/back" />
 
         <TextView
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="항상 떠있는 레이아웃"
-            android:textColor="@color/black"
-            android:textSize="20sp" />
+            android:layout_marginLeft="10dp"
+            android:text="상세 정보"
+            android:textColor="@color/textColor"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
     </LinearLayout>
 
     <ScrollView

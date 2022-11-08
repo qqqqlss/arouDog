@@ -6,6 +6,7 @@ import android.graphics.Color
 import android.os.Bundle
 import android.text.style.ForegroundColorSpan
 import android.util.Log
+import android.widget.ImageButton
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -48,6 +49,7 @@ class ComprehensiveWalkInfoActivity : AppCompatActivity() {
     lateinit var monthDistance: TextView
     lateinit var monthSummaryData:TextView
     lateinit var walkRecyclerView:RecyclerView
+    lateinit var walkInfoBack:ImageButton
 
     //전체 산책 정보
     lateinit var allWalkInfoData:AllWalkInformationDto
@@ -80,6 +82,11 @@ class ComprehensiveWalkInfoActivity : AppCompatActivity() {
 
         //뷰 바인딩
         setView()
+
+        //뒤로가기 버튼 클릭
+        walkInfoBack.setOnClickListener {
+            finish()
+        }
 
         //년 월 표시방법 변경
         updateCalendarHeader()
@@ -307,7 +314,7 @@ class ComprehensiveWalkInfoActivity : AppCompatActivity() {
         monthDistance = findViewById(R.id.monthDistance)
 
         walkRecyclerView = findViewById(R.id.walkRecyclerView)
-
+        walkInfoBack = findViewById(R.id.walkComInfoBack)
 
     }
     class HasWalkDecorator(dates: Collection<CalendarDay>): DayViewDecorator {

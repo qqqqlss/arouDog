@@ -45,6 +45,7 @@ class SelectWarningDog : AppCompatActivity() {
     lateinit var mediumCheck: CheckBox
     lateinit var smallCheck: CheckBox
     lateinit var warningDogSelectButton: Button
+    lateinit var selectWarningBack:ImageButton
 
     //retrofit
     lateinit var userService: UserService
@@ -156,6 +157,7 @@ class SelectWarningDog : AppCompatActivity() {
         mediumCheck = findViewById(R.id.selectWarningMediumCheck)
         smallCheck = findViewById(R.id.selectWarningSmallCheck)
         warningDogSelectButton = findViewById(R.id.warningDogSelectButton)
+        selectWarningBack = findViewById(R.id.selectWarningBack)
     }
 
 
@@ -190,6 +192,11 @@ class SelectWarningDog : AppCompatActivity() {
 
 
     private fun setListener() {
+        //뒤로가기 버튼 리스너
+        selectWarningBack.setOnClickListener {
+            finish()
+        }
+
         //각 사진에 적용할 리스너 생성
         var listener = OnClickListener {
             for (size in dogData) {
@@ -198,6 +205,7 @@ class SelectWarningDog : AppCompatActivity() {
                     if (dogInSizeMap[it]!!.boolean) {//선택된 상태면 테두리 없앰
                         dogInSizeMap[it]!!.boolean = false
                         it.setBackgroundResource(0)
+                        it.background = resources.getDrawable(R.color.dp2, null)
                     } else {//선택 안되어있으면 테두리 생성
                         dogInSizeMap[it]!!.boolean = true//선택된거 true로 변경
                         it.background = resources.getDrawable(R.drawable.dog_select_style, null)
@@ -232,6 +240,7 @@ class SelectWarningDog : AppCompatActivity() {
             } else {
                 for (map in dogData["big"]!!) {
                     map.key.setBackgroundResource(0)
+                    map.key.background = resources.getDrawable(R.color.dp2, null)
                     map.value.boolean = false
                 }
             }
@@ -251,6 +260,7 @@ class SelectWarningDog : AppCompatActivity() {
             } else {
                 for (map in dogData["medium"]!!) {
                     map.key.setBackgroundResource(0)
+                    map.key.background = resources.getDrawable(R.color.dp2, null)
                     map.value.boolean = false
                 }
             }
@@ -270,6 +280,7 @@ class SelectWarningDog : AppCompatActivity() {
             } else {
                 for (map in dogData["small"]!!) {
                     map.key.setBackgroundResource(0)
+                    map.key.background = resources.getDrawable(R.color.dp2, null)
                     map.value.boolean = false
                 }
             }
