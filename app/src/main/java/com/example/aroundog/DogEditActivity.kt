@@ -72,7 +72,7 @@ class DogEditActivity : AppCompatActivity() {
             val strDogAge = dogAge!!.text.toString()
             val strDogWeight = dogWeight!!.text.toString()
             val strDogHeight = dogHeight!!.text.toString()
-            if (strDogName == "" || strDogAge == "" || strDogHeight == "" || strDogWeight == "") {
+            if (strDogName == "" || strDogAge == "" || strDogHeight == "" || strDogWeight == "" || DogBreedData.getId(dogBreed!!.text.toString()) == -1L) {
                 dogCheck!!.visibility = View.VISIBLE
             } else {
                 var gender: Gender

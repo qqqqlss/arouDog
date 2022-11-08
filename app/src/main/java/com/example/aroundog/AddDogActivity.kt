@@ -78,7 +78,7 @@ class AddDogActivity : AppCompatActivity() {
             val dogHeight = dog_height!!.text.toString()
             val dogWeight = dog_weight!!.text.toString()
 
-            if (dogName == "" || dogAge == "" || dogHeight == "" || dogWeight == "" || dogGender!!.checkedRadioButtonId == -1) {
+            if (dogName == "" || dogAge == "" || dogHeight == "" || dogWeight == "" || dogGender!!.checkedRadioButtonId == -1 || DogBreedData.getId(dogBreed!!.text.toString()) == -1L){
                 dogCheck!!.visibility = View.VISIBLE
                 return@OnClickListener
             } else {
