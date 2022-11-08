@@ -42,7 +42,7 @@
 
     <TextView
         android:id="@+id/login_id_check"
-        android:layout_width="330dp"
+        android:layout_width="300dp"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginTop="6dp"
@@ -71,7 +71,7 @@
 
     <TextView
         android:id="@+id/login_pw_check"
-        android:layout_width="330dp"
+        android:layout_width="300dp"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginTop="6dp"
@@ -83,7 +83,7 @@
 
     <TextView
         android:id="@+id/login_check"
-        android:layout_width="330dp"
+        android:layout_width="300dp"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginTop="6dp"
