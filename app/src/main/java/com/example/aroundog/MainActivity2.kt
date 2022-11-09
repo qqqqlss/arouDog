@@ -58,6 +58,12 @@ class MainActivity2 : AppCompatActivity(){
 
         setView()
 
+        var autoLoginFail = intent.getBooleanExtra("autoLoginFail", false)
+        if (autoLoginFail) {
+            login_stay_cb.isChecked = true
+            login_check.visibility = View.VISIBLE
+        }
+
         //permissionSupport 생성
         permissionSupport = PermissionSupport(this, this)
 
@@ -131,15 +137,6 @@ class MainActivity2 : AppCompatActivity(){
                     login(id, pw)
                 }
             }
-        }
-
-
-        var autoLogin = user_info_pref.getBoolean("autoLogin", false)
-        if (autoLogin) {//자동로그인일때
-            var id = user_info_pref.getString("id", "")!!
-            var password = user_info_pref.getString("password", "")!!
-            login_stay_cb.isChecked = true
-            login(id, password)
         }
     }
     fun setView() {
@@ -240,21 +237,19 @@ class MainActivity2 : AppCompatActivity(){
                                     true
                                 ) // 자동 로그인 여부를 true
                                 user_info_editor.commit()
-                                val intent =
-                                    Intent(this@MainActivity2, MainActivty::class.java)
-                                startActivity(intent)
-                                finish()
                             } else { // 로그인 상태 유지 체크가 안되어 있다면
                                 user_info_editor.putBoolean(
                                     "autoLogin",
                                     false
                                 ) // 자동 로그인 여부를 false
                                 user_info_editor.commit()
-                                val intent =
-                                    Intent(this@MainActivity2, MainActivty::class.java)
-                                startActivity(intent)
-                                finish()
                             }
+
+                            //메인 액티비티 시작
+                            val intent =
+                                Intent(this@MainActivity2, MainActivty::class.java)
+                            startActivity(intent)
+                            finish()
                         }
                     } else { // 아이디, 비밀번호가 일치하지 않을 때
                         if (login_check != null) {
