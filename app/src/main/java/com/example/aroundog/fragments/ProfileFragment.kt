@@ -136,7 +136,9 @@ class ProfileFragment : Fragment() {
         var listStr = dog_info_pref.getString("dogList", "")
         hasDog = dog_info_pref.getBoolean("hasDog", false)
 
-        dogList = makeGson.fromJson<MutableList<DogDto>>(listStr, type.type)
+        if (listStr != "") {
+            dogList = makeGson.fromJson<MutableList<DogDto>>(listStr, type.type)
+        }
 
         var gsonInstance: Gson = GsonBuilder().setLenient().create()
         retrofit = Retrofit.Builder()
