@@ -44,7 +44,7 @@ class SplashActivity : Activity(){
         if (autoLogin == false) {
             // 자동 로그인 하지 않았을 경우 로그인으로 이동하며 세션 영역 내 정보 삭제
             user_info_editor.clear()
-            val intent = Intent(this@SplashActivity, MainActivity2::class.java)
+            val intent = Intent(this@SplashActivity, LoginActivity::class.java)
             startActivity(intent)
             finish()
         } else {
@@ -61,13 +61,13 @@ class SplashActivity : Activity(){
                     if (endRetrofit) {
                         if (loginSuccess) {
                             //자동 로그인 성공
-                            val intent = Intent(this@SplashActivity, MainActivty::class.java)
+                            val intent = Intent(this@SplashActivity, MainActivity::class.java)
                             startActivity(intent)
                             finish()
                         } else {
                             //자동 로그인 실패
                             user_info_editor.clear()
-                            val intent = Intent(this@SplashActivity, MainActivity2::class.java)
+                            val intent = Intent(this@SplashActivity, LoginActivity::class.java)
                             intent.putExtra("autoLoginFail", true)
                             startActivity(intent)
                             finish()

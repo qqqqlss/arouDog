@@ -24,7 +24,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResult
 import androidx.lifecycle.MutableLiveData
 import com.example.aroundog.BuildConfig
-import com.example.aroundog.MainActivty
+import com.example.aroundog.MainActivity
 import com.example.aroundog.R
 import com.example.aroundog.Service.CoordinateService
 import com.example.aroundog.Service.NaverMapService
@@ -116,7 +116,7 @@ class MainFragment : Fragment(){
     var aroundUserMap = HashMap<Long, String>() //개id, 유저id
     var duplicateUserDog = HashSet<Long>()//주인이 중복되는 개 id 저장
 
-    lateinit var mainActivty: MainActivty
+    lateinit var mainActivty: MainActivity
 
     //경고 이미지(엣지라이팅)
     lateinit var imageView:ImageView
@@ -1018,7 +1018,7 @@ class MainFragment : Fragment(){
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        mainActivty = context as MainActivty
+        mainActivty = context as MainActivity
     }
     
     override fun onPause() {
