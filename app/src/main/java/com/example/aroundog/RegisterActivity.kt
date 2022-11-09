@@ -15,7 +15,6 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.cardview.widget.CardView
-import com.example.aroundog.Model.CheckSuccess
 import com.example.aroundog.Service.IntroService
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -208,7 +207,7 @@ class RegisterActivity : AppCompatActivity() {
                                     ).show()
                                     val intent = Intent(
                                         this@RegisterActivity,
-                                        MainActivity2::class.java
+                                        LoginActivity::class.java
                                     ) // 로그인 화면으로
                                     startActivity(intent)
                                     finish()
@@ -220,7 +219,7 @@ class RegisterActivity : AppCompatActivity() {
                                     ).show()
                                     val intent = Intent(
                                         this@RegisterActivity,
-                                        MainActivity2::class.java
+                                        LoginActivity::class.java
                                     )
                                     startActivity(intent)
                                     finish()
@@ -235,7 +234,7 @@ class RegisterActivity : AppCompatActivity() {
                                     Toast.LENGTH_LONG
                                 ).show()
                                 val intent =
-                                    Intent(this@RegisterActivity, MainActivity2::class.java)
+                                    Intent(this@RegisterActivity, LoginActivity::class.java)
                                 startActivity(intent)
                                 finish()
                                 t.printStackTrace()

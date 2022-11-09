@@ -3,24 +3,21 @@ import android.annotation.SuppressLint
 import android.app.*
 import android.content.Context
 import android.content.Intent
-import android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION
 import android.location.Location
 import android.os.Build
 import android.os.Looper
 import android.util.Log
-import androidx.annotation.NonNull
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.MutableLiveData
-import com.example.aroundog.MainActivty
+import com.example.aroundog.MainActivity
 import com.example.aroundog.PermissionSupport
 import com.example.aroundog.R
 import com.example.aroundog.utils.*
 import com.google.android.gms.location.*
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.LocationSource
-import com.naver.maps.map.util.FusedLocationSource
 
 typealias Polyline = MutableList<LatLng>
 typealias Polylines = MutableList<Polyline>
@@ -63,7 +60,7 @@ class NaverMapService():LifecycleService(){
 
     override fun onCreate() {
         super.onCreate()
-        val notificationIntent = Intent(this,MainActivty::class.java)
+        val notificationIntent = Intent(this,MainActivity::class.java)
         notificationIntent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
         val pendingIntent = PendingIntent.getActivity(this,0,notificationIntent,PendingIntent.FLAG_IMMUTABLE)
         baseNotificationBuilder = NotificationCompat.Builder(applicationContext, NOTIFICATION_CHANNEL_ID)

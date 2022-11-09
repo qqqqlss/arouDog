@@ -1,32 +1,26 @@
 package com.example.aroundog
 
-import android.content.Intent
-import android.graphics.Color
-import android.graphics.drawable.AnimationDrawable
-import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
-import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.app.AppCompatDialog
-import com.example.aroundog.databinding.ActivityMainAfterLoginBinding
+import com.example.aroundog.databinding.ActivityMainBinding
 import com.example.aroundog.fragments.AroundWalkFragment
 import com.example.aroundog.fragments.MainFragment
 import com.example.aroundog.fragments.ProfileFragment
 import com.google.android.material.navigation.NavigationBarView
 import kotlin.system.exitProcess
 
-class MainActivty : AppCompatActivity() {
+class MainActivity : AppCompatActivity() {
     private var TAG: String = "MAINTAG"
-    private lateinit var binding: ActivityMainAfterLoginBinding
+    private lateinit var binding: ActivityMainBinding
     private var backPressedTime : Long = 0
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityMainAfterLoginBinding.inflate(layoutInflater)
+        binding = ActivityMainBinding.inflate(layoutInflater)
         val view = binding.root
         setContentView(view)
         setFragment()

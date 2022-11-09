@@ -2,6 +2,7 @@ package com.example.aroundog.fragments
 
 import android.content.DialogInterface
 import android.content.Intent
+import android.content.SharedPreferences
 import android.graphics.Typeface
 import android.os.Bundle
 import android.util.Log
@@ -9,11 +10,7 @@ import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.ImageButton
-import android.widget.LinearLayout
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
@@ -51,6 +48,7 @@ class ProfileFragment : Fragment() {
     lateinit var profileTotalCountTV:TextView
     lateinit var profileSelectWarningDog:TextView
     lateinit var walkInfo:LinearLayout
+    lateinit var logout:TextView
 
     var hasDog:Boolean = false
     var buttonList = mutableListOf<Button>()
@@ -58,6 +56,8 @@ class ProfileFragment : Fragment() {
 
     lateinit var userData:UserData
 
+    lateinit var user_info_pref:SharedPreferences
+    lateinit var dog_info_pref:SharedPreferences
 //    https://greensky0026.tistory.com/224
     init{
 
@@ -131,7 +131,7 @@ class ProfileFragment : Fragment() {
         //유저 정보 업데이트
         getSharedUserData()
 
-        var dog_info_pref =
+        dog_info_pref =
             requireActivity().getSharedPreferences("dogInfo", AppCompatActivity.MODE_PRIVATE)
         var listStr = dog_info_pref.getString("dogList", "")
         hasDog = dog_info_pref.getBoolean("hasDog", false)
@@ -178,7 +178,7 @@ class ProfileFragment : Fragment() {
     }
 
     private fun getSharedUserData() {
-        var user_info_pref =
+        user_info_pref =
             requireActivity().getSharedPreferences("userInfo", AppCompatActivity.MODE_PRIVATE)
         userName = user_info_pref.getString("userName", "").toString()
         userId = user_info_pref.getString("id", "").toString()
@@ -224,6 +224,29 @@ class ProfileFragment : Fragment() {
             val intent = Intent(context, ComprehensiveWalkInfoActivity::class.java)
             intent.putExtra("user", userData)
             it.context.startActivity(intent)
+        }
+
+        logout.setOnClickListener {
+            //다이얼로그 뿌리고 true면 삭제, retrofit 강아지 삭제 통신도 필요(cascade도 해야할듯)
+            val builder = AlertDialog.Builder(view!!.context) //context만 하면 이상하게 나옴
+            builder.setTitle("로그아웃")
+                .setMessage(
+                    "로그아웃하시겠습니까?"
+                )
+                .setPositiveButton("확인", object : DialogInterface.OnClickListener {
+                    override fun onClick(dialog: DialogInterface?, which: Int) {
+                        user_info_pref.edit().clear().commit()
+                        dog_info_pref.edit().clear().commit()
+                        var intent = Intent(context, SplashActivity::class.java)
+                        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
+                        startActivity(intent)
+                    }
+                })
+                .setNegativeButton("취소") { dialog, i ->
+                    dialog.dismiss()
+                }
+            val dialog = builder.create()
+            dialog.show()
         }
 
         addDogFragments()
@@ -359,6 +382,7 @@ class ProfileFragment : Fragment() {
         profileTotalCountTV = view.findViewById(R.id.profileTotalCountTV)
         profileSelectWarningDog = view.findViewById(R.id.profileSelectWarningDog)
         walkInfo =  view.findViewById(R.id.walkInfo)
+        logout = view.findViewById(R.id.logout)
         return view
     }
     inner class ButtonClickListener(var fragment:Fragment):View.OnClickListener{

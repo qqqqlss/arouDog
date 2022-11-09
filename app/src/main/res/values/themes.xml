@@ -19,4 +19,9 @@
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">match_parent</item>
     </style>
+
+    <style name="Theme.Aroundog.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/brown</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/dog_s_maltese2</item>
+    </style>
 </resources>

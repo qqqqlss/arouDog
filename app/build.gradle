@@ -130,4 +130,7 @@ dependencies {
 
 //    //플로팅 버튼
 //    implementation 'com.google.android.material:material:1.8.0-alpha02'
+
+    // Core SplashScreen
+    implementation 'androidx.core:core-splashscreen:1.0.0'
 }
