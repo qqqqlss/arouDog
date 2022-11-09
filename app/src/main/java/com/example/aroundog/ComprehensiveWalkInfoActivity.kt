@@ -196,36 +196,56 @@ class ComprehensiveWalkInfoActivity : AppCompatActivity() {
                 response: Response<AllWalkInformationDto>
             ) {
                 if (response.isSuccessful) {
+                    var todayYearMonth = YearMonth.now()
+                    var nowYearMonthStr =
+                        "" + todayYearMonth.year + "-" + todayYearMonth.monthValue
+
+                    //월 전체 산책 정보 저장하는 리사이클러뷰
+                    var temp = ArrayList<WalkRecyclerViewItem>()
+
                     if (response.body()!!.hasWalkData) {
                         allWalkInfoData = response.body()!!
 
                         //전체 산책 요약 정보 설정
-                        totalSecond.text = String.format("%.1f", (allWalkInfoData.summaryTotalData[0] / 60.0 / 60.0)) + "시간"
-                        totalDistance.text = String.format("%.2f", (allWalkInfoData.summaryTotalData[1] / 1000.0)) + " KM"
+                        totalSecond.text = String.format(
+                            "%.1f",
+                            (allWalkInfoData.summaryTotalData[0] / 60.0 / 60.0)
+                        ) + "시간"
+                        totalDistance.text = String.format(
+                            "%.2f",
+                            (allWalkInfoData.summaryTotalData[1] / 1000.0)
+                        ) + " KM"
                         totalCount.text = allWalkInfoData.summaryTotalData[2].toString() + " 회"
-
-                        var todayYearMonth = YearMonth.now()
-                        var nowYearMonthStr = "" + todayYearMonth.year + "-" + todayYearMonth.monthValue
 
                         //월 정보 가져옴
                         val monthData = allWalkInfoData.summaryMonthData[nowYearMonthStr]
 
                         //오늘을 기준으로 월 산책 요약 정보 설정
                         if (!monthData.isNullOrEmpty()) {
-                            monthSecond.text = String.format("%.1f", monthData[0] / 60.0 / 60.0) + " 시간"
-                            monthDistance.text = String.format("%.2f", monthData[1] / 1000.0) + " KM"
+                            monthSecond.text =
+                                String.format("%.1f", monthData[0] / 60.0 / 60.0) + " 시간"
+                            monthDistance.text =
+                                String.format("%.2f", monthData[1] / 1000.0) + " KM"
                             monthCount.text = monthData[2].toString() + " 회"
                         }
-
-                        //월에 따라 변하게
-                        monthSummaryData.text = "" + todayYearMonth.monthValue +" 월 산책 정보"
 
                         //월 전체 산책 정보 리사이클러뷰에 추가
                         var temp = ArrayList<WalkRecyclerViewItem>()
                         val monthDataList = allWalkInfoData.monthData[nowYearMonthStr]
-                        for (monthData in monthDataList!!) {
-                            var hourStr = monthData.startTime.format(DateTimeFormatter.ofPattern("a HH:mm"))
-                            temp.add(WalkRecyclerViewItem(monthData.walkId, monthData.startTime.dayOfMonth, monthData.second, monthData.distance, hourStr))
+                        if (monthDataList != null) {
+                            for (monthData in monthDataList) {
+                                var hourStr =
+                                    monthData.startTime.format(DateTimeFormatter.ofPattern("a HH:mm"))
+                                temp.add(
+                                    WalkRecyclerViewItem(
+                                        monthData.walkId,
+                                        monthData.startTime.dayOfMonth,
+                                        monthData.second,
+                                        monthData.distance,
+                                        hourStr
+                                    )
+                                )
+                            }
                         }
 
                         //리스트뷰 업데이트
@@ -235,7 +255,7 @@ class ComprehensiveWalkInfoActivity : AppCompatActivity() {
                         for (data in allWalkInfoData.monthData) {
                             var yearMonth = data.key //"like 2022-10"
 
-                            var monthWalkInfoList:ArrayList<MonthInformationDto> = data.value
+                            var monthWalkInfoList: ArrayList<MonthInformationDto> = data.value
                             for (monthInformationDto in monthWalkInfoList) {
                                 var startTime = monthInformationDto.startTime
                                 val calendarDay = CalendarDay.from(
@@ -247,11 +267,16 @@ class ComprehensiveWalkInfoActivity : AppCompatActivity() {
                                 hasWalkDates.add(calendarDay)
                             }
                         }
-                        calendar.addDecorator(HasWalkDecorator(hasWalkDates))//산책 있는날 원 추가
-                        calendar.addDecorators(DayDisableDecorator(hasWalkDates))//산책 없는날 선택 안되게
-                    } else {
-
                     }
+                    //산책 데이터가 없을때
+                    else {//리스트뷰 업데이트
+                        adapter.swap(temp)
+                    }
+
+                    //월에 따라 변하게(첫 로딩)
+                    monthSummaryData.text = "" + todayYearMonth.monthValue + " 월 산책 정보"
+                    calendar.addDecorator(HasWalkDecorator(hasWalkDates))//산책 있는날 원 추가
+                    calendar.addDecorators(DayDisableDecorator(hasWalkDates))//산책 없는날 선택 안되게
                 }
             }
 
