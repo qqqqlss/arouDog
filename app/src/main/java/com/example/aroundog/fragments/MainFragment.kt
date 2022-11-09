@@ -385,8 +385,10 @@ class MainFragment : Fragment(){
                 Log.d(TAG, "option change : $mode")
 
                 //None이면 지도에서 마커 없어짐
-                if (mode == LocationTrackingMode.None) {
-                    naverMap.locationTrackingMode = LocationTrackingMode.NoFollow
+                if (locationSource.isActivated) {
+                    if (mode == LocationTrackingMode.None) {
+                        naverMap.locationTrackingMode = LocationTrackingMode.NoFollow
+                    }
                 }
 
                 //face -> NoFollow면 카메라 현재 위치에서 정북방향으로 회전되게
