@@ -32,7 +32,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 class ProfileFragment : Fragment() {
     val TAG = "PROFILEFRAGMENT"
     lateinit var userName:String
-    lateinit var dogList:MutableList<DogDto>
+    var dogList:MutableList<DogDto> = mutableListOf()
     lateinit var profileUserNameTV:TextView
     lateinit var profileUserConfig:ImageButton
     lateinit var profileButtonLayout: LinearLayout
