@@ -138,7 +138,7 @@ class DogFragment : Fragment() {
 
         val path = File(context!!.cacheDir, "images") //캐시폴더의 images/
         path.mkdirs()//없으면 생성
-        val tempFile = File(path, imgDto.path)
+        val tempFile = File(path, imgDto.fileName)
         tempFile.createNewFile()//파일 저장
         val out = FileOutputStream(tempFile)
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out)//파일에 쓰기
