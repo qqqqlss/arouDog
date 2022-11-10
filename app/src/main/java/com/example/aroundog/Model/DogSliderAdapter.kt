@@ -1,15 +1,8 @@
 package com.example.aroundog.Model
 
-import android.app.Activity
 import android.app.AlertDialog
-import android.app.LauncherActivity.ListItem
-import android.content.ClipData.Item
 import android.content.DialogInterface
 import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.net.Uri
-import android.util.Base64
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -17,13 +10,12 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.example.aroundog.AddDogActivity
 import com.example.aroundog.BuildConfig
 import com.example.aroundog.R
 import com.example.aroundog.Service.DogService
-import com.example.aroundog.dto.ImgDto
-import com.example.aroundog.dto.ImgDtoUri
-import com.example.aroundog.fragments.DogFragment
+import com.example.aroundog.dto.DogIdImgIdFilename
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import retrofit2.Call
@@ -32,7 +24,7 @@ import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-class DogSliderAdapter(var imgList: MutableList<ImgDtoUri>): RecyclerView.Adapter<DogSliderAdapter.ViewHolder>() {
+class DogSliderAdapter(var imgList: MutableList<DogIdImgIdFilename>): RecyclerView.Adapter<DogSliderAdapter.ViewHolder>() {
 
     val TAG = "DOGSLIDERADAPTER"
     lateinit var adapterListener:ItemClickListener
@@ -50,13 +42,9 @@ class DogSliderAdapter(var imgList: MutableList<ImgDtoUri>): RecyclerView.Adapte
         val TAG = "DOGSLIDERADAPTER"
         var dogSlider:ImageView
         var view = view
-        var path: String = ""
-        var dogImgId:Long = 0
 
-
-        //ViewHolder에 어댑터 등록(아이템 삭제하기 위해)
+//        //ViewHolder에 어댑터 등록(아이템 삭제하기 위해)
         lateinit var adapter:DogSliderAdapter
-        private val DEFAULT_GALLERY_REQUEST_CODE = 0
         fun linkAdapter(adapter: DogSliderAdapter):ViewHolder{
             this.adapter = adapter
             return this
@@ -73,44 +61,50 @@ class DogSliderAdapter(var imgList: MutableList<ImgDtoUri>): RecyclerView.Adapte
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.path = imgList[holder.adapterPosition].path
-        holder.dogImgId = imgList[holder.adapterPosition].id
+        var view = holder.view
+        var dogSlider = holder.dogSlider
+        var dogIdImgIdFilename = imgList[position]
+        var dogId = dogIdImgIdFilename.dogId
+        var filename = dogIdImgIdFilename.filename
+        var imgId = dogIdImgIdFilename.imgId
 
-        if (imgList[holder.adapterPosition].path == "emptyImg") {//이미지가 없는 경우
-            holder.dogSlider.setImageResource(R.drawable.dog_camera)
+        var path = BuildConfig.SERVER + "image/" + dogId + "/" + filename
+
+        if (filename == "emptyImg") {//이미지가 없는 경우
+            dogSlider.setImageResource(R.drawable.dog_camera)
         }
-        else if(imgList[holder.adapterPosition].path == "emptyDog"){//강아지가 없는 경우
-            holder.dogSlider.setImageResource(R.drawable.add_dog)
+        else if(filename == "emptyDog"){//강아지가 없는 경우
+            dogSlider.setImageResource(R.drawable.add_dog)
         }
         else {//강아지 사진 추가
-            holder.dogSlider.setImageURI(imgList[holder.adapterPosition].imgUri)
+            Glide.with(view.context).load(path).into(dogSlider)
         }
 
         //원클릭 이벤트 리스너
-        holder.dogSlider.setOnClickListener {
-                //path에 따라 리스너 달라지게
-                //강아지 사진 추가 이미지
-                if (imgList[holder.adapterPosition].id == -100L) {
-                    if(adapterListener != null) {
-                        //adapterListener사용
-                        adapterListener!!.onItemClicked(it, holder.adapterPosition)
-                    }
+        dogSlider.setOnClickListener {
+            //path에 따라 리스너 달라지게
+            //강아지 사진 추가 이미지
+            if (imgList[holder.adapterPosition].imgId == -100L) {
+                if(adapterListener != null) {
+//                        adapterListener사용
+                    adapterListener!!.onItemClicked(it, holder.adapterPosition)
                 }
-
-                //강아지 추가 이미지
-                if (imgList[holder.adapterPosition].id==-200L) {
-                    val intent = Intent(it.context, AddDogActivity::class.java)
-                    it.context.startActivity(intent)
-                }
-
-                Toast.makeText(it.context, "path : ${imgList[holder.adapterPosition].path}, id : ${imgList[holder.adapterPosition].id}", Toast.LENGTH_SHORT).show()
             }
 
-        holder.dogSlider.setOnLongClickListener {
+            //강아지 추가 이미지
+            if (dogIdImgIdFilename.imgId==-200L) {
+                val intent = Intent(it.context, AddDogActivity::class.java)
+                it.context.startActivity(intent)
+            }
+
+            Toast.makeText(it.context, "filename : $filename, dogId : $dogId, imgId : $imgId", Toast.LENGTH_SHORT).show()
+        }
+
+        dogSlider.setOnLongClickListener {
             //리스트뷰에서 지우면 포지션인 -1이 되므로 미리 저장
             var selectPosition = holder.adapterPosition
             //삭제 예 아니오 다이얼로그
-            if (imgList[selectPosition].id != -100L && imgList[selectPosition].id != -200L) {
+            if (imgList[selectPosition].imgId != -100L && imgList[selectPosition].imgId != -200L) {
                 //강아지 사진 길게 누를 시 삭제
                 val builder = AlertDialog.Builder(it.context)
                 builder.setTitle("사진 삭제")
@@ -120,7 +114,7 @@ class DogSliderAdapter(var imgList: MutableList<ImgDtoUri>): RecyclerView.Adapte
                     .setPositiveButton("삭제", object : DialogInterface.OnClickListener {
                         override fun onClick(dialog: DialogInterface?, which: Int) {
 
-                            retrofit.deleteDogImg(imgList[selectPosition].id)
+                            retrofit.deleteDogImg(imgId)
                                 .enqueue(object : Callback<Boolean> {
                                     override fun onResponse(
                                         call: Call<Boolean>,
@@ -141,10 +135,10 @@ class DogSliderAdapter(var imgList: MutableList<ImgDtoUri>): RecyclerView.Adapte
                                                 Log.d(TAG, "imgList size : ${imgList.size}")
                                                 if (imgList.size == 0) {
                                                     imgList.add(
-                                                        ImgDtoUri(
+                                                        DogIdImgIdFilename(
+                                                            dogId,
                                                             -100,
-                                                            "emptyImg",
-                                                            Uri.parse("emptyImg")
+                                                            "emptyImg"
                                                         )
                                                     )
                                                     notifyItemInserted(0)
@@ -177,7 +171,6 @@ class DogSliderAdapter(var imgList: MutableList<ImgDtoUri>): RecyclerView.Adapte
             //true일 경우 longclick만 발생
             return@setOnLongClickListener (true)
         }
-
     }
 
     override fun getItemCount(): Int {
