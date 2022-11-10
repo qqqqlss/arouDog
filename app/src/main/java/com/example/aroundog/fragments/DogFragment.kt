@@ -83,14 +83,14 @@ class DogFragment : Fragment() {
                 //이미지를 캐시디렉터리에 저장 후 Uri 리스트에 추가
                 for (imgDto in dogImgList) {
                     try {
-                        //이미지 uri 리스트에 추가
+                        //리스트에 추가
                         dogIdImgIdFilenameList.add(DogIdImgIdFilename(dogId, imgDto.id, imgDto.fileName))
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }
                 }
 
-                dogImgList.clear()//얘가 값이 커서 오류났기때문에 클리어해줌
+//                dogImgList.clear()//얘가 값이 커서 오류났기때문에 클리어해줌
             }
             else{//강아지가 없는 경우 초기화
 //                dogImgList = mutableListOf()
