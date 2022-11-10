@@ -32,11 +32,10 @@ import retrofit2.converter.gson.GsonConverterFactory
 class ProfileFragment : Fragment() {
     val TAG = "PROFILEFRAGMENT"
     lateinit var userName:String
-    var dogList:MutableList<DogDto> = mutableListOf()
+    var dogList:MutableList<DogDto> = mutableListOf()//소유 강아지 리스트
     lateinit var profileUserNameTV:TextView
     lateinit var profileUserConfig:ImageButton
     lateinit var profileButtonLayout: LinearLayout
-    var idList = mutableListOf<Int>()
 
     lateinit var retrofit:Retrofit
     lateinit var walkService:WalkService
@@ -51,78 +50,73 @@ class ProfileFragment : Fragment() {
     lateinit var logout:TextView
 
     var hasDog:Boolean = false
-    var buttonList = mutableListOf<Button>()
+
     lateinit var style:ContextThemeWrapper
 
     lateinit var userData:UserData
 
     lateinit var user_info_pref:SharedPreferences
     lateinit var dog_info_pref:SharedPreferences
-//    https://greensky0026.tistory.com/224
+
+
+    var buttonAndFragmentMap = LinkedHashMap<Button, DogIdAndFragment>()
+    var buttonL = mutableListOf<Button>()
+
     init{
 
         //AddDogActivity의 newDogData값이 변경될 때 실행
-        AddDogActivity.newDogData.observe(this){
-            dogList.add(it)
-            val dogFragment = addNewDog(it)
+        AddDogActivity.newDogData.observe(this){dogDto->
+            //강아지 목록에서 추가
+            dogList.add(dogDto)
 
-            //리스트 마지막, 마지막-1 변경(+버튼과 추가한 강아지 인덱스 변경)
-            changeIndex(buttonList as MutableList<Any>)
-            changeIndex(idList as MutableList<Any>)
+            //새 버튼 생성
+            var newButton = addButton(dogDto.dogName, "button"+dogDto.dogId)
+            newButton.setOnClickListener(clickListener)
+            newButton.setOnLongClickListener(longClickListener)
 
-            //버튼 전체 삭제
+            //새 프래그먼트 생성
+            var newFragment = DogFragment.newInstanceWithDog(dogDto)
+            var daf = DogIdAndFragment(dogDto.dogId, newFragment)
+
+            //마지막 버튼과 마지막 프래그먼트(강아지 추가 화면)
+            var lastButton = buttonL.last()
+            var lastDaf = buttonAndFragmentMap[lastButton]!!
+            buttonL.removeLast()
+            buttonAndFragmentMap.remove(lastButton)
+
+            //새 버튼 추가 후 강아지 추가 화면 추가
+            add(newButton, daf)
+            add(lastButton, lastDaf)
+
+            //뷰에서 버튼 전체 삭제
             profileButtonLayout.removeAllViews()
 
             //버튼 리스트의 순서대로 버튼 추가
-            for (button in buttonList) {
+            for (button in buttonL) {
                 profileButtonLayout.addView(button)
             }
 
-            //추가된 강아지 프래그먼트 추가
+           //추가 강아지 화면 뷰에 추가
             childFragmentManager.beginTransaction()
-                .add(R.id.dogInfoFragment, dogFragment, buttonList[buttonList.lastIndex-1].id.toString())
-                .commit()
-            //강아지 추가 프래그먼트 숨기기
-            childFragmentManager.beginTransaction().hide(childFragmentManager.findFragmentByTag("-1")!!).commit()
-            
-            //추가한 강아지 버튼 텍스트 스타일 변경
-            clickButton(buttonList.lastIndex - 1)
+                .add(R.id.dogInfoFragment, newFragment, newButton.tag.toString()).commit()
 
-            //강아지 추가 버튼 스타일 변경
-            var button = buttonList.last()
-            button.textColor = resources.getColor(R.color.lightGray)
-            button.setTypeface(Typeface.create(button.typeface, Typeface.NORMAL))//BOLD할때처럼 하면 적용 안딤
-            button.textSize = 14F
+            //새 프래그먼트 보이게
+            showFragment(newFragment)
+
+            //새 버튼 클릭 상태
+            clickButton(newButton)
         }
 
         //강아지 정보가 수정되면 강아지 이름 버튼 텍스트 변경
         DogEditActivity.editDogInfo.observe(this){
-            var id = it.dogId
-            for (button in buttonList) {
-                if (button.id == id.toInt())
-                    button.text = it.dogName
+            for (entry in buttonAndFragmentMap) {
+                if (entry.value.dogId == it.dogId) {
+                    entry.key.text = it.dogName
+                }
             }
         }
     }
 
-    /**
-     * @param MutableList 인덱스를 변경할 리스트
-     */
-    private fun changeIndex(list:MutableList<Any>){
-        var lastIndex = list.lastIndex
-        var lastObject = list.last()
-        var secondFromLast = list[lastIndex-1]
-        list[lastIndex] = secondFromLast
-        list[lastIndex-1] = lastObject
-    }
-
-    private fun addNewDog(newDogData:DogDto):DogFragment {
-        var dogFragment = DogFragment.newInstanceWithDog(newDogData)//프래그먼트 생성
-        addButton(newDogData.dogName, newDogData.dogId.toInt(), dogFragment)
-        return dogFragment
-    }
-
-    //    https://greensky0026.tistory.com/224
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         var makeGson = GsonBuilder().create()
@@ -179,29 +173,6 @@ class ProfileFragment : Fragment() {
         profileUserNameTV.text = userName
     }
 
-    private fun getSharedUserData() {
-        user_info_pref =
-            requireActivity().getSharedPreferences("userInfo", AppCompatActivity.MODE_PRIVATE)
-        userName = user_info_pref.getString("userName", "").toString()
-        userId = user_info_pref.getString("id", "").toString()
-
-
-        var id = user_info_pref.getString("id", "").toString()
-        var password = user_info_pref.getString("password", "").toString()
-        var userAge = user_info_pref.getInt("userAge", 0)
-        var image = user_info_pref.getInt("image", 0)
-        var userName = user_info_pref.getString("userName", "").toString()
-        var phone = user_info_pref.getString("phone", "").toString()
-        var email = user_info_pref.getString("email", "").toString()
-        var userGender =
-            if (user_info_pref.getString("userGender", "").toString().equals(Gender.MAN)) {
-                Gender.MAN
-            } else {
-                Gender.WOMAN
-            }
-        userData = UserData(id, password, userAge, image, userName, phone, email, userGender)
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -256,118 +227,106 @@ class ProfileFragment : Fragment() {
         return view
     }
 
+    /**
+     * @param button 버튼
+     * @param daf DogIdAndFragment
+     */
+    fun add(button:Button, daf:DogIdAndFragment) {
+        buttonL.add(button)
+        buttonAndFragmentMap[button] = daf
+    }
+
+    /**
+     * @param button 버튼
+     * @return 삭제된 인덱스
+     */
+    fun delete(button:Button):Int {
+        var index = buttonL.indexOf(button)
+        buttonL.remove(button)
+        val fragment = buttonAndFragmentMap.get(button)!!.fragment
+        childFragmentManager.beginTransaction().remove(fragment).commit()
+        return index
+    }
+
     private fun addDogFragments() {
         if(hasDog) {//강아지 있을때
-            //dogList의 첫번째 원소를 이용한 강아지 프래그먼트 추가
-            var initFragment = DogFragment.newInstanceWithDog(dogList[0])
-            childFragmentManager.beginTransaction()
-                .replace(R.id.dogInfoFragment, initFragment, dogList[0].dogId.toString())
-                .commitAllowingStateLoss()
 
+            if (dogList != null) {
+                dogList.forEach { dogDto ->
+                    var button = addButton(dogDto.dogName, "button"+dogDto.dogId)
+                    button.setOnClickListener(clickListener)
+                    button.setOnLongClickListener(longClickListener)
 
-            //dogList 전체 추가
-            dogList.forEach { dogDto ->
+                    var dogId = dogDto.dogId
+                    var fragment = DogFragment.newInstanceWithDog(dogDto)
+                    var daf = DogIdAndFragment(dogId, fragment)
+                    add(button, daf)
+//                    buttonAndFragmentMap[button] = daf
+                }//forEach
+            }//if
+        }//hasDog
 
-                var dogFragment = DogFragment.newInstanceWithDog(dogDto)//프래그먼트 생성
-                addButton(dogDto.dogName, dogDto.dogId.toInt(), dogFragment)
-            }//dogList.forEach
-        }
+        //강아지 추가 프래그먼트
+        var addDogButton = addButton("+", "buttonAdd")
+        addDogButton.setOnClickListener(clickListener)
 
-        //강아지 추가 띄우는 프래그먼트
         var addFragment = DogFragment.newInstanceAddDog()
-        childFragmentManager.beginTransaction()//프래그먼트 생성(등록된 강아지 없는 경우 버튼을 클릭해야지만 프래그먼트가 생성되기때문에)
-            .add(R.id.dogInfoFragment, addFragment,"-1")
-            .commit()
-        addButton("+", -1, addFragment)
+        var daf = DogIdAndFragment(-1L, addFragment)
+        add(addDogButton, daf)
 
-        if (hasDog) {
-            childFragmentManager.beginTransaction().hide(addFragment).commit()
+        //커밋은 바로 수행되는게 아님.
+        //executePendingTransactions()로 즉시 수행
+        //프래그먼트 컨테이너에 추가
+        for (entry in buttonAndFragmentMap) {
+            var button = entry.key
+            var daf = entry.value
+            var fragment = daf.fragment
+            childFragmentManager.beginTransaction().add(R.id.dogInfoFragment, fragment, button.tag.toString()).commit()
+            Log.d(TAG, "프래그먼트 추가 - button: ${button.tag}, fragment.tag: ${fragment.tag}")
         }
+        childFragmentManager.executePendingTransactions()
 
-        //첫 버튼에 클릭된 효과
-        clickButton(0)
+        //첫번째 버튼 클릭
+        var firstButton = buttonL[0]
+        var firstFragment = buttonAndFragmentMap[firstButton]!!.fragment
+        clickButton(firstButton)
+        showFragment(firstFragment)
+
+        //화면에 버튼 추가
+        for (button in buttonL) {
+            profileButtonLayout.addView(button)
+        }
     }
-    
-    private fun clickButton(index:Int){
-        var firstButton = buttonList[index]
-        firstButton.textColor = resources.getColor(R.color.brown)
-        firstButton.setTypeface(firstButton.typeface, Typeface.BOLD)
-        firstButton.textSize = 20F
-    }
-    
-    private fun addButton(
-        buttonText: String,
-        buttonId:Int,
-        fragment: DogFragment
-    ) {
+
+    private fun addButton(buttonStr:String, tagStr:String): Button {
         var button = Button(style, null, R.style.borderLessButton).apply {
-            buttonList.add(this)
-            text = buttonText
-            id = buttonId
+            text = buttonStr
+            tag = tagStr
             textColor = resources.getColor(R.color.lightGray)
             textSize = 14F
             setTypeface(this.typeface, Typeface.NORMAL)
-            idList.add(buttonId)//아이디 리스트에 추가(클릭 리스너에서 사용)
-
-            setOnClickListener(ButtonClickListener(fragment))
-
-            if (id != -1) {
-                setOnLongClickListener {
-                    //다이얼로그 뿌리고 true면 삭제, retrofit 강아지 삭제 통신도 필요(cascade도 해야할듯)
-                    val builder = AlertDialog.Builder(view!!.context) //context만 하면 이상하게 나옴
-                    builder.setTitle("강아지 삭제")
-                        .setMessage(
-                            "강아지를 삭제하시겠어요?"
-                        )
-                        .setPositiveButton("삭제", object : DialogInterface.OnClickListener {
-                            override fun onClick(dialog: DialogInterface?, which: Int) {
-                                dogService.deleteDog(id.toLong()).enqueue(object:Callback<Boolean>{
-                                    override fun onResponse(
-                                        call: Call<Boolean>,
-                                        response: Response<Boolean>
-                                    ) {
-                                        if (response.isSuccessful) {
-                                            if (response.body() == true) {
-                                                profileButtonLayout.removeView(it)
-
-                                                var index = buttonList.indexOf(it)
-                                                if (index == 0) {//삭제할게 첫 인덱스면
-                                                    //첫 버튼에 클릭된 효과
-                                                    clickButton(1)
-                                                }
-                                                
-                                                //buttonList, idList를 추가할때 dogList에서 추가했으므로 셋이 인덱스가 같음
-                                                idList.removeAt(index) //idList에서 인덱스를 사용해 id 삭제
-                                                buttonList.remove(it) //button에서 버튼 삭제
-                                                dogList.removeAt(index)//강아지 삭제
-
-                                                Toast.makeText(context, "삭제 완료", Toast.LENGTH_SHORT).show()
-                                            } else{
-                                                Toast.makeText(context, "삭제 실패", Toast.LENGTH_SHORT).show()
-                                            }
-                                        }
-                                    }
-                                    override fun onFailure(call: Call<Boolean>, t: Throwable) {
-                                        Toast.makeText(context, "삭제 실패", Toast.LENGTH_SHORT).show()
-                                    }
-                                })
-                            }
-                        })
-                        .setNegativeButton("취소") { dialog, i ->
-                            dialog.dismiss()
-                        }
-                    val dialog = builder.create()
-                    dialog.show()
-
-                    return@setOnLongClickListener true
-                }
-            }
         }
-        profileButtonLayout.addView(button)
-
-
+        return button
     }
 
+    private fun clickButton(clickButton: Button) {
+        for (button in buttonL) {
+            if (button == clickButton) {
+                button.textColor = resources.getColor(R.color.brown)
+                button.setTypeface(button.typeface, Typeface.BOLD)
+                button.textSize = 20F
+            } else {
+                button.textColor = resources.getColor(R.color.lightGray)
+                button.setTypeface(Typeface.create(button.typeface, Typeface.NORMAL))//BOLD할때처럼 하면 적용 안딤
+                button.textSize = 14F
+            }
+        }
+    }
+    
+    private fun clickButton(index:Int){
+        var button = buttonL[index]
+        clickButton(button)
+    }
 
     private fun setView(
         inflater: LayoutInflater,
@@ -387,42 +346,132 @@ class ProfileFragment : Fragment() {
         logout = view.findViewById(R.id.logout)
         return view
     }
-    inner class ButtonClickListener(var fragment:Fragment):View.OnClickListener{
-        override fun onClick(view: View) {
-            //button id == 프래그먼트 태그
-            if (childFragmentManager.findFragmentByTag(view.id.toString()) != null) {//해당 태그를 가진 프래그먼트가 있을때
-                childFragmentManager.beginTransaction()
-                    .show(childFragmentManager.findFragmentByTag(view.id.toString())!!)
-                    .commit()
+
+    private fun getSharedUserData() {
+        user_info_pref =
+            requireActivity().getSharedPreferences("userInfo", AppCompatActivity.MODE_PRIVATE)
+        userName = user_info_pref.getString("userName", "").toString()
+        userId = user_info_pref.getString("id", "").toString()
+
+
+        var id = user_info_pref.getString("id", "").toString()
+        var password = user_info_pref.getString("password", "").toString()
+        var userAge = user_info_pref.getInt("userAge", 0)
+        var image = user_info_pref.getInt("image", 0)
+        var userName = user_info_pref.getString("userName", "").toString()
+        var phone = user_info_pref.getString("phone", "").toString()
+        var email = user_info_pref.getString("email", "").toString()
+        var userGender =
+            if (user_info_pref.getString("userGender", "").toString().equals(Gender.MAN)) {
+                Gender.MAN
             } else {
-                childFragmentManager.beginTransaction()
-                    .add(R.id.dogInfoFragment, fragment, view.id.toString())
-                    .commit()
+                Gender.WOMAN
             }
+        userData = UserData(id, password, userAge, image, userName, phone, email, userGender)
+    }
 
-            //다른 프래그먼트 hide
-            for (id in idList) {
-                if (view.id != id) {//자신은 제외
-                    if (childFragmentManager.findFragmentByTag(id.toString()) != null) {
-                        childFragmentManager.beginTransaction()
-                            .hide(childFragmentManager.findFragmentByTag(id.toString())!!)
-                            .commit()
-                    }
-                }
+    /**
+     * @param fragment 보여질 프래그먼트
+     */
+    fun showFragment(fragment: Fragment) {
+        for (entry in buttonAndFragmentMap) {
+            var entryFragment = entry.value.fragment
+            if (entryFragment == fragment) {
+                childFragmentManager.beginTransaction().show(entryFragment).commit()
+            } else {
+                childFragmentManager.beginTransaction().hide(entryFragment).commit()
             }
+        }
+        childFragmentManager.executePendingTransactions()
+    }
 
-            //클릭된 버튼 크기, 색 변경
-            for (button in buttonList) {
-                if (button == view) {
-                    button.textColor = resources.getColor(R.color.brown)
-                    button.setTypeface(button.typeface, Typeface.BOLD)
-                    button.textSize = 20F
-                } else {
-                    button.textColor = resources.getColor(R.color.lightGray)
-                    button.setTypeface(Typeface.create(button.typeface, Typeface.NORMAL))//BOLD할때처럼 하면 적용 안딤
-                    button.textSize = 14F
+    var clickListener = View.OnClickListener { view ->
+        var fragment = buttonAndFragmentMap[view]!!.fragment
+        showFragment(fragment)
+        clickButton(view as Button)
+    }
+
+    var longClickListener = View.OnLongClickListener { buttonView ->
+        //다이얼로그 뿌리고 true면 삭제, retrofit 강아지 삭제 통신도 필요(cascade도 해야할듯)
+        val builder = AlertDialog.Builder(view!!.context) //context만 하면 이상하게 나옴
+        builder.setTitle("강아지 삭제")
+            .setMessage(
+                "강아지를 삭제하시겠어요?"
+            )
+            .setPositiveButton("삭제", object : DialogInterface.OnClickListener {
+                override fun onClick(dialog: DialogInterface?, which: Int) {
+
+                    var dogId = buttonAndFragmentMap[buttonView]!!.dogId
+                    //레트로핏
+                    dogService.deleteDog(dogId).enqueue(object : Callback<Boolean> {
+                        override fun onResponse(
+                            call: Call<Boolean>,
+                            response: Response<Boolean>
+                        ) {
+                            if (response.isSuccessful) {
+                                if (response.body() == true) {
+                                    //뷰에서 버튼 삭제
+                                    profileButtonLayout.removeView(buttonView)
+
+                                    var fragment =
+                                        buttonAndFragmentMap[buttonView]!!.fragment
+
+                                    //강아지 목록에서 제거
+                                    for (dogDto in dogList) {
+                                        if (dogDto.dogId == dogId) {
+                                            dogList.remove(dogDto)
+                                            break
+                                        }
+                                    }
+
+                                    Log.d(TAG, "삭제된 버튼: ${buttonView!!.tag} 프래그먼트: ${fragment.tag}")
+                                    //리스트와 맵에서 삭제, 삭제된 버튼의 인덱스 리턴
+                                    var deleteIndex = delete(buttonView as Button)
+
+                                    //삭제된 버튼 하나 전
+                                    var preButton:Button
+
+                                    //삭제된 인덱스가 0이면
+                                    if (deleteIndex <= 0) {
+                                        //이전 버튼을 첫번째 인덱스로
+                                        preButton = buttonL[0]
+                                    } else {
+                                        //이전 버튼 지정
+                                        preButton = buttonL[deleteIndex - 1]
+                                    }
+
+                                    //이전 프래그먼트 보여주고 클릭상태로
+                                    var preFragment = buttonAndFragmentMap[preButton]!!.fragment
+                                    showFragment(preFragment)
+                                    clickButton(preButton)
+
+
+                                    Log.d(TAG, "보여질 버튼: ${preButton.tag} 프래그먼트: ${preFragment.tag}")
+                                    Toast.makeText(context,"삭제 완료",Toast.LENGTH_SHORT).show()
+                                } else {
+                                    Toast.makeText(context,"삭제 실패",Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                        }
+
+                        override fun onFailure(call: Call<Boolean>, t: Throwable) {
+                            Toast.makeText(context, "삭제 실패", Toast.LENGTH_SHORT)
+                                .show()
+                        }
+                    })
                 }
+            })
+            .setNegativeButton("취소") { dialog, i ->
+                dialog.dismiss()
             }
+        val dialog = builder.create()
+        dialog.show()
+        return@OnLongClickListener true
+    }
+
+    inner class DogIdAndFragment(var dogId:Long, var fragment:Fragment){
+        override fun toString(): String {
+            return "DogIdAndFragment(dogId=$dogId, fragment=${fragment.tag})"
         }
     }
 }
