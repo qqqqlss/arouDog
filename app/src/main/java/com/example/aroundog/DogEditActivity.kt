@@ -38,7 +38,9 @@ class DogEditActivity : AppCompatActivity() {
 
     init {
         SelectDogActivity.selectDog.observe(this){
-            dogBreed!!.text = DogBreedData.getBreed(it)
+            if (it != null) {
+                dogBreed!!.text = DogBreedData.getBreed(it)
+            }
         }
     }
 

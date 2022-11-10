@@ -37,7 +37,11 @@ class AddDogActivity : AppCompatActivity() {
 
     init {
         SelectDogActivity.selectDog.observe(this){
-            dogBreed!!.text = DogBreedData.getBreed(it)
+            if (it != null) {
+                dogBreed!!.text = DogBreedData.getBreed(it)
+            }
+            Log.d(TAG, "selectDog : $it")
+
         }
     }
 
@@ -49,6 +53,7 @@ class AddDogActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_dog)
         setView()
+        dogBreed!!.text = "종을 선택해주세요"
 
         var gsonInstance: Gson = GsonBuilder().setLenient().create()
         retrofit = Retrofit.Builder()

@@ -127,4 +127,9 @@ class SelectDogActivity : AppCompatActivity() {
 
     inner class DogIdAndBoolean(var dogId:Long, var boolean:Boolean){
     }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        selectDog.postValue(null)
+    }
 }
