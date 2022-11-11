@@ -4,6 +4,8 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.provider.OpenableColumns
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -214,6 +216,24 @@ class DogFragment : Fragment() {
 
                 //갤러리에서 고른 사진의 uri
                 var photo = data.data as Uri
+
+                //바이트 단위
+                var fileSize = 0L
+                //10MB = 10,485,760byte
+                data.data?.let { returnUri ->
+                    context!!.contentResolver.query(returnUri, null, null, null, null)
+                }?.use { cursor ->
+                    val sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE)
+                    cursor.moveToFirst()
+                    fileSize = cursor.getLong(sizeIndex)
+                    Log.d("sex", fileSize.toString())
+                }
+
+                if (fileSize > 10485760) {
+                    Toast.makeText(context, "10MB 이하의 이미지만 추가할 수 있습니다.", Toast.LENGTH_SHORT)
+                        .show()
+                    return
+                }
 
                 //확장자
                 var cr = context!!.contentResolver
