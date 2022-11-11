@@ -66,9 +66,9 @@ class NaverMapService():LifecycleService(){
         baseNotificationBuilder = NotificationCompat.Builder(applicationContext, NOTIFICATION_CHANNEL_ID)
             .setAutoCancel(false)
             .setOngoing(true)
-            .setSmallIcon(R.drawable.dog1)
-            .setContentTitle("달리기 기록을 측정중입니다.")
-            .setContentText("00:00:00")
+            .setSmallIcon(R.drawable.icon)
+            .setContentTitle("ArounDog")
+            .setContentText("AroundDog과 함께 산책중입니다.")
             .setContentIntent(pendingIntent)
         currentNotificationBuilder = baseNotificationBuilder
 
