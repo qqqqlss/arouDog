@@ -3,6 +3,7 @@ package com.example.aroundog.Model
 import android.app.AlertDialog
 import android.content.DialogInterface
 import android.content.Intent
+import android.graphics.drawable.Drawable
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -12,6 +13,10 @@ import android.widget.Toast
 import androidx.appcompat.widget.AppCompatDrawableManager.preload
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.Target
 import com.example.aroundog.AddDogActivity
 import com.example.aroundog.BuildConfig
 import com.example.aroundog.R
@@ -79,7 +84,28 @@ class DogSliderAdapter(var imgList: MutableList<DogIdImgIdFilename>): RecyclerVi
         }
         else {//강아지 사진 추가
             //gif 를 사용하기 위해 plcaceholder대신 thumbnail 사용
-            Glide.with(view.context).load(path).thumbnail(Glide.with(view.context).load(R.drawable.loading)).into(dogSlider)
+            Glide.with(view.context).load(path).thumbnail(Glide.with(view.context).load(R.drawable.loading)).listener(object:RequestListener<Drawable>{
+                override fun onLoadFailed(
+                    e: GlideException?,
+                    model: Any?,
+                    target: Target<Drawable>?,
+                    isFirstResource: Boolean
+                ): Boolean {
+                    dogSlider.setImageResource(R.drawable.error)
+                    return false
+                }
+
+                override fun onResourceReady(
+                    resource: Drawable?,
+                    model: Any?,
+                    target: Target<Drawable>?,
+                    dataSource: DataSource?,
+                    isFirstResource: Boolean
+                ): Boolean {
+                    return false;
+                }
+
+            }).into(dogSlider)
         }
 
         //원클릭 이벤트 리스너
