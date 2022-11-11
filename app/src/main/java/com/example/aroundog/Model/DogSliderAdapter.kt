@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.Toast
+import androidx.appcompat.widget.AppCompatDrawableManager.preload
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.aroundog.AddDogActivity
@@ -77,7 +78,8 @@ class DogSliderAdapter(var imgList: MutableList<DogIdImgIdFilename>): RecyclerVi
             dogSlider.setImageResource(R.drawable.add_dog)
         }
         else {//강아지 사진 추가
-            Glide.with(view.context).load(path).into(dogSlider)
+            //gif 를 사용하기 위해 plcaceholder대신 thumbnail 사용
+            Glide.with(view.context).load(path).thumbnail(Glide.with(view.context).load(R.drawable.loading)).into(dogSlider)
         }
 
         //원클릭 이벤트 리스너
@@ -170,6 +172,19 @@ class DogSliderAdapter(var imgList: MutableList<DogIdImgIdFilename>): RecyclerVi
             //false일 경우 길게 누르고있을때 onlongclicklistiner, 손 뗄때 onclick발생
             //true일 경우 longclick만 발생
             return@setOnLongClickListener (true)
+        }
+
+        //미리 로딩
+        if (position <= imgList.size -1) {
+            //size -1은 addimg
+            val endPosition = if (position + 2 > imgList.size-1) {
+                imgList.size-1
+            } else {
+                position + 2
+            }
+            imgList.subList(position, endPosition ).map { it }.forEach {
+                Glide.with(view.context).load(BuildConfig.SERVER + "image/" + it.dogId + "/" + it.filename).preload()
+            }
         }
     }
 
