@@ -30,12 +30,14 @@ import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import okhttp3.MediaType
 import okhttp3.MultipartBody
+import okhttp3.OkHttpClient
 import okhttp3.RequestBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.util.concurrent.TimeUnit
 
 
 class DogFragment : Fragment() {
@@ -112,8 +114,15 @@ class DogFragment : Fragment() {
         }
 
         var gsonInstance: Gson = GsonBuilder().setLenient().create()
+        var okHttpClient = OkHttpClient().newBuilder()
+            .connectTimeout(30, TimeUnit.SECONDS)//완료될때까지 지속되는 시간
+            .readTimeout(30, TimeUnit.SECONDS) //응답
+            .writeTimeout(20, TimeUnit.SECONDS) //요청
+            .build();
+
         retrofit = Retrofit.Builder()
             .baseUrl(BuildConfig.SERVER)
+            .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create(gsonInstance))
             .build()
 
