@@ -137,6 +137,9 @@ class MainFragment : Fragment(){
 
     lateinit var user_info_pref:SharedPreferences
 
+    //같이 산책하는 강아지 리스트
+    var walkWidthDogList = listOf<Long>()
+
     companion object {
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1000
         val firstTile = MutableLiveData<String>()
@@ -336,8 +339,8 @@ class MainFragment : Fragment(){
                 duplicateUserDog.clear() //중복되는 유저 초기화
             }
 
-            //서버에 false 전송
-            coordinateService.endWalking(userId).enqueue(object:Callback<Boolean>{
+//            //서버에 false 전송
+            coordinateService.endWalking(walkWidthDogList).enqueue(object:Callback<Boolean>{
                 override fun onResponse(call: Call<Boolean>, response: Response<Boolean>) {
                     if (response.isSuccessful) {
                         Log.d(TAG, "endWalking is success");
@@ -658,9 +661,9 @@ class MainFragment : Fragment(){
                 }//if
 
                 if (naverMap != null) {
-                    if (!coorUpdate) {//첫 실행일때는 모든 정보 넣어서 테이블에 추가
-                        coordinateService.insert(
-                            userId,
+                    //첫 실행 여부는 서버에서 판단
+                    coordinateService.update(
+                        walkWidthDogList,
                             lastLocation.latitude,
                             lastLocation.longitude,
                             tile
@@ -681,34 +684,6 @@ class MainFragment : Fragment(){
                                 Log.d(TAG, "전송실패 ", t)
                             }
                         })
-                        Log.d(TAG, "tile ${tile}")
-                        coorUpdate = true
-                    } //if
-
-                    else {//첫실행 아닐때
-                        coordinateService.update(
-                            userId,
-                            lastLocation.latitude,
-                            lastLocation.longitude,
-                            tile
-                        ).enqueue(object : Callback<Boolean> {
-                            override fun onResponse(
-                                call: Call<Boolean>,
-                                response: Response<Boolean>
-                            ) {
-                                if (response.isSuccessful) {
-                                    if (response.body() == true) {
-                                        Log.d(TAG, "업데이트 성공")
-                                    } else
-                                        Log.d(TAG, "업데이트 실패")
-                                }
-                            }
-
-                            override fun onFailure(call: Call<Boolean>, t: Throwable) {
-                                Log.d(TAG, "전송실패 ", t)
-                            }
-                        })
-                    }//else
 
                     //다른 사용자들의 위치정보 불러오기
                     //tile 올려서 해당 사용자들만 받아오게
