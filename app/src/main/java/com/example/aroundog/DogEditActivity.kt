@@ -14,6 +14,7 @@ import com.example.aroundog.dto.DogDto
 import com.example.aroundog.utils.DogBreedData
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
+import com.google.gson.reflect.TypeToken
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -106,6 +107,40 @@ class DogEditActivity : AppCompatActivity() {
                     override fun onResponse(call: Call<Boolean>, response: Response<Boolean>) {
                         if (response.isSuccessful && response.body() == true) {
                             editDogInfo.postValue(dogDto)
+
+                           //sharedPreferences에 저장
+                            var dog_info_pref =
+                                getSharedPreferences("dogInfo", MODE_PRIVATE) // 세션 영역에 저장할 유저 정보
+                            var dog_info_editor = dog_info_pref.edit()
+
+                            var listStr = dog_info_pref.getString("dogList", "")
+                            var makeGson = GsonBuilder().create()
+                            var type: TypeToken<MutableList<DogDto>> = object: TypeToken<MutableList<DogDto>>(){}
+
+                            //객체형태로 변환
+                            var dogList = mutableListOf<DogDto>()
+                            if (listStr != "") {
+                                dogList = makeGson.fromJson<MutableList<DogDto>>(listStr, type.type)
+                            }
+                            //기존내용 변경해야함
+                            for (dog in dogList) {
+                                if (dog.dogId == dogDto.dogId) {
+                                    dog.dogName = dogDto.dogName
+                                    dog.dogAge = dogDto.dogAge
+                                    dog.dogWeight = dogDto.dogWeight
+                                    dog.dogHeight = dogDto.dogHeight
+                                    dog.dogGender = dogDto.dogGender
+                                    dog.breed = dogDto.breed
+                                    break
+                                }
+
+                            }
+
+                            //sharedPreferences에 저장
+                            var dogStr = makeGson.toJson(dogList, type.type)
+                            dog_info_editor.putBoolean("hasDog", true)
+                            dog_info_editor.putString("dogList", dogStr)
+                            dog_info_editor.commit()
                         }else{
                             Toast.makeText(applicationContext, "정보 수정에 실패했습니다.", Toast.LENGTH_SHORT).show()
                         }
