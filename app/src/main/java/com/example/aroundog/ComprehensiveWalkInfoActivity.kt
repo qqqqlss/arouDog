@@ -60,6 +60,33 @@ class ComprehensiveWalkInfoActivity : AppCompatActivity() {
     var mLayoutManager = LinearLayoutManager(this);
     var defaultList = ArrayList<WalkRecyclerViewItem>()//어댑터 초기화를 위한 리스트
     var adapter = WalkRecyclerViewAdapter(defaultList)
+    init {
+        WalkInfoActivity.isDelete.observe(this) {
+            Log.d(TAG, "in observe : $it")
+            var observeForever = androidx.lifecycle.Observer<WalkInfoActivity.LongString>{
+                var deleteId = it.walkId
+                var yaerMonth = it.yearMonth
+                var temp = ArrayList<WalkRecyclerViewItem>()
+                val monthDataList = allWalkInfoData.monthData[yaerMonth]
+
+                if (!monthDataList.isNullOrEmpty()) {
+                    for (monthData in monthDataList!!) {
+                        if (monthData.walkId == deleteId) {
+                            var index = monthDataList.indexOf(monthData)
+                            adapter.notifyItemRemoved(index)
+                            break
+                        }
+                    }
+                }
+            }
+            if (it) {
+                WalkInfoActivity.data.observeForever(observeForever)
+            } else {
+
+                WalkInfoActivity.data.removeObserver(observeForever)
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -376,5 +403,9 @@ class ComprehensiveWalkInfoActivity : AppCompatActivity() {
         override fun decorate(view: DayViewFacade?) {
             view?.addSpan(DotSpan(12F, Color.parseColor("#675E4D")))
         }
+    }
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.d(TAG, "onDestroy")
     }
 }

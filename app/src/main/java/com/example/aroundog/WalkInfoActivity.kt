@@ -10,6 +10,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.*
+import androidx.lifecycle.MutableLiveData
 import com.bumptech.glide.Glide
 import com.example.aroundog.Service.Polyline
 import com.example.aroundog.Service.WalkService
@@ -26,6 +27,7 @@ import retrofit2.*
 import retrofit2.converter.gson.GsonConverterFactory
 import java.lang.reflect.Type
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 
 class WalkInfoActivity : AppCompatActivity() {
@@ -42,6 +44,12 @@ class WalkInfoActivity : AppCompatActivity() {
     lateinit var walkInfoButton: Button
 
     lateinit var walkInfoDto:WalkInfoDto
+
+    companion object{
+        var isDelete = MutableLiveData<Boolean>(false)
+        var data = MutableLiveData<LongString>()
+    }
+    class LongString(var walkId: Long, var yearMonth: String)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_walk_info)
@@ -78,8 +86,12 @@ class WalkInfoActivity : AppCompatActivity() {
                 override fun onResponse(call: Call<Boolean>, response: Response<Boolean>) {
                     if (response.isSuccessful) {
                         if (response.body() == true) {
-
+                            var str =
+                                "" + walkInfoDto.startTime.year + "-" + walkInfoDto.startTime.monthValue
+                            isDelete.postValue(true)
+                            data.postValue(LongString(walkId, str))
                             Toast.makeText(applicationContext, "삭제 성공", Toast.LENGTH_SHORT).show()
+
                         }
                     } else {
                         Toast.makeText(applicationContext, "삭제 실패", Toast.LENGTH_SHORT).show()
@@ -200,5 +212,10 @@ class WalkInfoActivity : AppCompatActivity() {
             .build()
             .create(WalkService::class.java)
         return retrofit
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        isDelete.postValue(false)
     }
 }
