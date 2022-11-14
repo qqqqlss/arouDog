@@ -57,6 +57,7 @@ import java.time.LocalDateTime
 import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
 
 class MainFragment : Fragment(){
@@ -79,6 +80,7 @@ class MainFragment : Fragment(){
     lateinit var dog1:OverlayImage
     lateinit var dog2:OverlayImage
     lateinit var dog3:OverlayImage
+    lateinit var markerWarning:OverlayImage
 
     //화면 관련
     lateinit var frame: FrameLayout
@@ -116,6 +118,7 @@ class MainFragment : Fragment(){
     var visibleOnMapMap = HashMap<Long, Marker>()//<개id, 마커> 현재 화면에 표시된 강아지 정보
     var aroundUserMap = HashMap<Long, String>() //개id, 유저id
     var duplicateUserDog = HashSet<Long>()//주인이 중복되는 개 id 저장
+    var userMarkerList = HashMap<String, ArrayList<Marker>>()
 
     lateinit var mainActivty: MainActivity
 
@@ -327,6 +330,7 @@ class MainFragment : Fragment(){
                 visibleOnMapMap.clear() //지도에 표시되는 마커들이 저장된 맵 초기화
                 aroundUserMap.clear() //개id, 유저id 해시맵 초기화
                 duplicateUserDog.clear() //중복되는 유저 초기화
+                userMarkerList.clear()
             }
 
 //            //서버에 false 전송
@@ -514,6 +518,7 @@ class MainFragment : Fragment(){
         dog1 = OverlayImage.fromResource(R.drawable.dog1)
         dog2 = OverlayImage.fromResource(R.drawable.dog2)
         dog3 = OverlayImage.fromResource(R.drawable.dog3)
+        markerWarning = OverlayImage.fromResource(R.drawable.marker_warning)
     }
 
     /**
@@ -746,20 +751,21 @@ class MainFragment : Fragment(){
                                     updateCoordinateMap.clear()
                                     userCoordinateDogDtoList.forEach { dto ->
                                         if (!userId.equals(dto.userId)) {//자신의 정보를 제외하고 실행
+
+                                            //유저 마커 리스트에 정보 없으면 리스트 초기화
+                                            if (!userMarkerList.contains(dto.userId)) {
+                                                userMarkerList[dto.userId] = arrayListOf()
+                                            }
+
                                             if (!visibleOnMapMap.containsKey(dto.dogId)) {//해당 아이디가 지도에 없으면(visibleOnMapMap) 마커 추가
-                                                var latLng: LatLng
-                                                if (!aroundUserMap.containsValue(dto.userId)) {//주인이 중복되지 않는경우
-                                                    latLng = LatLng(
-                                                        dto.latitude,
-                                                        dto.longitude
-                                                    )
-                                                } else {
-                                                    latLng = LatLng(
-                                                        dto.latitude - 0.0001,
-                                                        dto.longitude - 0.0001
-                                                    )
+                                                var latLng = LatLng(
+                                                    dto.latitude,
+                                                    dto.longitude
+                                                )
+                                                if (aroundUserMap.containsValue(dto.userId)) {//주인이 중복되는 경우
                                                     duplicateUserDog.add(dto.dogId)//주인이 중복될경우 개id저장
                                                 }
+                                                //중복되면 마커 추가 안되게
 
                                                 var marker = Marker().apply {
                                                     position = latLng
@@ -774,8 +780,15 @@ class MainFragment : Fragment(){
                                                         true
                                                     }
                                                 }
-                                                CoroutineScope(Dispatchers.Main).launch {
-                                                    marker.map = naverMap
+
+                                                userMarkerList[dto.userId]!!.add(marker)
+
+                                                //중복되지 않을 경우 지도에 추가
+                                                if (!duplicateUserDog.contains(dto.dogId)) {
+                                                    CoroutineScope(Dispatchers.Main).launch {
+                                                        marker.map = naverMap
+                                                    }
+
                                                 }
                                                 visibleOnMapMap.put(
                                                     dto.dogId,
@@ -788,24 +801,21 @@ class MainFragment : Fragment(){
                                                 aroundUserMap.put(dto.dogId, dto.userId)//개, 유저 매핑
 
                                             } else {//지도에 있으면 position 변경
-                                                var latLng: LatLng
-                                                if (!duplicateUserDog.contains(dto.dogId)) {//주인이 중복되지 않는경우
-                                                    latLng = LatLng(
-                                                        dto.latitude,
-                                                        dto.longitude
-                                                    )
-                                                } else {//주인이 중복되는 경우
-                                                    latLng = LatLng(
-                                                        dto.latitude - 0.00005,
-                                                        dto.longitude - 0.00005
-                                                    )
-                                                }
+                                                var latLng = LatLng(
+                                                    dto.latitude,
+                                                    dto.longitude
+                                                )
+                                                
                                                 val marker = visibleOnMapMap.get(dto.dogId)
                                                 marker!!.position = latLng
                                                 updateCoordinateMap.put(
                                                     dto.dogId,
                                                     marker
                                                 ) //서버에서 불러온 정보이므로 지도에 표시된 여부와 상관없이 추가해야함(불러온 정보가 모두 추가됨)
+
+                                                //마커 변경
+                                                var index = userMarkerList[dto.userId]!!.indexOf(marker)
+                                                userMarkerList[dto.userId]!![index] = marker
                                             }
                                         }
                                     }
@@ -817,10 +827,13 @@ class MainFragment : Fragment(){
                                                 value.map = null //지도에서 표시안함
                                                 visibleOnMapMap.remove(key) //지도에 표시되는 마커를 관리하는 맵에서 제거
                                                 duplicateUserDog.remove(key) //중복되는 유저 삭제
+                                                var userId = aroundUserMap.get(key)
                                                 aroundUserMap.remove(key) //개, 유저 매핑에서 삭제
+                                                userMarkerList.remove(userId)
                                             }
                                         }
                                     }
+                                    Log.d("sexking", "$userMarkerList")
                                 }
                             }
 
@@ -936,6 +949,7 @@ class MainFragment : Fragment(){
      * 주변 강아지 확인
      */
     private fun checkBound():Boolean{
+        var isWarning = false
         //bound가 초기화 되었다면
         if(this::bounds.isInitialized) {
             //        지도에 표시된 개의 마커의 위치를 기준으로 bounds안에 들어와있는지 확인
@@ -946,9 +960,18 @@ class MainFragment : Fragment(){
                             //updateCoordinateMap에서 찾을 경우 일정 시간마다 clear하기 때문에 비어있을 수 있음
                             //그래서 visibleOnMapMap 사용
                             if (visibleOnMapMap[userCoordinateDogDto.dogId] != null) {//userCoordinateDogDto에는 내정보도 들어가지만, visibleOnMapMap에는 내 정보가 없으므로 null값이 됨
+
                                 val markerPosition = visibleOnMapMap[userCoordinateDogDto.dogId]!!.position
+                                var userId = userCoordinateDogDto.userId
+                                var marker = userMarkerList.get(userId)!!.get(0)//첫번째 마커
                                 if (bounds.contains(markerPosition)) {//좌표가 영역 안에 포함될경우
-                                    return true
+                                    marker.icon = markerWarning
+                                    isWarning = true
+
+//                                    return true
+                                } else {
+                                    //마커 원래대로
+                                    marker.icon = setDogImage(userCoordinateDogDto.dogBreed.eng)
                                 }
                             }
                         }
@@ -959,7 +982,7 @@ class MainFragment : Fragment(){
         else{
 
         }
-        return false
+        return isWarning
     }
 
     /**
