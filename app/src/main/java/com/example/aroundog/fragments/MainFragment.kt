@@ -23,26 +23,25 @@ import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResult
 import androidx.lifecycle.MutableLiveData
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.LayoutManager
 import com.example.aroundog.*
 import com.example.aroundog.BuildConfig
+import com.example.aroundog.Model.BottomSheetAdapter
 import com.example.aroundog.R
-import com.example.aroundog.Service.CoordinateService
-import com.example.aroundog.Service.NaverMapService
-import com.example.aroundog.Service.Polyline
-import com.example.aroundog.Service.UserService
+import com.example.aroundog.Service.*
 import com.example.aroundog.dto.DogDto
 import com.example.aroundog.dto.UserCoordinateDogDto
 import com.example.aroundog.utils.*
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.geometry.LatLngBounds
 import com.naver.maps.map.*
-import com.naver.maps.map.overlay.LocationOverlay
-import com.naver.maps.map.overlay.Marker
-import com.naver.maps.map.overlay.OverlayImage
-import com.naver.maps.map.overlay.PathOverlay
+import com.naver.maps.map.overlay.*
 import com.naver.maps.map.util.FusedLocationSource
 import kotlinx.coroutines.*
 import retrofit2.Call
@@ -119,6 +118,7 @@ class MainFragment : Fragment(){
     var aroundUserMap = HashMap<Long, String>() //개id, 유저id
     var duplicateUserDog = HashSet<Long>()//주인이 중복되는 개 id 저장
     var userMarkerList = HashMap<String, ArrayList<Marker>>()
+    var userAndDog = HashMap<String, ArrayList<UserCoordinateDogDto>>()//유저, 강아지 매핑
 
     lateinit var mainActivty: MainActivity
 
@@ -153,6 +153,13 @@ class MainFragment : Fragment(){
     var type: TypeToken<MutableList<DogDto>> = object: TypeToken<MutableList<DogDto>>(){}
 
     var selectDog = mutableListOf<Long>()
+
+    //bottomSheetDialog
+    lateinit var bottom:BottomSheetDialog
+    lateinit var adapter: BottomSheetAdapter
+    lateinit var mLayoutManager:LayoutManager
+    lateinit var username:TextView
+    lateinit var recyclerView:RecyclerView
 
 
     companion object {
@@ -214,8 +221,12 @@ class MainFragment : Fragment(){
         dog_info_pref =
             requireActivity().getSharedPreferences("dogInfo", AppCompatActivity.MODE_PRIVATE)
 
+        bottom = BottomSheetDialog(context!!)
+        bottom.setContentView(R.layout.bottom_sheet_dialog)
 
-
+        mLayoutManager = LinearLayoutManager(context);
+        username = bottom.findViewById<TextView>(R.id.bottomUserName)!!
+        recyclerView = bottom.findViewById<RecyclerView>(R.id.bottomRecycler)!!
     }
 
     override fun onCreateView(//인터페이스를 그리기위해 호출
@@ -309,6 +320,7 @@ class MainFragment : Fragment(){
             stopRun()
             setBundle()//Bundle설정
             endWalk()
+//            adapter.notifyDataSetChanged()
             Log.d(TAG, "end walk : $pathPoints")
             parentFragmentManager.beginTransaction()
                 .add(R.id.main_container, EndWalkFragment(), "endWalk").addToBackStack(null)
@@ -326,11 +338,13 @@ class MainFragment : Fragment(){
                 updateCoordinateMap.forEach{ (id, marker)->
                     marker.map = null
                 }
+
                 updateCoordinateMap.clear() //서버에서 불러오는 정보 저장하는 맵 초기화
                 visibleOnMapMap.clear() //지도에 표시되는 마커들이 저장된 맵 초기화
                 aroundUserMap.clear() //개id, 유저id 해시맵 초기화
                 duplicateUserDog.clear() //중복되는 유저 초기화
                 userMarkerList.clear()
+                userAndDog.clear()
             }
 
 //            //서버에 false 전송
@@ -757,6 +771,11 @@ class MainFragment : Fragment(){
                                                 userMarkerList[dto.userId] = arrayListOf()
                                             }
 
+                                            //강아지-유저 매핑
+                                           if (!userAndDog.contains(dto.userId)) {
+                                                userAndDog[dto.userId] = arrayListOf()
+                                            }
+
                                             if (!visibleOnMapMap.containsKey(dto.dogId)) {//해당 아이디가 지도에 없으면(visibleOnMapMap) 마커 추가
                                                 var latLng = LatLng(
                                                     dto.latitude,
@@ -771,14 +790,6 @@ class MainFragment : Fragment(){
                                                     position = latLng
                                                     captionText = dto.dogName
                                                     icon = setDogImage(dto.dogBreed.eng)//이미지 설정
-                                                    setOnClickListener { o ->
-                                                        Toast.makeText(
-                                                            context,
-                                                            dto.dogName + " / " + dto.dogAge + "살",
-                                                            Toast.LENGTH_SHORT
-                                                        ).show()
-                                                        true
-                                                    }
                                                 }
 
                                                 userMarkerList[dto.userId]!!.add(marker)
@@ -800,6 +811,12 @@ class MainFragment : Fragment(){
                                                 ) //서버에서 불러온 정보를 저장한 맵에도 추가
                                                 aroundUserMap.put(dto.dogId, dto.userId)//개, 유저 매핑
 
+                                                //유저 - 개 매핑
+                                                //없는 경우 추가
+                                                if (!userAndDog[dto.userId]!!.contains(dto)) {
+                                                    userAndDog[dto.userId]!!.add(dto)
+                                                }
+
                                             } else {//지도에 있으면 position 변경
                                                 var latLng = LatLng(
                                                     dto.latitude,
@@ -817,6 +834,14 @@ class MainFragment : Fragment(){
                                                 var index = userMarkerList[dto.userId]!!.indexOf(marker)
                                                 userMarkerList[dto.userId]!![index] = marker
                                             }
+
+                                        }
+                                    }
+
+                                    for (entry in userMarkerList) {
+                                        entry.value[0].onClickListener = Overlay.OnClickListener {
+                                            showBottomSheetDialog(entry.key)
+                                            return@OnClickListener true
                                         }
                                     }
 
@@ -830,6 +855,7 @@ class MainFragment : Fragment(){
                                                 var userId = aroundUserMap.get(key)
                                                 aroundUserMap.remove(key) //개, 유저 매핑에서 삭제
                                                 userMarkerList.remove(userId)
+                                                userAndDog.remove(userId)
                                             }
                                         }
                                     }
@@ -849,6 +875,17 @@ class MainFragment : Fragment(){
                 }//if
             }//while
         }//launch
+    }
+
+    private fun showBottomSheetDialog(userId:String) {
+        //강아지 중복일때
+        var recyclerItem = userAndDog[userId]
+        adapter = BottomSheetAdapter(recyclerItem!!)
+        recyclerView!!.layoutManager = mLayoutManager;
+        username!!.text = userAndDog[userId]!!.get(0).userName
+        recyclerView!!.adapter = adapter
+        bottom.behavior.maxHeight = 1000
+        bottom.show()
     }
 
     /**
