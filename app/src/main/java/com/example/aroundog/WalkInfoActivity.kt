@@ -39,6 +39,7 @@ class WalkInfoActivity : AppCompatActivity() {
     lateinit var walkInfoBack:ImageButton
     lateinit var walkInfoDogs:LinearLayout
     lateinit var walkInfoNone:TextView
+    lateinit var walkInfoButton: Button
 
     lateinit var walkInfoDto:WalkInfoDto
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -70,6 +71,29 @@ class WalkInfoActivity : AppCompatActivity() {
         //뒤로가기 버튼 리스너
         walkInfoBack.setOnClickListener {
             finish()
+        }
+
+        walkInfoButton.setOnClickListener {
+            walkService.delete(walkId).enqueue(object : Callback<Boolean> {
+                override fun onResponse(call: Call<Boolean>, response: Response<Boolean>) {
+                    if (response.isSuccessful) {
+                        if (response.body() == true) {
+
+                            Toast.makeText(applicationContext, "삭제 성공", Toast.LENGTH_SHORT).show()
+                        }
+                    } else {
+                        Toast.makeText(applicationContext, "삭제 실패", Toast.LENGTH_SHORT).show()
+                    }
+                    finish()
+                }
+
+                override fun onFailure(call: Call<Boolean>, t: Throwable) {
+                    Log.d(TAG, "실패", t)
+                    Toast.makeText(applicationContext, "삭제 실패", Toast.LENGTH_SHORT).show()
+                    finish()
+                }
+
+            })
         }
     }
 
@@ -148,6 +172,7 @@ class WalkInfoActivity : AppCompatActivity() {
         walkInfoBack = findViewById(R.id.walkInfoBack)
         walkInfoDogs = findViewById(R.id.walkInfoDogs)
         walkInfoNone = findViewById(R.id.walkInfoNone)
+        walkInfoButton = findViewById(R.id.walkInfoButton)
     }
     private fun setRetrofit(): WalkService {
         var jsonLocalDateTimeDeserializer = object : JsonDeserializer<LocalDateTime> {

@@ -56,5 +56,10 @@ interface WalkService {
     @GET("/walk/{walkId}/info")
     fun getWalkInfo(
         @Path("walkId") walkId: Long
-    ):Call<WalkInfoDto>
+    ): Call<WalkInfoDto>
+
+    @DELETE("/walk/{walkId}")
+    fun delete(
+        @Path("walkId") walkId:Long
+    ):Call<Boolean>
 }
