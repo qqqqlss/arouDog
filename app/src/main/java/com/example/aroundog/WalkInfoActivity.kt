@@ -12,6 +12,7 @@ import android.view.View
 import android.widget.*
 import androidx.lifecycle.MutableLiveData
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.example.aroundog.Service.Polyline
 import com.example.aroundog.Service.WalkService
 import com.example.aroundog.dto.WalkInfoDto
@@ -143,6 +144,8 @@ class WalkInfoActivity : AppCompatActivity() {
                             var textView = layout.findViewById<TextView>(R.id.walkingTV)
                             var path = BuildConfig.SERVER + "image/" + entry.key
                             Glide.with(applicationContext).load(path).override(100)
+                                .diskCacheStrategy(DiskCacheStrategy.NONE)// 디스크 캐시 저장 off
+                                .skipMemoryCache(true)// 메모리 캐시 저장 off
                                 .error(R.drawable.error).into(imageView)
                             textView.text = entry.value
                             walkInfoDogs.addView(layout)
