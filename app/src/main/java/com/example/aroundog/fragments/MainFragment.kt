@@ -23,18 +23,19 @@ import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResult
 import androidx.lifecycle.MutableLiveData
+import com.example.aroundog.*
 import com.example.aroundog.BuildConfig
-import com.example.aroundog.MainActivity
 import com.example.aroundog.R
 import com.example.aroundog.Service.CoordinateService
 import com.example.aroundog.Service.NaverMapService
 import com.example.aroundog.Service.Polyline
 import com.example.aroundog.Service.UserService
-import com.example.aroundog.Util
+import com.example.aroundog.dto.DogDto
 import com.example.aroundog.dto.UserCoordinateDogDto
 import com.example.aroundog.utils.*
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
+import com.google.gson.reflect.TypeToken
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.geometry.LatLngBounds
 import com.naver.maps.map.*
@@ -136,9 +137,20 @@ class MainFragment : Fragment(){
     var width:Double = 0.0
 
     lateinit var user_info_pref:SharedPreferences
+    lateinit var dog_info_pref:SharedPreferences
 
     //같이 산책하는 강아지 리스트
-    var walkWidthDogList = listOf<Long>()
+//    var walkWidthDogList = listOf<Long>()
+
+
+    lateinit var fadeIn:ObjectAnimator
+
+    var dogList:MutableList<DogDto> = mutableListOf()//소유 강아지 리스트
+    var makeGson = GsonBuilder().create()
+    var type: TypeToken<MutableList<DogDto>> = object: TypeToken<MutableList<DogDto>>(){}
+
+    var selectDog = mutableListOf<Long>()
+
 
     companion object {
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1000
@@ -165,6 +177,11 @@ class MainFragment : Fragment(){
             }
 
         }
+        SelectWalkingDog.selectWalkingDog.observe(this){
+            selectDog = it
+            walking()
+        }
+
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -190,6 +207,12 @@ class MainFragment : Fragment(){
             requireActivity().getSharedPreferences("userInfo", AppCompatActivity.MODE_PRIVATE)
         userId = user_info_pref.getString("id", "error").toString()
 
+        //강아지 정보
+        dog_info_pref =
+            requireActivity().getSharedPreferences("dogInfo", AppCompatActivity.MODE_PRIVATE)
+
+
+
     }
 
     override fun onCreateView(//인터페이스를 그리기위해 호출
@@ -203,7 +226,7 @@ class MainFragment : Fragment(){
         imageView = view.findViewById<ImageView>(R.id.warning)
         imageView.visibility = View.INVISIBLE
 
-        val fadeIn = ObjectAnimator.ofFloat(imageView, "alpha", 0f, 1f)
+        fadeIn = ObjectAnimator.ofFloat(imageView, "alpha", 0f, 1f)
         fadeIn.repeatCount = -1
         fadeIn.duration = 1500
         fadeIn.repeatMode = ObjectAnimator.REVERSE
@@ -246,60 +269,27 @@ class MainFragment : Fragment(){
 
             //최신 위치가 저장되었는지 확인
             if (this::lastLocation.isInitialized) {
-                startWalk()
-                dbProcess()
-                createWebView()//웹뷰 생성, tile 값 지정
-                sendCommandToService(ACTION_SHOW_RUNNING_ACTIVITY)
-                sendCommandToService(ACTION_START_OR_RESUME_SERVICE)
-
-                //기피 강아지 목록 불러오기
-                getHateDogList()
-
-                //기피 강아지 경고
-                boundCoroutine = CoroutineScope(Dispatchers.Main).launch {
-                    var isWarning = false
-                    //안드로이드 버전에 따라 다르게 저장
-                    var vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                        val vibratorManager =
-                            context!!.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
-                        vibratorManager.defaultVibrator;
-                    } else {
-                        context!!.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-                    }
-//                    val notification: Uri =
-//                        RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
-//                    val ringtone = RingtoneManager.getRingtone(context,notification)
-
-                    while(true){
-                        //위험 개 있을때
-                        if(checkBound()){
-                            if(!isWarning){//경고중이 아닐때
-                                //애니메이션 실행
-                                isWarning = true
-                                animationStatus(fadeIn, true)
-                            }
-                            //이미 경고중일때
-                            else{
-                                //할거없음
-                            }
-
-                            //소리, 진동 으로알림(공통)
-                            //안드로이드 버전에 따라 다르게
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                                vibrator.vibrate(VibrationEffect.createOneShot(500,255))
-                            } else {
-                                vibrator.vibrate(500L)
-                            }
-//                            ringtone.play()
-                        }
-                        //위험 개 없을때
-                        else{
-                            isWarning = false
-                            animationStatus(fadeIn, false)
-                        }
-                        delay(2000)
-                    }
+                //강아지 선택
+                var listStr = dog_info_pref.getString("dogList", "")
+                if (listStr != "") {
+                    dogList = makeGson.fromJson<MutableList<DogDto>>(listStr, type.type)
+                    Log.d(TAG, "dogList : ${dogList.toString()}")
                 }
+
+                if (dogList.isNotEmpty()) {
+                    //강아지 없어도 산책..
+//                    val intent = Intent(context, SelectWalkingDog::class.java)
+//                    startActivity(intent)
+
+                    SelectWalkingDog(context!!).show()
+                } else {
+                    //강아지 없으면
+                    selectDog.add(-1L)
+                    walking()
+                }
+
+
+
 
             } else {
                 Toast.makeText(context, "로딩중입니다. 잠시만 기다려주세요", Toast.LENGTH_SHORT).show()
@@ -340,7 +330,7 @@ class MainFragment : Fragment(){
             }
 
 //            //서버에 false 전송
-            coordinateService.endWalking(walkWidthDogList).enqueue(object:Callback<Boolean>{
+            coordinateService.endWalking(selectDog).enqueue(object:Callback<Boolean>{
                 override fun onResponse(call: Call<Boolean>, response: Response<Boolean>) {
                     if (response.isSuccessful) {
                         Log.d(TAG, "endWalking is success");
@@ -358,6 +348,63 @@ class MainFragment : Fragment(){
 
         }//listener
         return view
+    }
+
+    private fun walking() {
+        startWalk()
+        dbProcess()
+        createWebView()//웹뷰 생성, tile 값 지정
+        sendCommandToService(ACTION_SHOW_RUNNING_ACTIVITY)
+        sendCommandToService(ACTION_START_OR_RESUME_SERVICE)
+
+        //기피 강아지 목록 불러오기
+        getHateDogList()
+
+        //기피 강아지 경고
+        boundCoroutine = CoroutineScope(Dispatchers.Main).launch {
+            var isWarning = false
+            //안드로이드 버전에 따라 다르게 저장
+            var vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                val vibratorManager =
+                    context!!.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+                vibratorManager.defaultVibrator;
+            } else {
+                context!!.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+            }
+    //                    val notification: Uri =
+    //                        RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+    //                    val ringtone = RingtoneManager.getRingtone(context,notification)
+
+            while (true) {
+                //위험 개 있을때
+                if (checkBound()) {
+                    if (!isWarning) {//경고중이 아닐때
+                        //애니메이션 실행
+                        isWarning = true
+                        animationStatus(fadeIn, true)
+                    }
+                    //이미 경고중일때
+                    else {
+                        //할거없음
+                    }
+
+                    //소리, 진동 으로알림(공통)
+                    //안드로이드 버전에 따라 다르게
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                        vibrator.vibrate(VibrationEffect.createOneShot(500, 255))
+                    } else {
+                        vibrator.vibrate(500L)
+                    }
+    //                            ringtone.play()
+                }
+                //위험 개 없을때
+                else {
+                    isWarning = false
+                    animationStatus(fadeIn, false)
+                }
+                delay(2000)
+            }
+        }
     }
 
     /**
@@ -663,7 +710,7 @@ class MainFragment : Fragment(){
                 if (naverMap != null) {
                     //첫 실행 여부는 서버에서 판단
                     coordinateService.update(
-                        walkWidthDogList,
+                            selectDog,
                             lastLocation.latitude,
                             lastLocation.longitude,
                             tile
@@ -682,6 +729,7 @@ class MainFragment : Fragment(){
 
                             override fun onFailure(call: Call<Boolean>, t: Throwable) {
                                 Log.d(TAG, "전송실패 ", t)
+
                             }
                         })
 
