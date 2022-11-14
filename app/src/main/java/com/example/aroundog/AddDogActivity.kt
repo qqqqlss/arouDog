@@ -14,6 +14,7 @@ import com.example.aroundog.dto.ImgDto
 import com.example.aroundog.utils.DogBreedData
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
+import com.google.gson.reflect.TypeToken
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -118,6 +119,31 @@ class AddDogActivity : AppCompatActivity() {
                                     mutableListOf<ImgDto>()
                                 )
                                 newDogData.postValue(newDog)//newDogData 업데이트 알림
+
+                                //sharedPreferences에 저장
+                                var dog_info_pref =
+                                    getSharedPreferences("dogInfo", MODE_PRIVATE) // 세션 영역에 저장할 유저 정보
+                                var dog_info_editor = dog_info_pref.edit()
+
+                                var listStr = dog_info_pref.getString("dogList", "")
+                                var makeGson = GsonBuilder().create()
+                                var type: TypeToken<MutableList<DogDto>> = object: TypeToken<MutableList<DogDto>>(){}
+
+                                //객체형태로 변환
+                                var dogList = mutableListOf<DogDto>()
+                                if (listStr != "") {
+                                    dogList = makeGson.fromJson<MutableList<DogDto>>(listStr, type.type)
+                                }
+                                //추가
+                                dogList.add(newDog)
+
+                                //sharedPreferences에 저장
+                                var dogStr = makeGson.toJson(dogList, type.type)
+                                dog_info_editor.putBoolean("hasDog", true)
+                                dog_info_editor.putString("dogList", dogStr)
+                                dog_info_editor.commit()
+
+
                                 Log.d(TAG, "성공")
                                 Toast.makeText(applicationContext, "추가 성공", Toast.LENGTH_SHORT)
                                     .show()
