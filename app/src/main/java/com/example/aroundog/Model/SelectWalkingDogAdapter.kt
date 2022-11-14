@@ -41,7 +41,10 @@ class SelectWalkingDogAdapter(var dogList:MutableList<DogDto>): RecyclerView.Ada
             selectWalkingDogItemView = view.findViewById(R.id.selectWalkingDogItemView)
 
             var dogId = dog.dogId
-            var filename = dog.dogImgList[0].fileName
+            var filename = "error"
+            if (dog.dogImgList.isNotEmpty()) {
+                filename = dog.dogImgList[0].fileName
+            }
             var path = BuildConfig.SERVER+"image/" + dogId + "/"+filename
             Glide.with(view.context).load(path).override(100).error(R.drawable.error).into(imageView)
 
