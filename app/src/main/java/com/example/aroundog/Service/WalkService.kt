@@ -50,8 +50,8 @@ interface WalkService {
 
     @GET("/walk/{userId}/allInfo")
     fun getAllWalkInfo(
-        @Path("userId") userId:String
-    ):Call<AllWalkInformationDto>
+        @Path("userId") userId: String
+    ): Call<AllWalkInformationDto>
 
     @GET("/walk/{walkId}/info")
     fun getWalkInfo(

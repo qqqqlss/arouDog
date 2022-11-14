@@ -1077,6 +1077,7 @@ class MainFragment : Fragment(){
      * 산책 종료 화면에서 사용할 번들 생성
      */
     private fun setBundle() {
+        var strSelectDog = "%"+selectDog.joinToString("%")
         var bundle: Bundle = Bundle()
         bundle.putSerializable("pathPoints", pathPoints as java.io.Serializable)
         bundle.putSerializable("walkDistance", walkDistance)
@@ -1084,6 +1085,7 @@ class MainFragment : Fragment(){
         bundle.putSerializable("startTime", startTime)
         bundle.putSerializable("tile", tile)
         bundle.putSerializable("second", time)
+        bundle.putString("dogIds", strSelectDog)
         setFragmentResult("walkEnd", bundle)
     }
 

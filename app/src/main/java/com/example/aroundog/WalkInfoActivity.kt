@@ -7,10 +7,10 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Base64
 import android.util.Log
-import android.widget.ImageButton
-import android.widget.ImageView
-import android.widget.TextView
-import android.widget.Toast
+import android.view.LayoutInflater
+import android.view.View
+import android.widget.*
+import com.bumptech.glide.Glide
 import com.example.aroundog.Service.Polyline
 import com.example.aroundog.Service.WalkService
 import com.example.aroundog.dto.WalkInfoDto
@@ -37,6 +37,8 @@ class WalkInfoActivity : AppCompatActivity() {
     lateinit var walkInfoDistance:TextView
     lateinit var floatingActionButton:FloatingActionButton
     lateinit var walkInfoBack:ImageButton
+    lateinit var walkInfoDogs:LinearLayout
+    lateinit var walkInfoNone:TextView
 
     lateinit var walkInfoDto:WalkInfoDto
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -94,6 +96,26 @@ class WalkInfoActivity : AppCompatActivity() {
                         walkDetailsImageView.setImageBitmap(bitmap)
                     }
 
+                    var idNameMap = walkInfoDto.idNameMap
+                    if (!idNameMap.isEmpty()) {
+                        walkInfoNone.visibility = View.GONE
+
+                        for (entry in idNameMap) {
+                            var layout = LayoutInflater.from(applicationContext)
+                                .inflate(R.layout.walking_dog, null)
+                            var imageView = layout.findViewById<ImageView>(R.id.walkingImageView)
+                            var textView = layout.findViewById<TextView>(R.id.walkingTV)
+                            var path = BuildConfig.SERVER + "image/" + entry.key
+                            Glide.with(applicationContext).load(path).override(100)
+                                .error(R.drawable.error).into(imageView)
+                            textView.text = entry.value
+                            walkInfoDogs.addView(layout)
+                        }
+                    }
+
+
+
+
                     //텍스트뷰 설정
                     var start = walkInfoDto.startTime.format(DateTimeFormatter.ofPattern("a hh:mm"))
                     var end = walkInfoDto.endTime.format(DateTimeFormatter.ofPattern("a hh:mm"))
@@ -124,6 +146,8 @@ class WalkInfoActivity : AppCompatActivity() {
         floatingActionButton = findViewById(R.id.floatingActionButton)
         walkDetailsImageView = findViewById(R.id.walkDetailsImageView)
         walkInfoBack = findViewById(R.id.walkInfoBack)
+        walkInfoDogs = findViewById(R.id.walkInfoDogs)
+        walkInfoNone = findViewById(R.id.walkInfoNone)
     }
     private fun setRetrofit(): WalkService {
         var jsonLocalDateTimeDeserializer = object : JsonDeserializer<LocalDateTime> {

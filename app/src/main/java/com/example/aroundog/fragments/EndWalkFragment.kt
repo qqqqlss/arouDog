@@ -68,6 +68,7 @@ class EndWalkFragment : Fragment(){
     lateinit var pathPoints:MutableList<Polyline>
     lateinit var tile:String
     lateinit var strSecond:String
+    var dogIds = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -186,6 +187,7 @@ class EndWalkFragment : Fragment(){
             walkDistance = round((bundle.getSerializable("walkDistance") as Double)).toString()
             tile = bundle.getSerializable("tile") as String
             strSecond = (bundle.getSerializable("second") as Long).toString()
+            dogIds = bundle.getString("dogIds").toString()
             timeTV.text = "산책시간\n" + time
             walkDistance_end.text = "이동거리\n" + walkDistance + "m"
 
@@ -295,6 +297,10 @@ class EndWalkFragment : Fragment(){
             RequestBody.create(MediaType.parse("multipart/form-data"), strSecond)
         var distance:RequestBody =
             RequestBody.create(MediaType.parse("multipart/form-data"), walkDistance)
+        var paramDogIds:RequestBody =
+            RequestBody.create(MediaType.parse("multipart/form-data"), dogIds)
+
+
 
         var params = HashMap<String, RequestBody>()
         params.put("course", course)
@@ -304,6 +310,7 @@ class EndWalkFragment : Fragment(){
         params.put("tile", tile)
         params.put("second", second)
         params.put("distance",distance)
+        params.put("dogIds", paramDogIds)
         return params
     }
 
