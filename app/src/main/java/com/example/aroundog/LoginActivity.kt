@@ -131,6 +131,7 @@ class LoginActivity : AppCompatActivity(){
                 } else {
                     loadingDialog?.show()
 
+                    Util.progressOn(this) // 로딩 다이얼로그
                     //로그인
                     login(id, pw)
                 }
@@ -243,15 +244,18 @@ class LoginActivity : AppCompatActivity(){
                                 user_info_editor.commit()
                             }
 
+
                             //메인 액티비티 시작
                             val intent =
                                 Intent(this@LoginActivity, MainActivity::class.java)
                             startActivity(intent)
+                            Util.progressOff() //로딩 다이얼로그
                             finish()
                         }
                     } else { // 아이디, 비밀번호가 일치하지 않을 때
                         if (login_check != null) {
                             login_check.visibility = View.VISIBLE
+                            Util.progressOff() //로딩 다이얼로그
                         } // 다시 확인하라는 텍스트뷰 출력
                     }
                 }

@@ -20,6 +20,9 @@ class BaseApplication : Application(){
     fun progressOn(view: Activity?) {
         if (view == null || view.isFinishing)
             return
+        if (dialog!=null) {
+
+        }
 
         if (dialog == null || (dialog != null && dialog!!.isShowing)) {
             dialog = AppCompatDialog(view).apply {
@@ -29,9 +32,13 @@ class BaseApplication : Application(){
                 show()
             }
         }
+        else if (dialog!=null) {
+            dialog!!.show()
+            return
+        }
 
         Glide.with(view).load(R.raw.dog_loading)
-            .apply(RequestOptions().override(50, 50))
+            .apply(RequestOptions().override(200, 200))
             .into(dialog!!.findViewById<ImageView>(R.id.load_image_view) as ImageView)
     }
 
