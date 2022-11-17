@@ -6,12 +6,14 @@ class RecyclerViewItem(
     var loginUserId:String,
     var walkId:Long,
     var img:Bitmap,
-    var userId:String,
     var good:Int,
     var bad:Int,
-    var walkSecond:Long,
     var checkGood:Boolean,
-    var checkBad:Boolean
+    var checkBad:Boolean,
+    var second: Long,
+    var distance: Long,
+    var address:String
+
     ) {
 
 

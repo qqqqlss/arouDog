@@ -222,7 +222,6 @@ class RecyclerViewAdapter(private val data : ArrayList<RecyclerViewItem?> ): Rec
 
 
         fun setItems(viewItem: RecyclerViewItem){
-            this.textViewUserId.text = viewItem.userId + "님의 산책 기록"
             this.imageView.setImageBitmap(viewItem.img)
             this.textViewGood.text = viewItem.good.toString()
             this.checkGood = viewItem.checkGood;
@@ -232,12 +231,12 @@ class RecyclerViewAdapter(private val data : ArrayList<RecyclerViewItem?> ): Rec
             this.walkId = viewItem.walkId
 
 
-            var totalSecond = viewItem.walkSecond
-            var hour = TimeUnit.SECONDS.toHours(totalSecond)
-            var minute = TimeUnit.SECONDS.toMinutes(totalSecond) - hour * 60
-            var second = TimeUnit.SECONDS.toSeconds(totalSecond) - hour * 3600 - minute * 60
-            var strTime = "소요시간 : " + String.format("%02d", hour) + " 시 " + String.format("%02d",minute) + " 분 " + String.format("%02d", second) + "초"
-            this.textViewWalkSecond.text =strTime
+//            var totalSecond = viewItem.walkSecond
+//            var hour = TimeUnit.SECONDS.toHours(totalSecond)
+//            var minute = TimeUnit.SECONDS.toMinutes(totalSecond) - hour * 60
+//            var second = TimeUnit.SECONDS.toSeconds(totalSecond) - hour * 3600 - minute * 60
+//            var strTime = "소요시간 : " + String.format("%02d", hour) + " 시 " + String.format("%02d",minute) + " 분 " + String.format("%02d", second) + "초"
+//            this.textViewWalkSecond.text =strTime
         }
     }
     class LoadingViewHolder(itemView:View) : RecyclerView.ViewHolder(itemView) {

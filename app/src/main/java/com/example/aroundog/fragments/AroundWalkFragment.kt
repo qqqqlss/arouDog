@@ -45,6 +45,7 @@ class AroundWalkFragment : Fragment() {
     lateinit var mList:ArrayList<RecyclerViewItem?>
     lateinit var userId:String
     var tile:String = ""
+    var address = "address"
 
     init {
         MainFragment.firstTile.observe(this){
@@ -83,7 +84,7 @@ class AroundWalkFragment : Fragment() {
                                 //에러일경우
                                 if(bitmap ==null)
                                     bitmap = BitmapFactory.decodeResource(resources,R.drawable.error2)
-                                addItem(userId, it.walkId, bitmap, it.userId, it.good, it.bad, it.walkSecond, it.checkGood, it.checkBad)
+                                addItem(userId, it.walkId, bitmap, it.good, it.bad, it.checkGood, it.checkBad, it.second, it.distance, address)
                             }
 
                         }
@@ -195,8 +196,7 @@ class AroundWalkFragment : Fragment() {
                                             )
                                         //에러일경우
 //                            bitmap = BitmapFactory.decodeResource(resources,R.drawable.error2)
-                                        //userId는 long값
-                                        addItem(userId, it.walkId, bitmap, it.userId, it.good, it.bad, it.walkSecond, it.checkGood, it.checkBad)
+                                        addItem(userId, it.walkId, bitmap, it.good, it.bad, it.checkGood, it.checkBad, it.second, it.distance, address)
                                     }
                                 }
                                 totalCount += list!!.size
@@ -216,9 +216,19 @@ class AroundWalkFragment : Fragment() {
 
     }
 
-
-    fun addItem(loginUserId:String, walkId:Long, bitmap: Bitmap, userId:String, good:Int, bad:Int, walkSecond:Long, checkGood:Boolean, checkBad:Boolean){
-        var item:RecyclerViewItem = RecyclerViewItem(loginUserId, walkId, bitmap, userId, good, bad, walkSecond, checkGood, checkBad)
+    /**
+     * @param loginUserId : 로그인한 유저 아이디(버튼 클릭 시 필요)
+     * @param walkId : 산책 기록 id
+     * @param bitmap : 이미지
+     * @param good : 좋아요 개수
+     * @param bad : 싫어요 개수
+     * @param checkGood : 좋아요 눌렀는지 여부
+     * @param checkBad : 싫어요 눌렀는지 여부
+     * @param second : 산책 시간
+     * @param distance : 산책 거리
+     */
+    fun addItem(loginUserId:String, walkId:Long, bitmap: Bitmap, good:Int, bad:Int, checkGood:Boolean, checkBad:Boolean, second:Long, distance:Long, address:String){
+        var item:RecyclerViewItem = RecyclerViewItem(loginUserId, walkId, bitmap, good, bad, checkGood, checkBad, second, distance, address)
         mList.add(item)
     }
 
