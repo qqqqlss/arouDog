@@ -50,6 +50,7 @@
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_margin="10dp"
         android:overScrollMode="never">
 
         <TableLayout
@@ -86,23 +87,31 @@
                     android:orientation="vertical"
                     android:padding="5dp">
 
-
-                    <ImageView
-                        android:id="@+id/selectBigImg1"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:adjustViewBounds="true"
-                        android:src="@drawable/dog_b_husky1" />
-
-                    <TextView
-                        android:id="@+id/selectBigTV1"
+                    <androidx.cardview.widget.CardView
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="5dp"
-                        android:gravity="center"
-                        android:text="허스키"
-                        android:textColor="@color/black"
-                        android:textSize="16sp" />
+                        android:layout_height="match_parent"
+                        app:cardCornerRadius="8dp">
+
+                        <ImageView
+                            android:id="@+id/selectBigImg1"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:adjustViewBounds="true"
+                            android:src="@drawable/dog_b_husky1" />
+
+                        <TextView
+                            android:id="@+id/selectBigTV1"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="bottom|center_horizontal"
+                            android:layout_margin="5dp"
+                            android:background="#4D000000"
+                            android:gravity="center"
+                            android:text="허스키"
+                            android:textColor="#FFFFFF"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+                    </androidx.cardview.widget.CardView>
                 </LinearLayout>
 
                 <LinearLayout
@@ -114,24 +123,31 @@
                     android:orientation="vertical"
                     android:padding="5dp">
 
-
-                    <ImageView
-                        android:id="@+id/selectBigImg2"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:adjustViewBounds="true"
-                        android:src="@drawable/dog_b_samoyed1" />
-
-                    <TextView
-                        android:id="@+id/selectBigTV2"
+                    <androidx.cardview.widget.CardView
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="5dp"
-                        android:gravity="center"
-                        android:text="사모예드"
-                        android:textColor="@color/black"
-                        android:textSize="16sp" />
+                        android:layout_height="match_parent"
+                        app:cardCornerRadius="8dp">
 
+                        <ImageView
+                            android:id="@+id/selectBigImg2"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:adjustViewBounds="true"
+                            android:src="@drawable/dog_b_samoyed1" />
+
+                        <TextView
+                            android:id="@+id/selectBigTV2"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="bottom|center_horizontal"
+                            android:layout_margin="5dp"
+                            android:background="#4D000000"
+                            android:gravity="center"
+                            android:text="사모예드"
+                            android:textColor="#FFFFFF"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+                    </androidx.cardview.widget.CardView>
                 </LinearLayout>
 
             </TableRow>
@@ -149,23 +165,32 @@
                     android:orientation="vertical"
                     android:padding="5dp">
 
-
-                    <ImageView
-                        android:id="@+id/selectBigImg3"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:adjustViewBounds="true"
-                        android:src="@drawable/dog_b_retriever1" />
-
-                    <TextView
-                        android:id="@+id/selectBigTV3"
+                    <androidx.cardview.widget.CardView
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="5dp"
-                        android:gravity="center"
-                        android:text="리트리버"
-                        android:textColor="@color/black"
-                        android:textSize="16sp" />
+                        android:layout_height="match_parent"
+                        app:cardCornerRadius="8dp">
+
+                        <ImageView
+                            android:id="@+id/selectBigImg3"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:adjustViewBounds="true"
+                            android:src="@drawable/dog_b_retriever1">
+                        </ImageView>
+
+                        <TextView
+                            android:id="@+id/selectBigTV3"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="bottom|center_horizontal"
+                            android:layout_margin="5dp"
+                            android:gravity="center"
+                            android:text="리트리버"
+                            android:textColor="#FFFFFF"
+                            android:background="#4D000000"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+                    </androidx.cardview.widget.CardView>
                 </LinearLayout>
 
                 <LinearLayout
@@ -177,24 +202,30 @@
                     android:orientation="vertical"
                     android:padding="5dp">
 
-
-                    <ImageView
-                        android:id="@+id/selectBigImg4"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:adjustViewBounds="true"
-                        android:src="@drawable/dog_b_shepherd2" />
-
-                    <TextView
-                        android:id="@+id/selectBigTV4"
+                    <androidx.cardview.widget.CardView
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="5dp"
-                        android:gravity="center"
-                        android:text="셰퍼드"
-                        android:textColor="@color/black"
-                        android:textSize="16sp" />
+                        android:layout_height="match_parent"
+                        app:cardCornerRadius="8dp">
+                        <ImageView
+                            android:id="@+id/selectBigImg4"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:adjustViewBounds="true"
+                            android:src="@drawable/dog_b_shepherd2" />
 
+                        <TextView
+                            android:id="@+id/selectBigTV4"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="bottom|center_horizontal"
+                            android:layout_margin="5dp"
+                            android:gravity="center"
+                            android:text="셰퍼드"
+                            android:textColor="#FFFFFF"
+                            android:background="#4D000000"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+                    </androidx.cardview.widget.CardView>
                 </LinearLayout>
 
             </TableRow>
@@ -212,23 +243,30 @@
                     android:orientation="vertical"
                     android:padding="5dp">
 
-
-                    <ImageView
-                        android:id="@+id/selectBigImg5"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:adjustViewBounds="true"
-                        android:src="@drawable/dog_b_malamute1" />
-
-                    <TextView
-                        android:id="@+id/selectBigTV5"
+                    <androidx.cardview.widget.CardView
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="5dp"
-                        android:gravity="center"
-                        android:text="말라뮤트"
-                        android:textColor="@color/black"
-                        android:textSize="16sp" />
+                        android:layout_height="match_parent"
+                        app:cardCornerRadius="8dp">
+                        <ImageView
+                            android:id="@+id/selectBigImg5"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:adjustViewBounds="true"
+                            android:src="@drawable/dog_b_malamute1" />
+
+                        <TextView
+                            android:id="@+id/selectBigTV5"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="bottom|center_horizontal"
+                            android:layout_margin="5dp"
+                            android:gravity="center"
+                            android:text="말라뮤트"
+                            android:textColor="#FFFFFF"
+                            android:background="#4D000000"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+                    </androidx.cardview.widget.CardView>
                 </LinearLayout>
 
                 <LinearLayout
@@ -240,24 +278,29 @@
                     android:orientation="vertical"
                     android:padding="5dp">
 
-
-                    <!--                    <ImageView-->
-                    <!--                        android:id="@+id/selectBigImgEct"-->
-                    <!--                        android:layout_width="wrap_content"-->
-                    <!--                        android:layout_height="wrap_content"-->
-                    <!--                        android:adjustViewBounds="true"-->
-                    <!--                        android:src="" />-->
-
-                    <TextView
-                        android:id="@+id/selectBigTVEct"
+                    <androidx.cardview.widget.CardView
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="5dp"
-                        android:gravity="center"
-                        android:text="기타"
-                        android:textColor="@color/black"
-                        android:textSize="16sp" />
+                        android:layout_height="match_parent"
+                        app:cardCornerRadius="8dp">
+                        <!--                    <ImageView-->
+                        <!--                        android:id="@+id/selectBigImgEct"-->
+                        <!--                        android:layout_width="wrap_content"-->
+                        <!--                        android:layout_height="wrap_content"-->
+                        <!--                        android:adjustViewBounds="true"-->
+                        <!--                        android:src="" />-->
 
+                        <TextView
+                            android:id="@+id/selectBigTVEct"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="bottom|center_horizontal"
+                            android:layout_marginTop="5dp"
+                            android:gravity="center"
+                            android:text="기타"
+                            android:textColor="@color/black"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+                    </androidx.cardview.widget.CardView>
                 </LinearLayout>
 
             </TableRow>
@@ -271,8 +314,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="3dp"
                     android:layout_marginLeft="20dp"
-                    android:layout_marginRight="20dp"
                     android:layout_marginTop="20dp"
+                    android:layout_marginRight="20dp"
                     android:layout_span="2"
                     android:background="@color/brown" />
             </TableRow>
@@ -306,23 +349,30 @@
                     android:orientation="vertical"
                     android:padding="5dp">
 
-
-                    <ImageView
-                        android:id="@+id/selectMediumImg1"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:adjustViewBounds="true"
-                        android:src="@drawable/dog_m_beagle1" />
-
-                    <TextView
-                        android:id="@+id/selectMediumTV1"
+                    <androidx.cardview.widget.CardView
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="5dp"
-                        android:gravity="center"
-                        android:text="비글"
-                        android:textColor="@color/black"
-                        android:textSize="16sp" />
+                        android:layout_height="match_parent"
+                        app:cardCornerRadius="8dp">
+                        <ImageView
+                            android:id="@+id/selectMediumImg1"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:adjustViewBounds="true"
+                            android:src="@drawable/dog_m_beagle1" />
+
+                        <TextView
+                            android:id="@+id/selectMediumTV1"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="bottom|center_horizontal"
+                            android:layout_margin="5dp"
+                            android:gravity="center"
+                            android:text="비글"
+                            android:textColor="#FFFFFF"
+                            android:background="#4D000000"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+                    </androidx.cardview.widget.CardView>
                 </LinearLayout>
 
                 <LinearLayout
@@ -334,24 +384,30 @@
                     android:orientation="vertical"
                     android:padding="5dp">
 
-
-                    <ImageView
-                        android:id="@+id/selectMediumImg2"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:adjustViewBounds="true"
-                        android:src="@drawable/dog_m_bordercollie1" />
-
-                    <TextView
-                        android:id="@+id/selectMediumTV2"
+                    <androidx.cardview.widget.CardView
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="5dp"
-                        android:gravity="center"
-                        android:text="보더콜리"
-                        android:textColor="@color/black"
-                        android:textSize="16sp" />
+                        android:layout_height="match_parent"
+                        app:cardCornerRadius="8dp">
+                        <ImageView
+                            android:id="@+id/selectMediumImg2"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:adjustViewBounds="true"
+                            android:src="@drawable/dog_m_bordercollie1" />
 
+                        <TextView
+                            android:id="@+id/selectMediumTV2"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="bottom|center_horizontal"
+                            android:layout_margin="5dp"
+                            android:gravity="center"
+                            android:text="보더콜리"
+                            android:textColor="#FFFFFF"
+                            android:background="#4D000000"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+                    </androidx.cardview.widget.CardView>
                 </LinearLayout>
 
             </TableRow>
@@ -369,23 +425,30 @@
                     android:orientation="vertical"
                     android:padding="5dp">
 
-
-                    <ImageView
-                        android:id="@+id/selectMediumImg3"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:adjustViewBounds="true"
-                        android:src="@drawable/dog_m_bulldog1" />
-
-                    <TextView
-                        android:id="@+id/selectMediumTV3"
+                    <androidx.cardview.widget.CardView
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="5dp"
-                        android:gravity="center"
-                        android:text="불독"
-                        android:textColor="@color/black"
-                        android:textSize="16sp" />
+                        android:layout_height="match_parent"
+                        app:cardCornerRadius="8dp">
+                        <ImageView
+                            android:id="@+id/selectMediumImg3"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:adjustViewBounds="true"
+                            android:src="@drawable/dog_m_bulldog1" />
+
+                        <TextView
+                            android:id="@+id/selectMediumTV3"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_margin="5dp"
+                            android:layout_gravity="bottom|center_horizontal"
+                            android:gravity="center"
+                            android:text="불독"
+                            android:textColor="#FFFFFF"
+                            android:background="#4D000000"
+                            android:textSize="16sp"
+                            android:textStyle="bold"/>
+                    </androidx.cardview.widget.CardView>
                 </LinearLayout>
 
                 <LinearLayout
@@ -397,24 +460,30 @@
                     android:orientation="vertical"
                     android:padding="5dp">
 
-
-                    <ImageView
-                        android:id="@+id/selectMediumImg4"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:adjustViewBounds="true"
-                        android:src="@drawable/dog_m_shiba2" />
-
-                    <TextView
-                        android:id="@+id/selectMediumTV4"
+                    <androidx.cardview.widget.CardView
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="5dp"
-                        android:gravity="center"
-                        android:text="시바"
-                        android:textColor="@color/black"
-                        android:textSize="16sp" />
+                        android:layout_height="match_parent"
+                        app:cardCornerRadius="8dp">
+                        <ImageView
+                            android:id="@+id/selectMediumImg4"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:adjustViewBounds="true"
+                            android:src="@drawable/dog_m_shiba2" />
 
+                        <TextView
+                            android:id="@+id/selectMediumTV4"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_margin="5dp"
+                            android:layout_gravity="bottom|center_horizontal"
+                            android:gravity="center"
+                            android:text="시바"
+                            android:textColor="#FFFFFF"
+                            android:background="#4D000000"
+                            android:textSize="16sp"
+                            android:textStyle="bold"/>
+                    </androidx.cardview.widget.CardView>
                 </LinearLayout>
 
             </TableRow>
@@ -432,23 +501,30 @@
                     android:orientation="vertical"
                     android:padding="5dp">
 
-
-                    <ImageView
-                        android:id="@+id/selectMediumImg5"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:adjustViewBounds="true"
-                        android:src="@drawable/dog_m_welshcorgi1" />
-
-                    <TextView
-                        android:id="@+id/selectMediumTV5"
+                    <androidx.cardview.widget.CardView
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="5dp"
-                        android:gravity="center"
-                        android:text="웰시코기"
-                        android:textColor="@color/black"
-                        android:textSize="16sp" />
+                        android:layout_height="match_parent"
+                        app:cardCornerRadius="8dp">
+                        <ImageView
+                            android:id="@+id/selectMediumImg5"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:adjustViewBounds="true"
+                            android:src="@drawable/dog_m_welshcorgi1" />
+
+                        <TextView
+                            android:id="@+id/selectMediumTV5"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_margin="5dp"
+                            android:layout_gravity="bottom|center_horizontal"
+                            android:gravity="center"
+                            android:text="웰시코기"
+                            android:textColor="#FFFFFF"
+                            android:background="#4D000000"
+                            android:textSize="16sp"
+                            android:textStyle="bold"/>
+                    </androidx.cardview.widget.CardView>
                 </LinearLayout>
 
                 <LinearLayout
@@ -460,24 +536,29 @@
                     android:orientation="vertical"
                     android:padding="5dp">
 
-
-                    <!--                    <ImageView-->
-                    <!--                        android:id="@+id/selectBigImgEct"-->
-                    <!--                        android:layout_width="wrap_content"-->
-                    <!--                        android:layout_height="wrap_content"-->
-                    <!--                        android:adjustViewBounds="true"-->
-                    <!--                        android:src="" />-->
-
-                    <TextView
-                        android:id="@+id/selectMediumTVEct"
+                    <androidx.cardview.widget.CardView
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="5dp"
-                        android:gravity="center"
-                        android:text="기타"
-                        android:textColor="@color/black"
-                        android:textSize="16sp" />
+                        android:layout_height="match_parent"
+                        app:cardCornerRadius="8dp">
+                        <!--                    <ImageView-->
+                        <!--                        android:id="@+id/selectBigImgEct"-->
+                        <!--                        android:layout_width="wrap_content"-->
+                        <!--                        android:layout_height="wrap_content"-->
+                        <!--                        android:adjustViewBounds="true"-->
+                        <!--                        android:src="" />-->
 
+                        <TextView
+                            android:id="@+id/selectMediumTVEct"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="5dp"
+                            android:layout_gravity="bottom|center_horizontal"
+                            android:gravity="center"
+                            android:text="기타"
+                            android:textColor="@color/black"
+                            android:textSize="16sp"
+                            android:textStyle="bold"/>
+                    </androidx.cardview.widget.CardView>
                 </LinearLayout>
 
             </TableRow>
@@ -491,8 +572,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="3dp"
                     android:layout_marginLeft="20dp"
-                    android:layout_marginRight="20dp"
                     android:layout_marginTop="20dp"
+                    android:layout_marginRight="20dp"
                     android:layout_span="2"
                     android:background="@color/brown" />
             </TableRow>
@@ -526,23 +607,30 @@
                     android:orientation="vertical"
                     android:padding="5dp">
 
-
-                    <ImageView
-                        android:id="@+id/selectSmallImg1"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:adjustViewBounds="true"
-                        android:src="@drawable/dog_s_chihuahua1" />
-
-                    <TextView
-                        android:id="@+id/selectSmallTV1"
+                    <androidx.cardview.widget.CardView
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="5dp"
-                        android:gravity="center"
-                        android:text="치와와"
-                        android:textColor="@color/black"
-                        android:textSize="16sp" />
+                        android:layout_height="match_parent"
+                        app:cardCornerRadius="8dp">
+                        <ImageView
+                            android:id="@+id/selectSmallImg1"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:adjustViewBounds="true"
+                            android:src="@drawable/dog_s_chihuahua1" />
+
+                        <TextView
+                            android:id="@+id/selectSmallTV1"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_margin="5dp"
+                            android:layout_gravity="bottom|center_horizontal"
+                            android:gravity="center"
+                            android:text="치와와"
+                            android:textColor="#FFFFFF"
+                            android:background="#4D000000"
+                            android:textSize="16sp"
+                            android:textStyle="bold"/>
+                    </androidx.cardview.widget.CardView>
                 </LinearLayout>
 
                 <LinearLayout
@@ -554,23 +642,30 @@
                     android:orientation="vertical"
                     android:padding="5dp">
 
-
-                    <ImageView
-                        android:id="@+id/selectSmallImg2"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:adjustViewBounds="true"
-                        android:src="@drawable/dog_s_maltese2" />
-
-                    <TextView
-                        android:id="@+id/selectSmallTV2"
+                    <androidx.cardview.widget.CardView
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="5dp"
-                        android:gravity="center"
-                        android:text="말티즈"
-                        android:textColor="@color/black"
-                        android:textSize="16sp" />
+                        android:layout_height="match_parent"
+                        app:cardCornerRadius="8dp">
+                        <ImageView
+                            android:id="@+id/selectSmallImg2"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:adjustViewBounds="true"
+                            android:src="@drawable/dog_s_maltese2" />
+
+                        <TextView
+                            android:id="@+id/selectSmallTV2"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_margin="5dp"
+                            android:layout_gravity="bottom|center_horizontal"
+                            android:gravity="center"
+                            android:text="말티즈"
+                            android:textColor="#FFFFFF"
+                            android:background="#4D000000"
+                            android:textSize="16sp"
+                            android:textStyle="bold"/>
+                    </androidx.cardview.widget.CardView>
 
                 </LinearLayout>
 
@@ -589,23 +684,30 @@
                     android:orientation="vertical"
                     android:padding="5dp">
 
-
-                    <ImageView
-                        android:id="@+id/selectSmallImg3"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:adjustViewBounds="true"
-                        android:src="@drawable/dog_s_poodle1" />
-
-                    <TextView
-                        android:id="@+id/selectSmallTV3"
+                    <androidx.cardview.widget.CardView
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="5dp"
-                        android:gravity="center"
-                        android:text="푸들"
-                        android:textColor="@color/black"
-                        android:textSize="16sp" />
+                        android:layout_height="match_parent"
+                        app:cardCornerRadius="8dp">
+                        <ImageView
+                            android:id="@+id/selectSmallImg3"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:adjustViewBounds="true"
+                            android:src="@drawable/dog_s_poodle1" />
+
+                        <TextView
+                            android:id="@+id/selectSmallTV3"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_margin="5dp"
+                            android:layout_gravity="bottom|center_horizontal"
+                            android:gravity="center"
+                            android:text="푸들"
+                            android:textColor="#FFFFFF"
+                            android:background="#4D000000"
+                            android:textSize="16sp"
+                            android:textStyle="bold"/>
+                    </androidx.cardview.widget.CardView>
                 </LinearLayout>
 
                 <LinearLayout
@@ -617,23 +719,30 @@
                     android:orientation="vertical"
                     android:padding="5dp">
 
-
-                    <ImageView
-                        android:id="@+id/selectSmallImg4"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:adjustViewBounds="true"
-                        android:src="@drawable/dog_s_shihtzu2" />
-
-                    <TextView
-                        android:id="@+id/selectSmallTV4"
+                    <androidx.cardview.widget.CardView
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="5dp"
-                        android:gravity="center"
-                        android:text="시츄"
-                        android:textColor="@color/black"
-                        android:textSize="16sp" />
+                        android:layout_height="match_parent"
+                        app:cardCornerRadius="8dp">
+                        <ImageView
+                            android:id="@+id/selectSmallImg4"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:adjustViewBounds="true"
+                            android:src="@drawable/dog_s_shihtzu2" />
+
+                        <TextView
+                            android:id="@+id/selectSmallTV4"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_margin="5dp"
+                            android:gravity="center"
+                            android:layout_gravity="bottom|center_horizontal"
+                            android:text="시츄"
+                            android:textColor="#FFFFFF"
+                            android:background="#4D000000"
+                            android:textSize="16sp"
+                            android:textStyle="bold"/>
+                    </androidx.cardview.widget.CardView>
 
                 </LinearLayout>
 
@@ -652,23 +761,30 @@
                     android:orientation="vertical"
                     android:padding="5dp">
 
-
-                    <ImageView
-                        android:id="@+id/selectSmallImg5"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:adjustViewBounds="true"
-                        android:src="@drawable/dog_s_yorkshireterrier1" />
-
-                    <TextView
-                        android:id="@+id/selectSmallTV5"
+                    <androidx.cardview.widget.CardView
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="5dp"
-                        android:gravity="center"
-                        android:text="요크셔테리어"
-                        android:textColor="@color/black"
-                        android:textSize="16sp" />
+                        android:layout_height="match_parent"
+                        app:cardCornerRadius="8dp">
+                        <ImageView
+                            android:id="@+id/selectSmallImg5"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:adjustViewBounds="true"
+                            android:src="@drawable/dog_s_yorkshireterrier1" />
+
+                        <TextView
+                            android:id="@+id/selectSmallTV5"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="bottom|center_horizontal"
+                            android:layout_margin="5dp"
+                            android:gravity="center"
+                            android:text="요크셔테리어"
+                            android:textColor="#FFFFFF"
+                            android:background="#4D000000"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+                    </androidx.cardview.widget.CardView>
                 </LinearLayout>
 
                 <LinearLayout
@@ -679,25 +795,29 @@
                     android:background="@color/dp2"
                     android:orientation="vertical"
                     android:padding="5dp">
-
-
-                    <!--                    <ImageView-->
-                    <!--                        android:id="@+id/selectBigImgEct"-->
-                    <!--                        android:layout_width="wrap_content"-->
-                    <!--                        android:layout_height="wrap_content"-->
-                    <!--                        android:adjustViewBounds="true"-->
-                    <!--                        android:src="" />-->
-
-                    <TextView
-                        android:id="@+id/selectSmallTVEct"
+                    <androidx.cardview.widget.CardView
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="5dp"
-                        android:gravity="center"
-                        android:text="기타"
-                        android:textColor="@color/black"
-                        android:textSize="16sp" />
+                        android:layout_height="match_parent"
+                        app:cardCornerRadius="8dp">
+                        <!--                    <ImageView-->
+                        <!--                        android:id="@+id/selectBigImgEct"-->
+                        <!--                        android:layout_width="wrap_content"-->
+                        <!--                        android:layout_height="wrap_content"-->
+                        <!--                        android:adjustViewBounds="true"-->
+                        <!--                        android:src="" />-->
 
+                        <TextView
+                            android:id="@+id/selectSmallTVEct"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="bottom|center_horizontal"
+                            android:layout_marginTop="5dp"
+                            android:gravity="center"
+                            android:text="기타"
+                            android:textColor="@color/black"
+                            android:textSize="16sp"
+                            android:textStyle="bold"/>
+                    </androidx.cardview.widget.CardView>
                 </LinearLayout>
 
             </TableRow>

@@ -175,6 +175,10 @@
                         android:orientation="vertical"
                         android:padding="5dp">
 
+                        <androidx.cardview.widget.CardView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            app:cardCornerRadius="8dp">
 
                         <ImageView
                             android:id="@+id/selectWarningBigImg1"
@@ -185,13 +189,17 @@
 
                         <TextView
                             android:id="@+id/selectWarningBigTV1"
-                            android:layout_width="match_parent"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_gravity="bottom|center_horizontal"
                             android:layout_margin="5dp"
+                            android:background="#4D000000"
                             android:gravity="center"
                             android:text="허스키"
-                            android:textColor="@color/black"
-                            android:textSize="16sp" />
+                            android:textColor="#FFFFFF"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+                        </androidx.cardview.widget.CardView>
                     </LinearLayout>
 
                     <LinearLayout
@@ -203,6 +211,10 @@
                         android:orientation="vertical"
                         android:padding="5dp">
 
+                        <androidx.cardview.widget.CardView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            app:cardCornerRadius="8dp">
 
                         <ImageView
                             android:id="@+id/selectWarningBigImg2"
@@ -213,14 +225,17 @@
 
                         <TextView
                             android:id="@+id/selectWarningBigTV2"
-                            android:layout_width="match_parent"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_gravity="bottom|center_horizontal"
                             android:layout_margin="5dp"
                             android:gravity="center"
                             android:text="사모예드"
-                            android:textColor="@color/black"
-                            android:textSize="16sp" />
+                            android:textColor="#FFFFFF"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
 
+                        </androidx.cardview.widget.CardView>
                     </LinearLayout>
 
                 </TableRow>
@@ -238,6 +253,10 @@
                         android:orientation="vertical"
                         android:padding="5dp">
 
+                        <androidx.cardview.widget.CardView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            app:cardCornerRadius="8dp">
 
                         <ImageView
                             android:id="@+id/selectWarningBigImg3"
@@ -248,13 +267,16 @@
 
                         <TextView
                             android:id="@+id/selectWarningBigTV3"
-                            android:layout_width="match_parent"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_gravity="bottom|center_horizontal"
                             android:layout_margin="5dp"
                             android:gravity="center"
                             android:text="리트리버"
-                            android:textColor="@color/black"
-                            android:textSize="16sp" />
+                            android:textColor="#FFFFFF"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+                        </androidx.cardview.widget.CardView>
                     </LinearLayout>
 
                     <LinearLayout
@@ -266,6 +288,10 @@
                         android:orientation="vertical"
                         android:padding="5dp">
 
+                        <androidx.cardview.widget.CardView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            app:cardCornerRadius="8dp">
 
                         <ImageView
                             android:id="@+id/selectWarningBigImg4"
@@ -276,14 +302,16 @@
 
                         <TextView
                             android:id="@+id/selectWarningBigTV4"
-                            android:layout_width="match_parent"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_gravity="bottom|center_horizontal"
                             android:layout_margin="5dp"
                             android:gravity="center"
                             android:text="셰퍼드"
-                            android:textColor="@color/black"
-                            android:textSize="16sp" />
-
+                            android:textColor="#FFFFFF"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+                        </androidx.cardview.widget.CardView>
                     </LinearLayout>
 
                 </TableRow>
@@ -301,6 +329,10 @@
                         android:orientation="vertical"
                         android:padding="5dp">
 
+                        <androidx.cardview.widget.CardView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            app:cardCornerRadius="8dp">
 
                         <ImageView
                             android:id="@+id/selectWarningBigImg5"
@@ -311,13 +343,16 @@
 
                         <TextView
                             android:id="@+id/selectWarningBigTV5"
-                            android:layout_width="match_parent"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_gravity="bottom|center_horizontal"
                             android:layout_margin="5dp"
                             android:gravity="center"
                             android:text="말라뮤트"
-                            android:textColor="@color/black"
-                            android:textSize="16sp" />
+                            android:textColor="#FFFFFF"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+                        </androidx.cardview.widget.CardView>
                     </LinearLayout>
 
                     <LinearLayout
@@ -329,7 +364,10 @@
                         android:orientation="vertical"
                         android:padding="5dp">
 
-
+                        <androidx.cardview.widget.CardView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            app:cardCornerRadius="8dp">
                         <!--                    <ImageView-->
                         <!--                        android:id="@+id/selectWarningBigImgEct"-->
                         <!--                        android:layout_width="wrap_content"-->
@@ -339,14 +377,16 @@
 
                         <TextView
                             android:id="@+id/selectWarningBigTVEct"
-                            android:layout_width="match_parent"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_gravity="bottom|center_horizontal"
                             android:layout_marginTop="5dp"
                             android:gravity="center"
                             android:text="기타"
                             android:textColor="@color/black"
-                            android:textSize="16sp" />
-
+                            android:textSize="16sp"
+                            android:textStyle="bold"/>
+                        </androidx.cardview.widget.CardView>
                     </LinearLayout>
 
                 </TableRow>
@@ -407,6 +447,10 @@
                         android:orientation="vertical"
                         android:padding="5dp">
 
+                        <androidx.cardview.widget.CardView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            app:cardCornerRadius="8dp">
 
                         <ImageView
                             android:id="@+id/selectWarningMediumImg1"
@@ -417,13 +461,16 @@
 
                         <TextView
                             android:id="@+id/selectWarningMediumTV1"
-                            android:layout_width="match_parent"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_gravity="bottom|center_horizontal"
                             android:layout_margin="5dp"
                             android:gravity="center"
                             android:text="비글"
-                            android:textColor="@color/black"
-                            android:textSize="16sp" />
+                            android:textColor="#FFFFFF"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+                        </androidx.cardview.widget.CardView>
                     </LinearLayout>
 
                     <LinearLayout
@@ -435,6 +482,10 @@
                         android:orientation="vertical"
                         android:padding="5dp">
 
+                        <androidx.cardview.widget.CardView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            app:cardCornerRadius="8dp">
 
                         <ImageView
                             android:id="@+id/selectWarningMediumImg2"
@@ -445,14 +496,16 @@
 
                         <TextView
                             android:id="@+id/selectWarningMediumTV2"
-                            android:layout_width="match_parent"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_gravity="bottom|center_horizontal"
                             android:layout_margin="5dp"
                             android:gravity="center"
                             android:text="보더콜리"
-                            android:textColor="@color/black"
-                            android:textSize="16sp" />
-
+                            android:textColor="#FFFFFF"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+                        </androidx.cardview.widget.CardView>
                     </LinearLayout>
 
                 </TableRow>
@@ -470,7 +523,10 @@
                         android:orientation="vertical"
                         android:padding="5dp">
 
-
+                        <androidx.cardview.widget.CardView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            app:cardCornerRadius="8dp">
                         <ImageView
                             android:id="@+id/selectWarningMediumImg3"
                             android:layout_width="wrap_content"
@@ -480,13 +536,16 @@
 
                         <TextView
                             android:id="@+id/selectWarningMediumTV3"
-                            android:layout_width="match_parent"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_gravity="bottom|center_horizontal"
                             android:layout_margin="5dp"
                             android:gravity="center"
                             android:text="불독"
-                            android:textColor="@color/black"
-                            android:textSize="16sp" />
+                            android:textColor="#FFFFFF"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+                        </androidx.cardview.widget.CardView>
                     </LinearLayout>
 
                     <LinearLayout
@@ -498,7 +557,10 @@
                         android:orientation="vertical"
                         android:padding="5dp">
 
-
+                        <androidx.cardview.widget.CardView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            app:cardCornerRadius="8dp">
                         <ImageView
                             android:id="@+id/selectWarningMediumImg4"
                             android:layout_width="wrap_content"
@@ -508,14 +570,16 @@
 
                         <TextView
                             android:id="@+id/selectWarningMediumTV4"
-                            android:layout_width="match_parent"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_gravity="bottom|center_horizontal"
                             android:layout_margin="5dp"
                             android:gravity="center"
                             android:text="시바"
-                            android:textColor="@color/black"
-                            android:textSize="16sp" />
-
+                            android:textColor="#FFFFFF"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+                        </androidx.cardview.widget.CardView>
                     </LinearLayout>
 
                 </TableRow>
@@ -533,7 +597,10 @@
                         android:orientation="vertical"
                         android:padding="5dp">
 
-
+                        <androidx.cardview.widget.CardView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            app:cardCornerRadius="8dp">
                         <ImageView
                             android:id="@+id/selectWarningMediumImg5"
                             android:layout_width="wrap_content"
@@ -543,13 +610,16 @@
 
                         <TextView
                             android:id="@+id/selectWarningMediumTV5"
-                            android:layout_width="match_parent"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_gravity="bottom|center_horizontal"
                             android:layout_margin="5dp"
                             android:gravity="center"
                             android:text="웰시코기"
-                            android:textColor="@color/black"
-                            android:textSize="16sp" />
+                            android:textColor="#FFFFFF"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+                        </androidx.cardview.widget.CardView>
                     </LinearLayout>
 
                     <LinearLayout
@@ -561,7 +631,10 @@
                         android:orientation="vertical"
                         android:padding="5dp">
 
-
+                        <androidx.cardview.widget.CardView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            app:cardCornerRadius="8dp">
                         <!--                    <ImageView-->
                         <!--                        android:id="@+id/selectWarningBigImgEct"-->
                         <!--                        android:layout_width="wrap_content"-->
@@ -571,14 +644,16 @@
 
                         <TextView
                             android:id="@+id/selectWarningMediumTVEct"
-                            android:layout_width="match_parent"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_gravity="bottom|center_horizontal"
                             android:layout_marginTop="5dp"
                             android:gravity="center"
                             android:text="기타"
                             android:textColor="@color/black"
-                            android:textSize="16sp" />
-
+                            android:textSize="16sp"
+                            android:textStyle="bold"/>
+                        </androidx.cardview.widget.CardView>
                     </LinearLayout>
 
                 </TableRow>
@@ -639,7 +714,10 @@
                         android:orientation="vertical"
                         android:padding="5dp">
 
-
+                        <androidx.cardview.widget.CardView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            app:cardCornerRadius="8dp">
                         <ImageView
                             android:id="@+id/selectWarningSmallImg1"
                             android:layout_width="wrap_content"
@@ -649,13 +727,16 @@
 
                         <TextView
                             android:id="@+id/selectWarningSmallTV1"
-                            android:layout_width="match_parent"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_gravity="bottom|center_horizontal"
                             android:layout_margin="5dp"
                             android:gravity="center"
                             android:text="치와와"
-                            android:textColor="@color/black"
-                            android:textSize="16sp" />
+                            android:textColor="#FFFFFF"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+                        </androidx.cardview.widget.CardView>
                     </LinearLayout>
 
                     <LinearLayout
@@ -667,7 +748,10 @@
                         android:orientation="vertical"
                         android:padding="5dp">
 
-
+                        <androidx.cardview.widget.CardView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            app:cardCornerRadius="8dp">
                         <ImageView
                             android:id="@+id/selectWarningSmallImg2"
                             android:layout_width="wrap_content"
@@ -677,14 +761,16 @@
 
                         <TextView
                             android:id="@+id/selectWarningSmallTV2"
-                            android:layout_width="match_parent"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_gravity="bottom|center_horizontal"
                             android:layout_margin="5dp"
                             android:gravity="center"
                             android:text="말티즈"
-                            android:textColor="@color/black"
-                            android:textSize="16sp" />
-
+                            android:textColor="#FFFFFF"
+                            android:textSize="16sp"
+                            android:textStyle="bold"/>
+                        </androidx.cardview.widget.CardView>
                     </LinearLayout>
 
                 </TableRow>
@@ -702,7 +788,10 @@
                         android:orientation="vertical"
                         android:padding="5dp">
 
-
+                        <androidx.cardview.widget.CardView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            app:cardCornerRadius="8dp">
                         <ImageView
                             android:id="@+id/selectWarningSmallImg3"
                             android:layout_width="wrap_content"
@@ -712,13 +801,16 @@
 
                         <TextView
                             android:id="@+id/selectWarningSmallTV3"
-                            android:layout_width="match_parent"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_gravity="bottom|center_horizontal"
                             android:layout_margin="5dp"
                             android:gravity="center"
                             android:text="푸들"
-                            android:textColor="@color/black"
-                            android:textSize="16sp" />
+                            android:textColor="#FFFFFF"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+                        </androidx.cardview.widget.CardView>
                     </LinearLayout>
 
                     <LinearLayout
@@ -730,7 +822,10 @@
                         android:orientation="vertical"
                         android:padding="5dp">
 
-
+                        <androidx.cardview.widget.CardView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            app:cardCornerRadius="8dp">
                         <ImageView
                             android:id="@+id/selectWarningSmallImg4"
                             android:layout_width="wrap_content"
@@ -740,14 +835,16 @@
 
                         <TextView
                             android:id="@+id/selectWarningSmallTV4"
-                            android:layout_width="match_parent"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_gravity="bottom|center_horizontal"
                             android:layout_margin="5dp"
                             android:gravity="center"
                             android:text="시츄"
-                            android:textColor="@color/black"
-                            android:textSize="16sp" />
-
+                            android:textColor="#FFFFFF"
+                            android:textSize="16sp"
+                            android:textStyle="bold"  />
+                        </androidx.cardview.widget.CardView>
                     </LinearLayout>
 
                 </TableRow>
@@ -765,7 +862,10 @@
                         android:orientation="vertical"
                         android:padding="5dp">
 
-
+                        <androidx.cardview.widget.CardView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            app:cardCornerRadius="8dp">
                         <ImageView
                             android:id="@+id/selectWarningSmallImg5"
                             android:layout_width="wrap_content"
@@ -775,13 +875,16 @@
 
                         <TextView
                             android:id="@+id/selectWarningSmallTV5"
-                            android:layout_width="match_parent"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_gravity="bottom|center_horizontal"
                             android:layout_margin="5dp"
                             android:gravity="center"
                             android:text="요크셔테리어"
-                            android:textColor="@color/black"
-                            android:textSize="16sp" />
+                            android:textColor="#FFFFFF"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+                        </androidx.cardview.widget.CardView>
                     </LinearLayout>
 
                     <LinearLayout
@@ -800,17 +903,22 @@
                         <!--                        android:layout_height="wrap_content"-->
                         <!--                        android:adjustViewBounds="true"-->
                         <!--                        android:src="" />-->
-
+                        <androidx.cardview.widget.CardView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            app:cardCornerRadius="8dp">
                         <TextView
                             android:id="@+id/selectWarningSmallTVEct"
-                            android:layout_width="match_parent"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="5dp"
+                            android:layout_gravity="bottom|center_horizontal"
                             android:gravity="center"
                             android:text="기타"
                             android:textColor="@color/black"
-                            android:textSize="16sp" />
-
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+                        </androidx.cardview.widget.CardView>
                     </LinearLayout>
 
                 </TableRow>

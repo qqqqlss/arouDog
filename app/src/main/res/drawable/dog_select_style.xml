@@ -9,6 +9,11 @@
             <stroke
                 android:width="5dp"
                 android:color="@color/brown" />
+            <corners
+                android:bottomLeftRadius="10dp"
+                android:bottomRightRadius="10dp"
+                android:topLeftRadius="10dp"
+                android:topRightRadius="10dp" />
 
             <solid android:color="@color/dp2" />
         </shape>
