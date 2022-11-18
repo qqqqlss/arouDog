@@ -153,7 +153,7 @@ class RecyclerViewAdapter(private val data : ArrayList<RecyclerViewItem?> ): Rec
     class ItemViewHolder(view: View) :RecyclerView.ViewHolder(view) {
         private val TAG = "RECYCLERVIEWADAPTER"
         var userId = ""
-        var textViewUserId: TextView
+        var textViewAddress: TextView
         var textViewWalkId: TextView
         var imageView: ImageView
         var textViewGood: TextView
@@ -161,6 +161,7 @@ class RecyclerViewAdapter(private val data : ArrayList<RecyclerViewItem?> ): Rec
         var buttonGood: ImageButton
         var buttonBad: ImageButton
         var textViewWalkSecond:TextView
+        var distance:TextView
         var checkGood: Boolean = false
         var checkBad: Boolean = false
         var walkId:Long = 0
@@ -172,7 +173,7 @@ class RecyclerViewAdapter(private val data : ArrayList<RecyclerViewItem?> ): Rec
             .create(WalkService::class.java)
 
         init {
-            textViewUserId = view.findViewById(R.id.textViewUserId)
+            textViewAddress = view.findViewById(R.id.textViewAddress)
             textViewWalkId = view.findViewById(R.id.textViewWalkId)
             imageView = view.findViewById(R.id.itemImage)
             textViewGood = view.findViewById(R.id.textViewGood)
@@ -180,6 +181,7 @@ class RecyclerViewAdapter(private val data : ArrayList<RecyclerViewItem?> ): Rec
             buttonGood = view.findViewById(R.id.buttonGood)
             buttonBad = view.findViewById(R.id.buttonBad)
             textViewWalkSecond = view.findViewById(R.id.textViewWalkSecond)
+            distance = view.findViewById(R.id.textViewDistance)
 
             buttonGood.setOnClickListener(View.OnClickListener {
                 if (!checkGood) {//기존에 좋아요버튼을 누르지 않았을때 => 어플 껐다 키면 쓸모없어짐
@@ -222,6 +224,7 @@ class RecyclerViewAdapter(private val data : ArrayList<RecyclerViewItem?> ): Rec
 
 
         fun setItems(viewItem: RecyclerViewItem){
+            this.textViewAddress.text = viewItem.address;
             this.imageView.setImageBitmap(viewItem.img)
             this.textViewGood.text = viewItem.good.toString()
             this.checkGood = viewItem.checkGood;
@@ -230,13 +233,11 @@ class RecyclerViewAdapter(private val data : ArrayList<RecyclerViewItem?> ): Rec
             this.textViewBad.text = viewItem.bad.toString()
             this.walkId = viewItem.walkId
 
+            this.distance.text = viewItem.distance.toString() + "M"
 
-//            var totalSecond = viewItem.walkSecond
-//            var hour = TimeUnit.SECONDS.toHours(totalSecond)
-//            var minute = TimeUnit.SECONDS.toMinutes(totalSecond) - hour * 60
-//            var second = TimeUnit.SECONDS.toSeconds(totalSecond) - hour * 3600 - minute * 60
-//            var strTime = "소요시간 : " + String.format("%02d", hour) + " 시 " + String.format("%02d",minute) + " 분 " + String.format("%02d", second) + "초"
-//            this.textViewWalkSecond.text =strTime
+            var totalSecond = viewItem.second
+            var strTime = String.format("%.1f",totalSecond/60.0) + " 분 "
+            this.textViewWalkSecond.text =strTime
         }
     }
     class LoadingViewHolder(itemView:View) : RecyclerView.ViewHolder(itemView) {

@@ -45,7 +45,6 @@ class AroundWalkFragment : Fragment() {
     lateinit var mList:ArrayList<RecyclerViewItem?>
     lateinit var userId:String
     var tile:String = ""
-    var address = "address"
 
     init {
         MainFragment.firstTile.observe(this){
@@ -84,7 +83,7 @@ class AroundWalkFragment : Fragment() {
                                 //에러일경우
                                 if(bitmap ==null)
                                     bitmap = BitmapFactory.decodeResource(resources,R.drawable.error2)
-                                addItem(userId, it.walkId, bitmap, it.good, it.bad, it.checkGood, it.checkBad, it.second, it.distance, address)
+                                addItem(userId, it.walkId, bitmap, it.good, it.bad, it.checkGood, it.checkBad, it.second, it.distance, it.address)
                             }
 
                         }
@@ -196,7 +195,7 @@ class AroundWalkFragment : Fragment() {
                                             )
                                         //에러일경우
 //                            bitmap = BitmapFactory.decodeResource(resources,R.drawable.error2)
-                                        addItem(userId, it.walkId, bitmap, it.good, it.bad, it.checkGood, it.checkBad, it.second, it.distance, address)
+                                        addItem(userId, it.walkId, bitmap, it.good, it.bad, it.checkGood, it.checkBad, it.second, it.distance, it.address)
                                     }
                                 }
                                 totalCount += list!!.size
