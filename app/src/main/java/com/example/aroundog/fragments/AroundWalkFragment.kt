@@ -130,7 +130,7 @@ class AroundWalkFragment : Fragment() {
 //        mRecyclerView.addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
 
         //아이템 사이 패딩 추가
-        mRecyclerView.addItemDecoration(RecyclerDecorationHeight(100))
+//        mRecyclerView.addItemDecoration(RecyclerDecorationHeight(100))
 
 
         mRecyclerView.adapter = mAdapter
