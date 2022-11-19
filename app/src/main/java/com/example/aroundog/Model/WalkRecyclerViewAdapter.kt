@@ -27,7 +27,6 @@ class WalkRecyclerViewAdapter(private var items:ArrayList<WalkRecyclerViewItem>)
             
             var listener = View.OnClickListener {
                 //레트로핏
-                Toast.makeText(it.context, "${item.walkId}", Toast.LENGTH_SHORT).show()
                 var intent = Intent(it.context, WalkInfoActivity::class.java)
                 intent.putExtra("walkId", item.walkId)
                 it.context.startActivity(intent)

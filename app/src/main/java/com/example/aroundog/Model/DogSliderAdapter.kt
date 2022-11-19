@@ -125,7 +125,6 @@ class DogSliderAdapter(var imgList: MutableList<DogIdImgIdFilename>): RecyclerVi
                 it.context.startActivity(intent)
             }
 
-            Toast.makeText(it.context, "filename : $filename, dogId : $dogId, imgId : $imgId", Toast.LENGTH_SHORT).show()
         }
 
         dogSlider.setOnLongClickListener {
