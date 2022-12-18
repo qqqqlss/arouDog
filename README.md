@@ -4,15 +4,27 @@
 #### 이를 모두 해결할 수 있는 산책 앱
 
 ---
+
 ### 환경 및 언어  
 **Language** - Android(Kotlin), Java(Spring), Python(자동화 스크립트)  
 **Development Environment** - Android Studio, Eclipse, Pycharm, MYSQL
   
 ---
 ### 시스템 구성도
-![image](https://user-images.githubusercontent.com/54983139/203083353-ee904d3a-2d46-490e-a448-78365437400e.png)
+![image](https://user-images.githubusercontent.com/54983139/208286560-e2f4b60e-021c-43dc-b333-efd07665f3b8.png)
 
 ---
+## 시연 영상
+#### 로그인, 회원가입
+[![image](https://user-images.githubusercontent.com/54983139/208286313-5442b121-23c1-407d-8759-f60024288078.png)](https://www.youtube.com/shorts/Uhx5RhuTjUc)
+#### 산책
+[![image](https://user-images.githubusercontent.com/54983139/208286364-394deb58-d02d-434c-ba0e-f4f0a05b4920.png)](https://www.youtube.com/watch?v=HiydHNueXks)
+#### 산책 정보
+[![image](https://user-images.githubusercontent.com/54983139/208286438-91c07692-f6ab-4794-9fb5-8b319bc53033.png)](https://youtube.com/shorts/eUsz2IGhO_4)
+#### 주변 산책로 추천
+[![image](https://user-images.githubusercontent.com/54983139/208286495-eef3b742-ca9c-4e04-bafd-6e25e4117485.png)](https://www.youtube.com/shorts/D7b0fWMozs0)
+
+
 
 ## 주요 기능
 
